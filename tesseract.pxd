@@ -29,7 +29,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         TessBaseAPI() except +
         @staticmethod
         const char *Version()
-        int Init(const char *, const char *) except -1
+        int Init(const char *, const char *)
         void SetPageSegMode(PageSegMode)
         void SetImage(Pix *)
         char *GetUTF8Text()
