@@ -1,8 +1,20 @@
 cdef extern from "leptonica/allheaders.h" nogil:
     struct Pix
+    char *getImagelibVersions()
+    char *getLeptonicaVersion()
     Pix *pixRead(const char *)
     Pix *pixReadMemBmp(const unsigned char *, size_t)
     void pixDestroy(Pix **)
+
+cdef extern from "tesseract/genericvector.h" nogil:
+    cdef cppclass GenericVector[T]:
+        int size() const
+        T &operator[](int) const
+
+
+cdef extern from "tesseract/strngs.h" nogil:
+    cdef cppclass STRING:
+       const char *string() const
 
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
     cdef enum PageSegMode:
@@ -29,7 +41,9 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         TessBaseAPI() except +
         @staticmethod
         const char *Version()
+        const char *GetDatapath()
         int Init(const char *, const char *)
+        void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
         void SetPageSegMode(PageSegMode)
         void SetImage(Pix *)
         char *GetUTF8Text()

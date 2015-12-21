@@ -1,10 +1,11 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
+from Cython.Distutils import build_ext
 
-ext_modules = cythonize(Extension("tesserocr",
+ext_modules = cythonize([Extension("tesserocr",
                         sources=["*.pyx"],
                         libraries=["tesseract", "lept"],
-                        language="c++"))
+                        language="c++")])
 
 setup(name="tesserocr",
       version="1.0",
@@ -12,5 +13,6 @@ setup(name="tesserocr",
       author='Fayez Zouheiry',
       install_requires=['cython', 'Pillow'],
       zip_safe=False,
+      cmd_class={'build_ext': build_ext},
       ext_modules=ext_modules,
       )
