@@ -8,7 +8,7 @@ ext_modules = cythonize([Extension("tesserocr",
                         language="c++")])
 
 setup(name="tesserocr",
-      version="1.0",
+      version="1.1",
       description='A Python wrapper for tesseract-ocr API',
       author='Fayez Zouheiry',
       install_requires=['cython', 'Pillow'],
