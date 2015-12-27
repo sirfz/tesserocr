@@ -8,7 +8,7 @@ Tesseract API methods. See :class:`~tesserocr.PyTessBaseAPI` for details.
 In addition, helper functions are provided for ocr operations:
 
     >>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')
-    >>> text = file_to_text('./image.jpg', psm=PSM.AUTO_OSD)
+    >>> text = file_to_text('./image.jpg', psm=PSM.AUTO)
     >>> print tesseract_version()
     tesseract 3.04.00
      leptonica-1.72
@@ -18,14 +18,21 @@ In addition, helper functions are provided for ocr operations:
      ['eng', 'osd', 'equ'])
 """
 
+__version__ = '1.2.1'
+
 import os
 from cStringIO import StringIO
 from contextlib import closing
 from os.path import abspath, join
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    # PIL.Image won't be supported
+    pass
 
 from tesseract cimport *
 from libc.stdlib cimport free
+
 
 # default paramters
 setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
@@ -377,7 +384,6 @@ cdef class PyTessBaseAPI:
             image.load()
 
         return image
-
 
     def GetThresholdedImageScaleFactor(PyTessBaseAPI self):
         """Return the scale factor of the thresholded image that would be returned by
