@@ -925,7 +925,7 @@ static char __pyx_k_Failed_recognize_picture[] = "Failed recognize picture";
 static char __pyx_k_Failed_to_initialize_api[] = "Failed to initialize api";
 static char __pyx_k_home_fz_workspace_tesserocr_tes[] = "/home/fz/workspace/tesserocr/tesserocr.pyx";
 static char __pyx_k_Failed_to_recognize_No_image_set[] = "Failed to recognize. No image set?";
-static char __pyx_k_Python_wrapper_around_the_Tesser[] = "Python wrapper around the Tesseract-OCR 3.02+ C++ API\n\nThis module provides a wrapper class `PyTessBaseAPI` to call\nTesseract API methods. See :class:`~tesserocr.PyTessBaseAPI` for details.\n\nIn addition, helper functions are provided for ocr operations:\n\n    >>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')\n    >>> text = file_to_text('./image.jpg', psm=PSM.AUTO_OSD)\n    >>> print tesseract_version()\n    tesseract 3.04.00\n     leptonica-1.72\n      libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8\n    >>> get_languages()\n    ('/usr/share/tesseract-ocr/tessdata/',\n     ['eng', 'osd', 'equ'])\n";
+static char __pyx_k_Python_wrapper_around_the_Tesser[] = "Python wrapper around the Tesseract-OCR 3.02+ C++ API\n\nThis module provides a wrapper class `PyTessBaseAPI` to call\nTesseract API methods. See :class:`~tesserocr.PyTessBaseAPI` for details.\n\nIn addition, helper functions are provided for ocr operations:\n\n    >>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')\n    >>> text = file_to_text('./image.jpg', psm=PSM.AUTO)\n    >>> print tesseract_version()\n    tesseract 3.04.00\n     leptonica-1.72\n      libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8\n    >>> get_languages()\n    ('/usr/share/tesseract-ocr/tessdata/',\n     ['eng', 'osd', 'equ'])\n";
 static PyObject *__pyx_kp_s_1_2_1;
 static PyObject *__pyx_n_s_AUTO;
 static PyObject *__pyx_n_s_AUTO_ONLY;
@@ -4022,7 +4022,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_36GetThresholdedImage(struc
  * 
  *         return image             # <<<<<<<<<<<<<<
  * 
- * 
+ *     def GetThresholdedImageScaleFactor(PyTessBaseAPI self):
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_image)) { __Pyx_RaiseUnboundLocalError("image"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L1_error;} }
@@ -4057,8 +4057,8 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_36GetThresholdedImage(struc
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":389
- * 
+/* "tesserocr.pyx":388
+ *         return image
  * 
  *     def GetThresholdedImageScaleFactor(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
  *         """Return the scale factor of the thresholded image that would be returned by
@@ -4088,7 +4088,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_38GetThresholdedImageScaleF
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetThresholdedImageScaleFactor", 0);
 
-  /* "tesserocr.pyx":396
+  /* "tesserocr.pyx":395
  *             int: 0 if no thresholder has been set.
  *         """
  *         return self._baseapi.GetThresholdedImageScaleFactor()             # <<<<<<<<<<<<<<
@@ -4096,14 +4096,14 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_38GetThresholdedImageScaleF
  *     def GetUTF8Text(PyTessBaseAPI self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_baseapi.GetThresholdedImageScaleFactor()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_baseapi.GetThresholdedImageScaleFactor()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":389
- * 
+  /* "tesserocr.pyx":388
+ *         return image
  * 
  *     def GetThresholdedImageScaleFactor(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
  *         """Return the scale factor of the thresholded image that would be returned by
@@ -4121,7 +4121,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_38GetThresholdedImageScaleF
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":398
+/* "tesserocr.pyx":397
  *         return self._baseapi.GetThresholdedImageScaleFactor()
  * 
  *     def GetUTF8Text(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4154,7 +4154,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GetUTF8Text", 0);
 
-  /* "tesserocr.pyx":401
+  /* "tesserocr.pyx":400
  *         """Return the recognized text coded as UTF-8 from the image."""
  *         cdef char *text
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4168,7 +4168,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":402
+        /* "tesserocr.pyx":401
  *         cdef char *text
  *         with nogil:
  *             text = self._baseapi.GetUTF8Text()             # <<<<<<<<<<<<<<
@@ -4177,7 +4177,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
  */
         __pyx_v_text = __pyx_v_self->_baseapi.GetUTF8Text();
 
-        /* "tesserocr.pyx":403
+        /* "tesserocr.pyx":402
  *         with nogil:
  *             text = self._baseapi.GetUTF8Text()
  *             self._destroy_pix()             # <<<<<<<<<<<<<<
@@ -4186,7 +4186,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
  */
         ((struct __pyx_vtabstruct_9tesserocr_PyTessBaseAPI *)__pyx_v_self->__pyx_vtab)->_destroy_pix(__pyx_v_self);
 
-        /* "tesserocr.pyx":404
+        /* "tesserocr.pyx":403
  *             text = self._baseapi.GetUTF8Text()
  *             self._destroy_pix()
  *             if text == NULL:             # <<<<<<<<<<<<<<
@@ -4196,7 +4196,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
         __pyx_t_1 = ((__pyx_v_text == NULL) != 0);
         if (__pyx_t_1) {
 
-          /* "tesserocr.pyx":405
+          /* "tesserocr.pyx":404
  *             self._destroy_pix()
  *             if text == NULL:
  *                 with gil:             # <<<<<<<<<<<<<<
@@ -4209,21 +4209,21 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
               #endif
               /*try:*/ {
 
-                /* "tesserocr.pyx":406
+                /* "tesserocr.pyx":405
  *             if text == NULL:
  *                 with gil:
  *                     raise RuntimeError('Failed to recognize. No image set?')             # <<<<<<<<<<<<<<
  *         return _strip_and_free(text)
  * 
  */
-                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_Raise(__pyx_t_2, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
               }
 
-              /* "tesserocr.pyx":405
+              /* "tesserocr.pyx":404
  *             self._destroy_pix()
  *             if text == NULL:
  *                 with gil:             # <<<<<<<<<<<<<<
@@ -4240,7 +4240,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
               }
           }
 
-          /* "tesserocr.pyx":404
+          /* "tesserocr.pyx":403
  *             text = self._baseapi.GetUTF8Text()
  *             self._destroy_pix()
  *             if text == NULL:             # <<<<<<<<<<<<<<
@@ -4250,7 +4250,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
         }
       }
 
-      /* "tesserocr.pyx":401
+      /* "tesserocr.pyx":400
  *         """Return the recognized text coded as UTF-8 from the image."""
  *         cdef char *text
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4274,7 +4274,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
       }
   }
 
-  /* "tesserocr.pyx":407
+  /* "tesserocr.pyx":406
  *                 with gil:
  *                     raise RuntimeError('Failed to recognize. No image set?')
  *         return _strip_and_free(text)             # <<<<<<<<<<<<<<
@@ -4282,13 +4282,13 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
  *     def AllWordConfidences(PyTessBaseAPI self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 407; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":398
+  /* "tesserocr.pyx":397
  *         return self._baseapi.GetThresholdedImageScaleFactor()
  * 
  *     def GetUTF8Text(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4307,7 +4307,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_40GetUTF8Text(struct __pyx_
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":409
+/* "tesserocr.pyx":408
  *         return _strip_and_free(text)
  * 
  *     def AllWordConfidences(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4344,7 +4344,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("AllWordConfidences", 0);
 
-  /* "tesserocr.pyx":416
+  /* "tesserocr.pyx":415
  *         """
  *         cdef:
  *             int *confidences = self._baseapi.AllWordConfidences()             # <<<<<<<<<<<<<<
@@ -4353,7 +4353,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
  */
   __pyx_v_confidences = __pyx_v_self->_baseapi.AllWordConfidences();
 
-  /* "tesserocr.pyx":418
+  /* "tesserocr.pyx":417
  *             int *confidences = self._baseapi.AllWordConfidences()
  *             int confidence
  *             size_t i = 0             # <<<<<<<<<<<<<<
@@ -4362,19 +4362,19 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
  */
   __pyx_v_i = 0;
 
-  /* "tesserocr.pyx":420
+  /* "tesserocr.pyx":419
  *             size_t i = 0
  * 
  *         confs = []             # <<<<<<<<<<<<<<
  *         while confidences[i] != -1:
  *             confidence = confidences[i]
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_confs = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tesserocr.pyx":421
+  /* "tesserocr.pyx":420
  * 
  *         confs = []
  *         while confidences[i] != -1:             # <<<<<<<<<<<<<<
@@ -4385,7 +4385,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
     __pyx_t_2 = (((__pyx_v_confidences[__pyx_v_i]) != -1L) != 0);
     if (!__pyx_t_2) break;
 
-    /* "tesserocr.pyx":422
+    /* "tesserocr.pyx":421
  *         confs = []
  *         while confidences[i] != -1:
  *             confidence = confidences[i]             # <<<<<<<<<<<<<<
@@ -4394,19 +4394,19 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
  */
     __pyx_v_confidence = (__pyx_v_confidences[__pyx_v_i]);
 
-    /* "tesserocr.pyx":423
+    /* "tesserocr.pyx":422
  *         while confidences[i] != -1:
  *             confidence = confidences[i]
  *             confs.append(confidence)             # <<<<<<<<<<<<<<
  *             i += 1
  *         free(confidences)
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_confidence); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 423; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_confidence); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 422; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyList_Append(__pyx_v_confs, __pyx_t_1); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 423; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyList_Append(__pyx_v_confs, __pyx_t_1); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 422; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "tesserocr.pyx":424
+    /* "tesserocr.pyx":423
  *             confidence = confidences[i]
  *             confs.append(confidence)
  *             i += 1             # <<<<<<<<<<<<<<
@@ -4416,7 +4416,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
     __pyx_v_i = (__pyx_v_i + 1);
   }
 
-  /* "tesserocr.pyx":425
+  /* "tesserocr.pyx":424
  *             confs.append(confidence)
  *             i += 1
  *         free(confidences)             # <<<<<<<<<<<<<<
@@ -4425,7 +4425,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
  */
   free(__pyx_v_confidences);
 
-  /* "tesserocr.pyx":426
+  /* "tesserocr.pyx":425
  *             i += 1
  *         free(confidences)
  *         return confs             # <<<<<<<<<<<<<<
@@ -4437,7 +4437,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
   __pyx_r = __pyx_v_confs;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":409
+  /* "tesserocr.pyx":408
  *         return _strip_and_free(text)
  * 
  *     def AllWordConfidences(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4457,7 +4457,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_42AllWordConfidences(struct
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":428
+/* "tesserocr.pyx":427
  *         return confs
  * 
  *     def AdaptToWordStr(PyTessBaseAPI self, PageSegMode psm, const char *word):             # <<<<<<<<<<<<<<
@@ -4497,11 +4497,11 @@ static PyObject *__pyx_pw_9tesserocr_13PyTessBaseAPI_45AdaptToWordStr(PyObject *
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_word)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("AdaptToWordStr", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("AdaptToWordStr", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "AdaptToWordStr") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "AdaptToWordStr") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4509,12 +4509,12 @@ static PyObject *__pyx_pw_9tesserocr_13PyTessBaseAPI_45AdaptToWordStr(PyObject *
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[0])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_word = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_word) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[0])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_word = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_word) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("AdaptToWordStr", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("AdaptToWordStr", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 427; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("tesserocr.PyTessBaseAPI.AdaptToWordStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4536,7 +4536,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_44AdaptToWordStr(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("AdaptToWordStr", 0);
 
-  /* "tesserocr.pyx":443
+  /* "tesserocr.pyx":442
  *             bool: `False` if adaption was not possible for some reason.
  *         """
  *         return self._baseapi.AdaptToWordStr(psm, word)             # <<<<<<<<<<<<<<
@@ -4544,13 +4544,13 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_44AdaptToWordStr(struct __p
  *     def Clear(PyTessBaseAPI self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->_baseapi.AdaptToWordStr(__pyx_v_psm, __pyx_v_word)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 443; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->_baseapi.AdaptToWordStr(__pyx_v_psm, __pyx_v_word)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 442; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":428
+  /* "tesserocr.pyx":427
  *         return confs
  * 
  *     def AdaptToWordStr(PyTessBaseAPI self, PageSegMode psm, const char *word):             # <<<<<<<<<<<<<<
@@ -4569,7 +4569,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_44AdaptToWordStr(struct __p
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":445
+/* "tesserocr.pyx":444
  *         return self._baseapi.AdaptToWordStr(psm, word)
  * 
  *     def Clear(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4596,7 +4596,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("Clear", 0);
 
-  /* "tesserocr.pyx":449
+  /* "tesserocr.pyx":448
  *         freeing any recognition data that would be time-consuming to reload.
  *         """
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4610,7 +4610,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":450
+        /* "tesserocr.pyx":449
  *         """
  *         with nogil:
  *             self._destroy_pix()             # <<<<<<<<<<<<<<
@@ -4619,7 +4619,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
  */
         ((struct __pyx_vtabstruct_9tesserocr_PyTessBaseAPI *)__pyx_v_self->__pyx_vtab)->_destroy_pix(__pyx_v_self);
 
-        /* "tesserocr.pyx":451
+        /* "tesserocr.pyx":450
  *         with nogil:
  *             self._destroy_pix()
  *             self._baseapi.Clear()             # <<<<<<<<<<<<<<
@@ -4629,7 +4629,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
         __pyx_v_self->_baseapi.Clear();
       }
 
-      /* "tesserocr.pyx":449
+      /* "tesserocr.pyx":448
  *         freeing any recognition data that would be time-consuming to reload.
  *         """
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4647,7 +4647,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
       }
   }
 
-  /* "tesserocr.pyx":445
+  /* "tesserocr.pyx":444
  *         return self._baseapi.AdaptToWordStr(psm, word)
  * 
  *     def Clear(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4662,7 +4662,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_46Clear(struct __pyx_obj_9t
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":453
+/* "tesserocr.pyx":452
  *             self._baseapi.Clear()
  * 
  *     def End(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4689,7 +4689,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_48End(struct __pyx_obj_9tes
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("End", 0);
 
-  /* "tesserocr.pyx":455
+  /* "tesserocr.pyx":454
  *     def End(PyTessBaseAPI self):
  *         """Close down tesseract and free up all memory."""
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4703,7 +4703,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_48End(struct __pyx_obj_9tes
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":456
+        /* "tesserocr.pyx":455
  *         """Close down tesseract and free up all memory."""
  *         with nogil:
  *             self._end_api()             # <<<<<<<<<<<<<<
@@ -4713,7 +4713,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_48End(struct __pyx_obj_9tes
         ((struct __pyx_vtabstruct_9tesserocr_PyTessBaseAPI *)__pyx_v_self->__pyx_vtab)->_end_api(__pyx_v_self);
       }
 
-      /* "tesserocr.pyx":455
+      /* "tesserocr.pyx":454
  *     def End(PyTessBaseAPI self):
  *         """Close down tesseract and free up all memory."""
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4731,7 +4731,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_48End(struct __pyx_obj_9tes
       }
   }
 
-  /* "tesserocr.pyx":453
+  /* "tesserocr.pyx":452
  *             self._baseapi.Clear()
  * 
  *     def End(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4746,7 +4746,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_48End(struct __pyx_obj_9tes
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":458
+/* "tesserocr.pyx":457
  *             self._end_api()
  * 
  *     def __enter__(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4772,7 +4772,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_50__enter__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__enter__", 0);
 
-  /* "tesserocr.pyx":459
+  /* "tesserocr.pyx":458
  * 
  *     def __enter__(PyTessBaseAPI self):
  *         return self             # <<<<<<<<<<<<<<
@@ -4784,7 +4784,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_50__enter__(struct __pyx_ob
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":458
+  /* "tesserocr.pyx":457
  *             self._end_api()
  * 
  *     def __enter__(PyTessBaseAPI self):             # <<<<<<<<<<<<<<
@@ -4799,7 +4799,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_50__enter__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":461
+/* "tesserocr.pyx":460
  *         return self
  * 
  *     def __exit__(PyTessBaseAPI self, exc_tp, exc_val, exc_tb):             # <<<<<<<<<<<<<<
@@ -4840,16 +4840,16 @@ static PyObject *__pyx_pw_9tesserocr_13PyTessBaseAPI_53__exit__(PyObject *__pyx_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_exc_val)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 461; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_exc_tb)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 461; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__exit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 461; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__exit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -4864,7 +4864,7 @@ static PyObject *__pyx_pw_9tesserocr_13PyTessBaseAPI_53__exit__(PyObject *__pyx_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 461; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("tesserocr.PyTessBaseAPI.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4882,7 +4882,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__exit__", 0);
 
-  /* "tesserocr.pyx":462
+  /* "tesserocr.pyx":461
  * 
  *     def __exit__(PyTessBaseAPI self, exc_tp, exc_val, exc_tb):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4896,7 +4896,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":463
+        /* "tesserocr.pyx":462
  *     def __exit__(PyTessBaseAPI self, exc_tp, exc_val, exc_tb):
  *         with nogil:
  *             self._end_api()             # <<<<<<<<<<<<<<
@@ -4906,7 +4906,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
         ((struct __pyx_vtabstruct_9tesserocr_PyTessBaseAPI *)__pyx_v_self->__pyx_vtab)->_end_api(__pyx_v_self);
       }
 
-      /* "tesserocr.pyx":462
+      /* "tesserocr.pyx":461
  * 
  *     def __exit__(PyTessBaseAPI self, exc_tp, exc_val, exc_tb):
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -4924,7 +4924,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
       }
   }
 
-  /* "tesserocr.pyx":464
+  /* "tesserocr.pyx":463
  *         with nogil:
  *             self._end_api()
  *         return False             # <<<<<<<<<<<<<<
@@ -4936,7 +4936,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
   __pyx_r = Py_False;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":461
+  /* "tesserocr.pyx":460
  *         return self
  * 
  *     def __exit__(PyTessBaseAPI self, exc_tp, exc_val, exc_tb):             # <<<<<<<<<<<<<<
@@ -4951,7 +4951,7 @@ static PyObject *__pyx_pf_9tesserocr_13PyTessBaseAPI_52__exit__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":467
+/* "tesserocr.pyx":466
  * 
  * 
  * cdef char *_image_to_text(Pix *pix, const char *lang, const PageSegMode pagesegmode,             # <<<<<<<<<<<<<<
@@ -4965,7 +4965,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
   char *__pyx_r;
   int __pyx_t_1;
 
-  /* "tesserocr.pyx":473
+  /* "tesserocr.pyx":472
  *         char *text
  * 
  *     if baseapi.Init(path, lang) == -1:             # <<<<<<<<<<<<<<
@@ -4975,7 +4975,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
   __pyx_t_1 = ((__pyx_v_baseapi.Init(__pyx_v_path, __pyx_v_lang) == -1L) != 0);
   if (__pyx_t_1) {
 
-    /* "tesserocr.pyx":474
+    /* "tesserocr.pyx":473
  * 
  *     if baseapi.Init(path, lang) == -1:
  *         return NULL             # <<<<<<<<<<<<<<
@@ -4985,7 +4985,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
     __pyx_r = NULL;
     goto __pyx_L0;
 
-    /* "tesserocr.pyx":473
+    /* "tesserocr.pyx":472
  *         char *text
  * 
  *     if baseapi.Init(path, lang) == -1:             # <<<<<<<<<<<<<<
@@ -4994,7 +4994,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   }
 
-  /* "tesserocr.pyx":476
+  /* "tesserocr.pyx":475
  *         return NULL
  * 
  *     baseapi.SetPageSegMode(pagesegmode)             # <<<<<<<<<<<<<<
@@ -5003,7 +5003,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   __pyx_v_baseapi.SetPageSegMode(__pyx_v_pagesegmode);
 
-  /* "tesserocr.pyx":477
+  /* "tesserocr.pyx":476
  * 
  *     baseapi.SetPageSegMode(pagesegmode)
  *     baseapi.SetImage(pix)             # <<<<<<<<<<<<<<
@@ -5012,7 +5012,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   __pyx_v_baseapi.SetImage(__pyx_v_pix);
 
-  /* "tesserocr.pyx":478
+  /* "tesserocr.pyx":477
  *     baseapi.SetPageSegMode(pagesegmode)
  *     baseapi.SetImage(pix)
  *     text = baseapi.GetUTF8Text()             # <<<<<<<<<<<<<<
@@ -5021,7 +5021,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   __pyx_v_text = __pyx_v_baseapi.GetUTF8Text();
 
-  /* "tesserocr.pyx":479
+  /* "tesserocr.pyx":478
  *     baseapi.SetImage(pix)
  *     text = baseapi.GetUTF8Text()
  *     pixDestroy(&pix)             # <<<<<<<<<<<<<<
@@ -5030,7 +5030,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   pixDestroy((&__pyx_v_pix));
 
-  /* "tesserocr.pyx":480
+  /* "tesserocr.pyx":479
  *     text = baseapi.GetUTF8Text()
  *     pixDestroy(&pix)
  *     baseapi.End()             # <<<<<<<<<<<<<<
@@ -5039,7 +5039,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
  */
   __pyx_v_baseapi.End();
 
-  /* "tesserocr.pyx":482
+  /* "tesserocr.pyx":481
  *     baseapi.End()
  * 
  *     return text             # <<<<<<<<<<<<<<
@@ -5049,7 +5049,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
   __pyx_r = __pyx_v_text;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":467
+  /* "tesserocr.pyx":466
  * 
  * 
  * cdef char *_image_to_text(Pix *pix, const char *lang, const PageSegMode pagesegmode,             # <<<<<<<<<<<<<<
@@ -5062,7 +5062,7 @@ static char *__pyx_f_9tesserocr__image_to_text(struct Pix *__pyx_v_pix, char con
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":485
+/* "tesserocr.pyx":484
  * 
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -5121,7 +5121,7 @@ static PyObject *__pyx_pw_9tesserocr_1image_to_text(PyObject *__pyx_self, PyObje
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "image_to_text") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "image_to_text") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5135,24 +5135,24 @@ static PyObject *__pyx_pw_9tesserocr_1image_to_text(PyObject *__pyx_self, PyObje
     }
     __pyx_v_image = values[0];
     if (values[1]) {
-      __pyx_v_lang = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_lang) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_lang = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_lang) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_lang = __pyx_k__14;
     }
     if (values[2]) {
-      __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[2])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[2])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_psm = __pyx_k__15;
     }
     if (values[3]) {
-      __pyx_v_path = __Pyx_PyObject_AsString(values[3]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 486; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_path = __Pyx_PyObject_AsString(values[3]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_path = __pyx_k__16;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("image_to_text", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("image_to_text", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("tesserocr.image_to_text", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5182,39 +5182,39 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("image_to_text", 0);
 
-  /* "tesserocr.pyx":509
+  /* "tesserocr.pyx":508
  *         str raw
  * 
  *     raw = _image_buffer(image)             # <<<<<<<<<<<<<<
  *     buff = raw
  *     size = len(raw)
  */
-  __pyx_t_1 = __pyx_f_9tesserocr__image_buffer(__pyx_v_image); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 509; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_9tesserocr__image_buffer(__pyx_v_image); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 508; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_raw = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tesserocr.pyx":510
+  /* "tesserocr.pyx":509
  * 
  *     raw = _image_buffer(image)
  *     buff = raw             # <<<<<<<<<<<<<<
  *     size = len(raw)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_AsUString(__pyx_v_raw); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_AsUString(__pyx_v_raw); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 509; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_buff = __pyx_t_2;
 
-  /* "tesserocr.pyx":511
+  /* "tesserocr.pyx":510
  *     raw = _image_buffer(image)
  *     buff = raw
  *     size = len(raw)             # <<<<<<<<<<<<<<
  * 
  *     with nogil:
  */
-  __pyx_t_3 = PyObject_Length(__pyx_v_raw); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 511; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyObject_Length(__pyx_v_raw); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_size = __pyx_t_3;
 
-  /* "tesserocr.pyx":513
+  /* "tesserocr.pyx":512
  *     size = len(raw)
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5228,7 +5228,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":514
+        /* "tesserocr.pyx":513
  * 
  *     with nogil:
  *         pix = pixReadMemBmp(buff, size)             # <<<<<<<<<<<<<<
@@ -5237,7 +5237,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         __pyx_v_pix = pixReadMemBmp(__pyx_v_buff, __pyx_v_size);
 
-        /* "tesserocr.pyx":515
+        /* "tesserocr.pyx":514
  *     with nogil:
  *         pix = pixReadMemBmp(buff, size)
  *         if pix == NULL:             # <<<<<<<<<<<<<<
@@ -5247,7 +5247,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_4 = ((__pyx_v_pix == NULL) != 0);
         if (__pyx_t_4) {
 
-          /* "tesserocr.pyx":516
+          /* "tesserocr.pyx":515
  *         pix = pixReadMemBmp(buff, size)
  *         if pix == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5260,21 +5260,21 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
               #endif
               /*try:*/ {
 
-                /* "tesserocr.pyx":517
+                /* "tesserocr.pyx":516
  *         if pix == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')             # <<<<<<<<<<<<<<
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  */
-                __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 517; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
                 __Pyx_GOTREF(__pyx_t_1);
                 __Pyx_Raise(__pyx_t_1, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 517; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
               }
 
-              /* "tesserocr.pyx":516
+              /* "tesserocr.pyx":515
  *         pix = pixReadMemBmp(buff, size)
  *         if pix == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5291,7 +5291,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
               }
           }
 
-          /* "tesserocr.pyx":515
+          /* "tesserocr.pyx":514
  *     with nogil:
  *         pix = pixReadMemBmp(buff, size)
  *         if pix == NULL:             # <<<<<<<<<<<<<<
@@ -5300,7 +5300,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         }
 
-        /* "tesserocr.pyx":518
+        /* "tesserocr.pyx":517
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)             # <<<<<<<<<<<<<<
@@ -5309,7 +5309,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         __pyx_v_text = __pyx_f_9tesserocr__image_to_text(__pyx_v_pix, __pyx_v_lang, __pyx_v_psm, __pyx_v_path);
 
-        /* "tesserocr.pyx":519
+        /* "tesserocr.pyx":518
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:             # <<<<<<<<<<<<<<
@@ -5319,7 +5319,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_4 = ((__pyx_v_text == NULL) != 0);
         if (__pyx_t_4) {
 
-          /* "tesserocr.pyx":520
+          /* "tesserocr.pyx":519
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5332,21 +5332,21 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
               #endif
               /*try:*/ {
 
-                /* "tesserocr.pyx":521
+                /* "tesserocr.pyx":520
  *         if text == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed recognize picture')             # <<<<<<<<<<<<<<
  * 
  *     return _strip_and_free(text)
  */
-                __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 521; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
+                __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 520; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
                 __Pyx_GOTREF(__pyx_t_1);
                 __Pyx_Raise(__pyx_t_1, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 521; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 520; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
               }
 
-              /* "tesserocr.pyx":520
+              /* "tesserocr.pyx":519
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5363,7 +5363,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
               }
           }
 
-          /* "tesserocr.pyx":519
+          /* "tesserocr.pyx":518
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:             # <<<<<<<<<<<<<<
@@ -5373,7 +5373,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
         }
       }
 
-      /* "tesserocr.pyx":513
+      /* "tesserocr.pyx":512
  *     size = len(raw)
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5397,7 +5397,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
       }
   }
 
-  /* "tesserocr.pyx":523
+  /* "tesserocr.pyx":522
  *                 raise RuntimeError('Failed recognize picture')
  * 
  *     return _strip_and_free(text)             # <<<<<<<<<<<<<<
@@ -5405,13 +5405,13 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 523; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":485
+  /* "tesserocr.pyx":484
  * 
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -5431,7 +5431,7 @@ static PyObject *__pyx_pf_9tesserocr_image_to_text(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":526
+/* "tesserocr.pyx":525
  * 
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -5490,7 +5490,7 @@ static PyObject *__pyx_pw_9tesserocr_3file_to_text(PyObject *__pyx_self, PyObjec
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "file_to_text") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "file_to_text") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5502,26 +5502,26 @@ static PyObject *__pyx_pw_9tesserocr_3file_to_text(PyObject *__pyx_self, PyObjec
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_filename = __Pyx_PyObject_AsString(values[0]); if (unlikely((!__pyx_v_filename) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_filename = __Pyx_PyObject_AsString(values[0]); if (unlikely((!__pyx_v_filename) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[1]) {
-      __pyx_v_lang = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_lang) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_lang = __Pyx_PyObject_AsString(values[1]); if (unlikely((!__pyx_v_lang) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_lang = __pyx_k__19;
     }
     if (values[2]) {
-      __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[2])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_psm = ((enum tesseract::PageSegMode)__Pyx_PyInt_As_enum__tesseract_3a__3a_PageSegMode(values[2])); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_psm = __pyx_k__20;
     }
     if (values[3]) {
-      __pyx_v_path = __Pyx_PyObject_AsString(values[3]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 527; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_path = __Pyx_PyObject_AsString(values[3]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_path = __pyx_k__21;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("file_to_text", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("file_to_text", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("tesserocr.file_to_text", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5546,7 +5546,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("file_to_text", 0);
 
-  /* "tesserocr.pyx":547
+  /* "tesserocr.pyx":546
  *         char *text
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5560,7 +5560,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
       #endif
       /*try:*/ {
 
-        /* "tesserocr.pyx":548
+        /* "tesserocr.pyx":547
  * 
  *     with nogil:
  *         pix = pixRead(filename)             # <<<<<<<<<<<<<<
@@ -5569,7 +5569,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         __pyx_v_pix = pixRead(__pyx_v_filename);
 
-        /* "tesserocr.pyx":549
+        /* "tesserocr.pyx":548
  *     with nogil:
  *         pix = pixRead(filename)
  *         if pix == NULL:             # <<<<<<<<<<<<<<
@@ -5579,7 +5579,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_1 = ((__pyx_v_pix == NULL) != 0);
         if (__pyx_t_1) {
 
-          /* "tesserocr.pyx":550
+          /* "tesserocr.pyx":549
  *         pix = pixRead(filename)
  *         if pix == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5592,21 +5592,21 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
               #endif
               /*try:*/ {
 
-                /* "tesserocr.pyx":551
+                /* "tesserocr.pyx":550
  *         if pix == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')             # <<<<<<<<<<<<<<
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  */
-                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 550; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_Raise(__pyx_t_2, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 550; __pyx_clineno = __LINE__; goto __pyx_L8_error;}
               }
 
-              /* "tesserocr.pyx":550
+              /* "tesserocr.pyx":549
  *         pix = pixRead(filename)
  *         if pix == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5623,7 +5623,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
               }
           }
 
-          /* "tesserocr.pyx":549
+          /* "tesserocr.pyx":548
  *     with nogil:
  *         pix = pixRead(filename)
  *         if pix == NULL:             # <<<<<<<<<<<<<<
@@ -5632,7 +5632,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         }
 
-        /* "tesserocr.pyx":552
+        /* "tesserocr.pyx":551
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)             # <<<<<<<<<<<<<<
@@ -5641,7 +5641,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
  */
         __pyx_v_text = __pyx_f_9tesserocr__image_to_text(__pyx_v_pix, __pyx_v_lang, __pyx_v_psm, __pyx_v_path);
 
-        /* "tesserocr.pyx":553
+        /* "tesserocr.pyx":552
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:             # <<<<<<<<<<<<<<
@@ -5651,7 +5651,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_1 = ((__pyx_v_text == NULL) != 0);
         if (__pyx_t_1) {
 
-          /* "tesserocr.pyx":554
+          /* "tesserocr.pyx":553
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5664,21 +5664,21 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
               #endif
               /*try:*/ {
 
-                /* "tesserocr.pyx":555
+                /* "tesserocr.pyx":554
  *         if text == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed recognize picture')             # <<<<<<<<<<<<<<
  * 
  *     return _strip_and_free(text)
  */
-                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_Raise(__pyx_t_2, 0, 0, 0);
                 __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L12_error;}
               }
 
-              /* "tesserocr.pyx":554
+              /* "tesserocr.pyx":553
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -5695,7 +5695,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
               }
           }
 
-          /* "tesserocr.pyx":553
+          /* "tesserocr.pyx":552
  *                 raise RuntimeError('Failed to read picture')
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:             # <<<<<<<<<<<<<<
@@ -5705,7 +5705,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
         }
       }
 
-      /* "tesserocr.pyx":547
+      /* "tesserocr.pyx":546
  *         char *text
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -5729,7 +5729,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
       }
   }
 
-  /* "tesserocr.pyx":557
+  /* "tesserocr.pyx":556
  *                 raise RuntimeError('Failed recognize picture')
  * 
  *     return _strip_and_free(text)             # <<<<<<<<<<<<<<
@@ -5737,13 +5737,13 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 557; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_f_9tesserocr__strip_and_free(__pyx_v_text); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 556; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":526
+  /* "tesserocr.pyx":525
  * 
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -5762,7 +5762,7 @@ static PyObject *__pyx_pf_9tesserocr_2file_to_text(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":560
+/* "tesserocr.pyx":559
  * 
  * 
  * def tesseract_version():             # <<<<<<<<<<<<<<
@@ -5803,7 +5803,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("tesseract_version", 0);
 
-  /* "tesserocr.pyx":562
+  /* "tesserocr.pyx":561
  * def tesseract_version():
  *     """Return tesseract-ocr and leptonica version info"""
  *     version_str = u"tesseract {}\n {}\n  {}"             # <<<<<<<<<<<<<<
@@ -5813,7 +5813,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
   __Pyx_INCREF(__pyx_kp_u_tesseract);
   __pyx_v_version_str = __pyx_kp_u_tesseract;
 
-  /* "tesserocr.pyx":563
+  /* "tesserocr.pyx":562
  *     """Return tesseract-ocr and leptonica version info"""
  *     version_str = u"tesseract {}\n {}\n  {}"
  *     tess_v = TessBaseAPI.Version()             # <<<<<<<<<<<<<<
@@ -5822,31 +5822,31 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
  */
   __pyx_v_tess_v = tesseract::TessBaseAPI::Version();
 
-  /* "tesserocr.pyx":564
+  /* "tesserocr.pyx":563
  *     version_str = u"tesseract {}\n {}\n  {}"
  *     tess_v = TessBaseAPI.Version()
  *     lept_v = _strip_and_free(getLeptonicaVersion())             # <<<<<<<<<<<<<<
  *     libs_v = _strip_and_free(getImagelibVersions())
  *     return version_str.format(tess_v, lept_v, libs_v)
  */
-  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(getLeptonicaVersion()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 564; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(getLeptonicaVersion()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_lept_v = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tesserocr.pyx":565
+  /* "tesserocr.pyx":564
  *     tess_v = TessBaseAPI.Version()
  *     lept_v = _strip_and_free(getLeptonicaVersion())
  *     libs_v = _strip_and_free(getImagelibVersions())             # <<<<<<<<<<<<<<
  *     return version_str.format(tess_v, lept_v, libs_v)
  * 
  */
-  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(getImagelibVersions()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_f_9tesserocr__strip_and_free(getImagelibVersions()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 564; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_libs_v = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tesserocr.pyx":566
+  /* "tesserocr.pyx":565
  *     lept_v = _strip_and_free(getLeptonicaVersion())
  *     libs_v = _strip_and_free(getImagelibVersions())
  *     return version_str.format(tess_v, lept_v, libs_v)             # <<<<<<<<<<<<<<
@@ -5854,9 +5854,9 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_version_str, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_version_str, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_tess_v); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyUnicode_FromString(__pyx_v_tess_v); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   __pyx_t_5 = 0;
@@ -5870,7 +5870,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
       __pyx_t_5 = 1;
     }
   }
-  __pyx_t_6 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   if (__pyx_t_4) {
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -5884,7 +5884,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
   __Pyx_GIVEREF(__pyx_v_libs_v);
   PyTuple_SET_ITEM(__pyx_t_6, 2+__pyx_t_5, __pyx_v_libs_v);
   __pyx_t_3 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5892,7 +5892,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":560
+  /* "tesserocr.pyx":559
  * 
  * 
  * def tesseract_version():             # <<<<<<<<<<<<<<
@@ -5918,7 +5918,7 @@ static PyObject *__pyx_pf_9tesserocr_4tesseract_version(CYTHON_UNUSED PyObject *
   return __pyx_r;
 }
 
-/* "tesserocr.pyx":569
+/* "tesserocr.pyx":568
  * 
  * 
  * def get_languages(cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
@@ -5958,7 +5958,7 @@ static PyObject *__pyx_pw_9tesserocr_7get_languages(PyObject *__pyx_self, PyObje
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_languages") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_languages") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5968,14 +5968,14 @@ static PyObject *__pyx_pw_9tesserocr_7get_languages(PyObject *__pyx_self, PyObje
       }
     }
     if (values[0]) {
-      __pyx_v_path = __Pyx_PyObject_AsString(values[0]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_path = __Pyx_PyObject_AsString(values[0]); if (unlikely((!__pyx_v_path) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_path = __pyx_k__24;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_languages", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("get_languages", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("tesserocr.get_languages", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6004,7 +6004,7 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_languages", 0);
 
-  /* "tesserocr.pyx":585
+  /* "tesserocr.pyx":584
  *         GenericVector[STRING] v
  *         int i
  *     baseapi.Init(path, NULL)             # <<<<<<<<<<<<<<
@@ -6013,7 +6013,7 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
  */
   __pyx_v_baseapi.Init(__pyx_v_path, NULL);
 
-  /* "tesserocr.pyx":586
+  /* "tesserocr.pyx":585
  *         int i
  *     baseapi.Init(path, NULL)
  *     path = baseapi.GetDatapath()             # <<<<<<<<<<<<<<
@@ -6022,7 +6022,7 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
  */
   __pyx_v_path = __pyx_v_baseapi.GetDatapath();
 
-  /* "tesserocr.pyx":587
+  /* "tesserocr.pyx":586
  *     baseapi.Init(path, NULL)
  *     path = baseapi.GetDatapath()
  *     baseapi.GetAvailableLanguagesAsVector(&v)             # <<<<<<<<<<<<<<
@@ -6031,27 +6031,27 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
  */
   __pyx_v_baseapi.GetAvailableLanguagesAsVector((&__pyx_v_v));
 
-  /* "tesserocr.pyx":588
+  /* "tesserocr.pyx":587
  *     path = baseapi.GetDatapath()
  *     baseapi.GetAvailableLanguagesAsVector(&v)
  *     langs = [v[i].string() for i in xrange(v.size())]             # <<<<<<<<<<<<<<
  *     baseapi.End()
  *     return path, langs
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __pyx_v_v.size();
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
-    __pyx_t_4 = __Pyx_PyUnicode_FromString((__pyx_v_v[__pyx_v_i]).string()); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyUnicode_FromString((__pyx_v_v[__pyx_v_i]).string()); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_v_langs = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "tesserocr.pyx":589
+  /* "tesserocr.pyx":588
  *     baseapi.GetAvailableLanguagesAsVector(&v)
  *     langs = [v[i].string() for i in xrange(v.size())]
  *     baseapi.End()             # <<<<<<<<<<<<<<
@@ -6059,15 +6059,15 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
  */
   __pyx_v_baseapi.End();
 
-  /* "tesserocr.pyx":590
+  /* "tesserocr.pyx":589
  *     langs = [v[i].string() for i in xrange(v.size())]
  *     baseapi.End()
  *     return path, langs             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyUnicode_FromString(__pyx_v_path); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 590; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyUnicode_FromString(__pyx_v_path); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 589; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 590; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 589; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -6079,7 +6079,7 @@ static PyObject *__pyx_pf_9tesserocr_6get_languages(CYTHON_UNUSED PyObject *__py
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "tesserocr.pyx":569
+  /* "tesserocr.pyx":568
  * 
  * 
  * def get_languages(cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
@@ -6493,58 +6493,58 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "tesserocr.pyx":406
+  /* "tesserocr.pyx":405
  *             if text == NULL:
  *                 with gil:
  *                     raise RuntimeError('Failed to recognize. No image set?')             # <<<<<<<<<<<<<<
  *         return _strip_and_free(text)
  * 
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_recognize_No_image_set); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 406; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_recognize_No_image_set); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 405; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "tesserocr.pyx":517
+  /* "tesserocr.pyx":516
  *         if pix == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')             # <<<<<<<<<<<<<<
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_read_picture); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 517; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_read_picture); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 516; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
-  /* "tesserocr.pyx":521
+  /* "tesserocr.pyx":520
  *         if text == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed recognize picture')             # <<<<<<<<<<<<<<
  * 
  *     return _strip_and_free(text)
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_Failed_recognize_picture); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 521; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_Failed_recognize_picture); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 520; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "tesserocr.pyx":551
+  /* "tesserocr.pyx":550
  *         if pix == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed to read picture')             # <<<<<<<<<<<<<<
  *         text = _image_to_text(pix, lang, psm, path)
  *         if text == NULL:
  */
-  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_read_picture); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_Failed_to_read_picture); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 550; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
 
-  /* "tesserocr.pyx":555
+  /* "tesserocr.pyx":554
  *         if text == NULL:
  *             with gil:
  *                 raise RuntimeError('Failed recognize picture')             # <<<<<<<<<<<<<<
  * 
  *     return _strip_and_free(text)
  */
-  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_Failed_recognize_picture); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_Failed_recognize_picture); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__23);
   __Pyx_GIVEREF(__pyx_tuple__23);
 
@@ -6566,53 +6566,53 @@ static int __Pyx_InitCachedConstants(void) {
  */
   __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_ClearPersistentCache, 159, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 159; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "tesserocr.pyx":485
+  /* "tesserocr.pyx":484
  * 
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
  *                    cchar_t *path=_DEFAULT_PATH):
  *     """Recognize OCR text from an image object.
  */
-  __pyx_tuple__27 = PyTuple_Pack(9, __pyx_n_s_image, __pyx_n_s_lang, __pyx_n_s_psm, __pyx_n_s_path, __pyx_n_s_pix, __pyx_n_s_buff, __pyx_n_s_size, __pyx_n_s_text, __pyx_n_s_raw); if (unlikely(!__pyx_tuple__27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__27 = PyTuple_Pack(9, __pyx_n_s_image, __pyx_n_s_lang, __pyx_n_s_psm, __pyx_n_s_path, __pyx_n_s_pix, __pyx_n_s_buff, __pyx_n_s_size, __pyx_n_s_text, __pyx_n_s_raw); if (unlikely(!__pyx_tuple__27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
-  __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_image_to_text, 485, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_image_to_text, 484, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "tesserocr.pyx":526
+  /* "tesserocr.pyx":525
  * 
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
  *                  cchar_t *path=_DEFAULT_PATH):
  *     """Extract OCR text from an image file.
  */
-  __pyx_tuple__29 = PyTuple_Pack(6, __pyx_n_s_filename, __pyx_n_s_lang, __pyx_n_s_psm, __pyx_n_s_path, __pyx_n_s_pix, __pyx_n_s_text); if (unlikely(!__pyx_tuple__29)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__29 = PyTuple_Pack(6, __pyx_n_s_filename, __pyx_n_s_lang, __pyx_n_s_psm, __pyx_n_s_path, __pyx_n_s_pix, __pyx_n_s_text); if (unlikely(!__pyx_tuple__29)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__29);
   __Pyx_GIVEREF(__pyx_tuple__29);
-  __pyx_codeobj__30 = (PyObject*)__Pyx_PyCode_New(4, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__29, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_file_to_text, 526, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__30 = (PyObject*)__Pyx_PyCode_New(4, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__29, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_file_to_text, 525, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "tesserocr.pyx":560
+  /* "tesserocr.pyx":559
  * 
  * 
  * def tesseract_version():             # <<<<<<<<<<<<<<
  *     """Return tesseract-ocr and leptonica version info"""
  *     version_str = u"tesseract {}\n {}\n  {}"
  */
-  __pyx_tuple__31 = PyTuple_Pack(4, __pyx_n_s_version_str, __pyx_n_s_tess_v, __pyx_n_s_lept_v, __pyx_n_s_libs_v); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__31 = PyTuple_Pack(4, __pyx_n_s_version_str, __pyx_n_s_tess_v, __pyx_n_s_lept_v, __pyx_n_s_libs_v); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
-  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(0, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_tesseract_version, 560, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(0, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_tesseract_version, 559, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "tesserocr.pyx":569
+  /* "tesserocr.pyx":568
  * 
  * 
  * def get_languages(cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
  *     """Return available languages in the given path.
  * 
  */
-  __pyx_tuple__33 = PyTuple_Pack(5, __pyx_n_s_path, __pyx_n_s_baseapi, __pyx_n_s_v, __pyx_n_s_i, __pyx_n_s_langs); if (unlikely(!__pyx_tuple__33)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__33 = PyTuple_Pack(5, __pyx_n_s_path, __pyx_n_s_baseapi, __pyx_n_s_v, __pyx_n_s_i, __pyx_n_s_langs); if (unlikely(!__pyx_tuple__33)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__33);
   __Pyx_GIVEREF(__pyx_tuple__33);
-  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_get_languages, 569, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__34 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__33, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_fz_workspace_tesserocr_tes, __pyx_n_s_get_languages, 568, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__34)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -7456,7 +7456,7 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
  */
   __pyx_k__8 = tesseract::PSM_AUTO;
 
-  /* "tesserocr.pyx":485
+  /* "tesserocr.pyx":484
  * 
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -7466,7 +7466,7 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
   __pyx_k__14 = __pyx_v_9tesserocr__DEFAULT_LANG;
   __pyx_k__15 = tesseract::PSM_AUTO;
 
-  /* "tesserocr.pyx":486
+  /* "tesserocr.pyx":485
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
  *                    cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
@@ -7475,19 +7475,19 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
  */
   __pyx_k__16 = __pyx_v_9tesserocr__DEFAULT_PATH;
 
-  /* "tesserocr.pyx":485
+  /* "tesserocr.pyx":484
  * 
  * 
  * def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
  *                    cchar_t *path=_DEFAULT_PATH):
  *     """Recognize OCR text from an image object.
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_1image_to_text, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_1image_to_text, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_image_to_text, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_image_to_text, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "tesserocr.pyx":526
+  /* "tesserocr.pyx":525
  * 
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
@@ -7497,7 +7497,7 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
   __pyx_k__19 = __pyx_v_9tesserocr__DEFAULT_LANG;
   __pyx_k__20 = tesseract::PSM_AUTO;
 
-  /* "tesserocr.pyx":527
+  /* "tesserocr.pyx":526
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
  *                  cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
@@ -7506,31 +7506,31 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
  */
   __pyx_k__21 = __pyx_v_9tesserocr__DEFAULT_PATH;
 
-  /* "tesserocr.pyx":526
+  /* "tesserocr.pyx":525
  * 
  * 
  * def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,             # <<<<<<<<<<<<<<
  *                  cchar_t *path=_DEFAULT_PATH):
  *     """Extract OCR text from an image file.
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_3file_to_text, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_3file_to_text, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_file_to_text, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 526; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_file_to_text, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 525; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "tesserocr.pyx":560
+  /* "tesserocr.pyx":559
  * 
  * 
  * def tesseract_version():             # <<<<<<<<<<<<<<
  *     """Return tesseract-ocr and leptonica version info"""
  *     version_str = u"tesseract {}\n {}\n  {}"
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_5tesseract_version, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_5tesseract_version, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tesseract_version, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_tesseract_version, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "tesserocr.pyx":569
+  /* "tesserocr.pyx":568
  * 
  * 
  * def get_languages(cchar_t *path=_DEFAULT_PATH):             # <<<<<<<<<<<<<<
@@ -7538,9 +7538,9 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
  * 
  */
   __pyx_k__24 = __pyx_v_9tesserocr__DEFAULT_PATH;
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_7get_languages, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9tesserocr_7get_languages, NULL, __pyx_n_s_tesserocr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_languages, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 569; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_languages, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "tesserocr.pyx":1
