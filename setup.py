@@ -41,9 +41,11 @@ else:
 
 setup(name='tesserocr',
       version=find_version('tesserocr.pyx'),
-      description='A Python wrapper around tesseract-ocr API using Cython',
+      description='A simple, Pillow-friendly, Python wrapper around tesseract-ocr API using Cython',
+      long_description=read('README.rst'),
       url='https://github.com/sirfz/tesserocr',
       author='Fayez Zouheiry',
+      author_email='iamfayez@gmail.com',
       license='MIT',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
@@ -52,11 +54,12 @@ setup(name='tesserocr',
           'Topic :: Multimedia :: Graphics :: Graphics Conversion',
           'Topic :: Scientific/Engineering :: Image Recognition',
           'License :: OSI Approved :: MIT License',
-          'Operating System :: POSIX :: Linux',
+          'Operating System :: POSIX',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Cython'
       ],
-      keywords='Tesseract,tesseract-ocr,OCR,optical image recognition,Cython',
+      keywords='Tesseract,tesseract-ocr,OCR,optical image recognition,PIL,Pillow,Cython',
       cmdclass={'build_ext': build_ext} if build_ext else {},
       ext_modules=ext_modules,
       )

@@ -1,11 +1,15 @@
 # tesserocr
-A simple wrapper around the `tesseract-ocr` API for Optical Image Recognition (OCR).
+A simple, [`Pillow`](http://python-pillow.github.io/)-friendly, wrapper around
+the `tesseract-ocr` API for Optical Image Recognition (OCR).
 
-`tesserocr` integrates directly with Tesseract's C++ API using Cython and
-allows real concurrent execution when used with `threading` by releasing the GIL while
-processing an image in tesseract.
+**tesserocr** integrates directly with Tesseract's C++ API using Cython which
+allows for a simple Pythonic and easy-to-read source code. It enables
+real concurrent execution when used with Python's `threading` module by
+releasing the GIL while processing an image in tesseract.
 
-`tesserocr` is designed to be `Pillow`-friendly but can also be used with image files instead.
+**tesserocr** is designed to be
+[`Pillow`](http://python-pillow.github.io/)-friendly but can also be used with
+image files instead.
 
 Requirements
 ------------
