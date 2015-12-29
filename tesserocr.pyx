@@ -18,7 +18,7 @@ In addition, helper functions are provided for ocr operations:
      ['eng', 'osd', 'equ'])
 """
 
-__version__ = '1.2.1rc1'
+__version__ = '1.2.1rc2'
 
 import os
 from cStringIO import StringIO
