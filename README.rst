@@ -2,7 +2,7 @@ tesserocr
 =========
 
 A simple, |Pillow|_-friendly,
-wrapper around the ``tesseract-ocr`` API for Optical Image Recognition
+wrapper around the ``tesseract-ocr`` API for Optical Character Recognition
 (OCR).
 
 **tesserocr** integrates directly with Tesseract's C++ API using Cython

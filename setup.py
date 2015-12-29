@@ -59,7 +59,7 @@ setup(name='tesserocr',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Cython'
       ],
-      keywords='Tesseract,tesseract-ocr,OCR,optical image recognition,PIL,Pillow,Cython',
+      keywords='Tesseract,tesseract-ocr,OCR,optical character recognition,PIL,Pillow,Cython',
       cmdclass={'build_ext': build_ext} if build_ext else {},
       ext_modules=ext_modules,
       )
