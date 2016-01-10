@@ -3,10 +3,8 @@ import codecs
 import re
 from setuptools import setup, Extension
 try:
-    from Cython.Build import cythonize
     from Cython.Distutils import build_ext
 except ImportError:
-    cythonize = None
     build_ext = None
 
 
@@ -27,16 +25,18 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-if cythonize:
-    ext_modules = cythonize(Extension("tesserocr",
-                            sources=["tesserocr.pyx"],
-                            libraries=["tesseract", "lept"],
-                            language="c++"))
+if build_ext:
+    ext_modules = [Extension("tesserocr",
+                             sources=["tesserocr.pyx"],
+                             libraries=["tesseract", "lept"],
+                             language="c++")]
+    cmdclass = {'build_ext': build_ext}
 else:
     ext_modules = [Extension("tesserocr",
                              sources=["tesserocr.cpp"],
                              libraries=["tesseract", "lept"],
                              language="c++")]
+    cmdclass = {}
 
 
 setup(name='tesserocr',
@@ -60,6 +60,7 @@ setup(name='tesserocr',
           'Programming Language :: Cython'
       ],
       keywords='Tesseract,tesseract-ocr,OCR,optical character recognition,PIL,Pillow,Cython',
-      cmdclass={'build_ext': build_ext} if build_ext else {},
+      cmdclass=cmdclass,
       ext_modules=ext_modules,
+      test_suite='tests'
       )
