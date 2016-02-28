@@ -1,4 +1,4 @@
 include README.rst
 include LICENSE
 include *.pyx *.pxd *.cpp
-include tests/*.py
+include tests/*.py tests/*.jpg
