@@ -20,7 +20,7 @@ with image files instead.
 Requirements
 ============
 
-Requires libtesseract (>=3.02) and libleptonica.
+Requires libtesseract (>=3.04) and libleptonica.
 
 On Debian/Ubuntu:
 

@@ -1347,7 +1347,7 @@ static char __pyx_k_size[] = "size";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_text[] = "text";
 static char __pyx_k_word[] = "word";
-static char __pyx_k_2_0_0[] = "2.0.0";
+static char __pyx_k_2_0_1[] = "2.0.1";
 static char __pyx_k_BLOCK[] = "BLOCK";
 static char __pyx_k_COUNT[] = "COUNT";
 static char __pyx_k_Image[] = "Image";
@@ -1503,8 +1503,8 @@ static char __pyx_k_home_fz_workspace_tesserocr_tes[] = "/home/fz/workspace/tess
 static char __pyx_k_is_an_enum_and_cannot_be_instan[] = "{} is an enum and cannot be instantiated";
 static char __pyx_k_ChoiceIterator_cannot_be_instant[] = "ChoiceIterator cannot be instantiated from Python";
 static char __pyx_k_Failed_to_recognize_No_image_set[] = "Failed to recognize. No image set?";
-static char __pyx_k_Python_wrapper_around_the_Tesser[] = "Python wrapper around the Tesseract-OCR 3.02+ C++ API\n\nThis module provides a wrapper class :class:`PyTessBaseAPI` to call\nTesseract API methods. See :class:`PyTessBaseAPI` for details.\n\nIn addition, helper functions are provided for ocr operations:\n\n>>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')\n>>> text = file_to_text('./image.jpg', psm=PSM.AUTO)\n>>> print tesseract_version()\ntesseract 3.04.00\n    leptonica-1.72\n    libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8\n>>> get_languages()\n('/usr/share/tesseract-ocr/tessdata/',\n ['eng', 'osd', 'equ'])\n";
-static PyObject *__pyx_kp_s_2_0_0;
+static char __pyx_k_Python_wrapper_around_the_Tesser[] = "Python wrapper around the Tesseract-OCR C++ API\n\nThis module provides a wrapper class :class:`PyTessBaseAPI` to call\nTesseract API methods. See :class:`PyTessBaseAPI` for details.\n\nIn addition, helper functions are provided for ocr operations:\n\n>>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')\n>>> text = file_to_text('./image.jpg', psm=PSM.AUTO)\n>>> print tesseract_version()\ntesseract 3.04.00\n    leptonica-1.72\n    libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8\n>>> get_languages()\n('/usr/share/tesseract-ocr/tessdata/',\n ['eng', 'osd', 'equ'])\n";
+static PyObject *__pyx_kp_s_2_0_1;
 static PyObject *__pyx_n_s_AUTO;
 static PyObject *__pyx_n_s_AUTO_ONLY;
 static PyObject *__pyx_n_s_AUTO_OSD;
@@ -21843,7 +21843,7 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_s_2_0_0, __pyx_k_2_0_0, sizeof(__pyx_k_2_0_0), 0, 0, 1, 0},
+  {&__pyx_kp_s_2_0_1, __pyx_k_2_0_1, sizeof(__pyx_k_2_0_1), 0, 0, 1, 0},
   {&__pyx_n_s_AUTO, __pyx_k_AUTO, sizeof(__pyx_k_AUTO), 0, 0, 1, 1},
   {&__pyx_n_s_AUTO_ONLY, __pyx_k_AUTO_ONLY, sizeof(__pyx_k_AUTO_ONLY), 0, 0, 1, 1},
   {&__pyx_n_s_AUTO_OSD, __pyx_k_AUTO_OSD, sizeof(__pyx_k_AUTO_OSD), 0, 0, 1, 1},
@@ -22620,14 +22620,14 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
   /* "tesserocr.pyx":21
  * """
  * 
- * __version__ = '2.0.0'             # <<<<<<<<<<<<<<
+ * __version__ = '2.0.1'             # <<<<<<<<<<<<<<
  * 
  * import os
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_version, __pyx_kp_s_2_0_0) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_version, __pyx_kp_s_2_0_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "tesserocr.pyx":23
- * __version__ = '2.0.0'
+ * __version__ = '2.0.1'
  * 
  * import os             # <<<<<<<<<<<<<<
  * from cStringIO import StringIO
@@ -24025,7 +24025,7 @@ PyMODINIT_FUNC PyInit_tesserocr(void)
   /* "tesserocr.pyx":1
  * #!python             # <<<<<<<<<<<<<<
  * #cython: c_string_type=unicode, c_string_encoding=utf-8
- * """Python wrapper around the Tesseract-OCR 3.02+ C++ API
+ * """Python wrapper around the Tesseract-OCR C++ API
  */
   __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
