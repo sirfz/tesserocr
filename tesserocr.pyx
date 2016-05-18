@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.0.1'
+__version__ = '2.0.2-beta'
 
 import os
 from cStringIO import StringIO
@@ -291,7 +291,7 @@ cdef unicode _free_str(char *text):
 cdef str _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with closing(StringIO()) as f:
-        image.save(f, 'BMP')
+        image.save(f, image.format)
         return f.getvalue()
 
 
@@ -300,8 +300,16 @@ cdef _pix_to_image(Pix *pix):
     cdef:
         unsigned char *buff
         size_t size
-    pixWriteMemBmp(&buff, &size, pix)
+        int result
+        int fmt = pixGetInputFormat(pix)
+    if fmt > 0:
+        result = pixWriteMem(&buff, &size, pix, fmt)
+    else:
+        # write as BMP if format is unknown
+        result = pixWriteMemBmp(&buff, &size, pix)
 
+    if result == 1:
+        raise RuntimeError("Failed to convert pix image to PIL.Image")
     with closing(StringIO(<bytes>buff[:size])) as f:
         image = Image.open(f)
         image.load()
@@ -630,7 +638,7 @@ cdef class PyPageIterator:
             raw = _image_buffer(original_image)
             size = len(raw)
             buff = raw
-            opix = pixReadMemBmp(buff, size)
+            opix = pixReadMem(buff, size)
         pix = self._piter.GetImage(level, padding, opix, &left, &top)
         try:
             return _pix_to_image(pix), left, top
@@ -1447,7 +1455,7 @@ cdef class PyTessBaseAPI:
 
         with nogil:
             self._destroy_pix()
-            self._pix = pixReadMemBmp(buff, size)
+            self._pix = pixReadMem(buff, size)
             if self._pix == NULL:
                 with gil:
                     raise RuntimeError('Error reading image')
@@ -1898,7 +1906,7 @@ cdef class PyTessBaseAPI:
         raw = _image_buffer(image)
         size = len(raw)
         buff = raw
-        pix = pixReadMemBmp(buff, size)
+        pix = pixReadMem(buff, size)
         if pix == NULL:
             raise RuntimeError('Failed to read image')
         if renderer != NULL:
@@ -2135,7 +2143,7 @@ def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
     size = len(raw)
 
     with nogil:
-        pix = pixReadMemBmp(buff, size)
+        pix = pixReadMem(buff, size)
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
