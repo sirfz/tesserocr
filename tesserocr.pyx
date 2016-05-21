@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.0.2-beta'
+__version__ = '2.0.2-beta.3'
 
 import os
 from cStringIO import StringIO
@@ -291,7 +291,7 @@ cdef unicode _free_str(char *text):
 cdef str _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with closing(StringIO()) as f:
-        image.save(f, image.format)
+        image.save(f, image.format or 'JPEG')
         return f.getvalue()
 
 
@@ -305,8 +305,8 @@ cdef _pix_to_image(Pix *pix):
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
-        # write as BMP if format is unknown
-        result = pixWriteMemBmp(&buff, &size, pix)
+        # write as JPEG if format is unknown
+        result = pixWriteMemJpeg(&buff, &size, pix, 0, 0)
 
     if result == 1:
         raise RuntimeError("Failed to convert pix image to PIL.Image")
@@ -1795,6 +1795,11 @@ cdef class PyTessBaseAPI:
             TessResultRenderer *temp
             TessResultRenderer *renderer = NULL
 
+        IF TESSERACT_VERSION >= 0x030401:
+            if self._baseapi.GetPageSegMode() == PSM.OSD_ONLY:
+                renderer = new TessOsdRenderer(outputbase)
+                return renderer
+
         self._baseapi.GetBoolVariable("tessedit_create_hocr", &b)
         if b:
             self._baseapi.GetBoolVariable("hocr_font_info", &font_info)
@@ -1875,7 +1880,7 @@ cdef class PyTessBaseAPI:
         if renderer != NULL:
             try:
                 return self._baseapi.ProcessPages(filename, retry_config, timeout, renderer)
-            except:
+            finally:
                 del renderer
         raise RuntimeError('No renderers enabled')
 
@@ -2056,13 +2061,33 @@ cdef class PyTessBaseAPI:
         """Get text direction.
 
         Returns:
-            tuple: offset and slop
+            tuple: offset and slope
         """
         cdef:
             int out_offset
             float out_slope
         self._baseapi.GetTextDirection(&out_offset, &out_slope)
         return out_offset, out_slope
+
+    def DetectOS(self):
+        """Estimate the Orientation and Script of the image.
+
+        Returns:
+            `dict` or `None` if image was not successfully processed. dict contains:
+                - orientation: Orientation ids [0..3] map to [0, 270, 180, 90] degree orientations of the
+                  page respectively, where the values refer to the amount of clockwise
+                  rotation to be applied to the page for the text to be upright and readable.
+                - oconfidence: Orientation confidence.
+                - script: Index of the script with the highest score for this orientation.
+                - sconfidence: script confidence.
+        """
+        cdef OSResults results
+        if self._baseapi.DetectOS(&results):
+            return {'orientation': results.best_result.orientation_id,
+                    'oconfidence': results.best_result.oconfidence,
+                    'script': results.get_best_script(results.best_result.orientation_id),
+                    'sconfidence': results.best_result.sconfidence}
+        return None
 
     def GetUnichar(self, int unichar_id):
         """Return the string form of the specified unichar.
@@ -2112,7 +2137,7 @@ cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode
 
 
 def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                   cchar_t *path=_DEFAULT_PATH):
+                  cchar_t *path=_DEFAULT_PATH):
     """Recognize OCR text from an image object.
 
     Args:

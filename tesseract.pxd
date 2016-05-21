@@ -29,14 +29,14 @@ cdef extern from "leptonica/allheaders.h" nogil:
     char *getLeptonicaVersion()
     Pix *pixRead(cchar_t *)
     Pix *pixReadMem(cuchar_t *, size_t)
-    int pixWriteMemBmp(unsigned char **, size_t *, Pix *)
+    int pixWriteMemJpeg(unsigned char **, size_t *, Pix *, int, int)
     int pixGetInputFormat(Pix *)
     int pixWriteMem(unsigned char **, size_t *, Pix *, int)
-    int pixWriteMemBmp(unsigned char **, size_t *, Pix *)
     void pixDestroy(Pix **)
     int setMsgSeverity(int)
     void pixaDestroy(Pixa **)
     void boxaDestroy(Boxa **)
+
     cdef enum:
         L_SEVERITY_EXTERNAL = 0   # Get the severity from the environment
         L_SEVERITY_ALL      = 1   # Lowest severity: print all messages
@@ -186,7 +186,25 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessBoxTextRenderer(TessResultRenderer):
         TessBoxTextRenderer(cchar_t *) except +
 
+    IF TESSERACT_VERSION >= 0x030401:
+        cdef cppclass TessOsdRenderer(TessResultRenderer):
+            TessOsdRenderer(cchar_t *) except +
+
+cdef extern from "tesseract/osdetect.h" nogil:
+    struct OSBestResult:
+        int orientation_id
+        int script_id
+        float sconfidence
+        float oconfidence
+
+    ctypedef int (*get_best_script)(int)
+
+    struct OSResults:
+        get_best_script get_best_script
+        OSBestResult best_result
+
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
+
     cdef enum OcrEngineMode:
         OEM_TESSERACT_ONLY
         OEM_CUBE_ONLY
@@ -289,6 +307,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         int IsValidWord(cchar_t *)
         bool IsValidCharacter(cchar_t *)
         bool GetTextDirection(int *, float *)
+        bool DetectOS(OSResults *);
         cchar_t *GetUnichar(int)
         const OcrEngineMode oem() const
         void set_min_orientation_margin(double)
