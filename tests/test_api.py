@@ -12,7 +12,7 @@ class TestTessBaseApi(unittest.TestCase):
 
     def setUp(self):
         self._test_dir = os.path.abspath(os.path.dirname(__file__))
-        self._image_file = os.path.join(self._test_dir, 'sample.jpg')
+        self._image_file = os.path.join(self._test_dir, 'eurotext.tif')
         if pil_installed:
             self._image = Image.open(self._image_file)
         self._api = tesserocr.PyTessBaseAPI(init=True)
@@ -53,7 +53,7 @@ class TestTessBaseApi(unittest.TestCase):
         self._api.Init()
         self._api.SetImage(self._image)
         text = self._api.GetUTF8Text()
-        self.assertIn('tesserocr', text)
+        self.assertIn('quick', text)
         text2 = tesserocr.image_to_text(self._image)
         self.assertEqual(text, text2)
 
@@ -62,7 +62,7 @@ class TestTessBaseApi(unittest.TestCase):
         self._api.Init()
         self._api.SetImageFile(self._image_file)
         text = self._api.GetUTF8Text()
-        self.assertIn('tesserocr', text)
+        self.assertIn('quick', text)
         text2 = tesserocr.file_to_text(self._image_file)
         self.assertEqual(text, text2)
 
@@ -125,13 +125,23 @@ class TestTessBaseApi(unittest.TestCase):
         """Test AllWordConfidences and MapWordConfidences."""
         self._api.Init()
         self._api.SetImageFile(self._image_file)
-        text = self._api.GetUTF8Text()
-        words = text.split(' ')
+        words = self._api.AllWords()
+        self.assertEqual(words, [])
+        self._api.Recognize()
+        words = self._api.AllWords()
         confidences = self._api.AllWordConfidences()
         self.assertEqual(len(words), len(confidences))
         mapped_confidences = self._api.MapWordConfidences()
         self.assertEqual([v[0] for v in mapped_confidences], words)
         self.assertEqual([v[1] for v in mapped_confidences], confidences)
+
+    def test_detect_os(self):
+        self._api.Init()
+        self._api.SetPageSegMode(tesserocr.PSM.OSD_ONLY)
+        self._api.SetImageFile(self._image_file)
+        orientation = self._api.DetectOS()
+        all(self.assertIn(k, orientation) for k in ['sconfidence', 'oconfidence', 'script', 'orientation'])
+        self.assertEqual(orientation['orientation'], 0)
 
     def test_clear(self):
         """Test Clear."""
