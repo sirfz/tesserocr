@@ -744,10 +744,15 @@ cdef class PyLTRResultIterator(PyPageIterator):
         self._piter = NULL
 
     def GetChoiceIterator(self):
-        """Return `PyChoiceIterator` instance to iterate over symbol choices"""
+        """Return `PyChoiceIterator` instance to iterate over symbol choices.
+
+        Returns `None` on failure.
+        """
         cdef:
             const LTRResultIterator *ltrriter = self._ltrriter
             ChoiceIterator *citer = new ChoiceIterator(ltrriter[0])
+        if citer == NULL:
+            return None
         return PyChoiceIterator.create(citer)
 
     def GetUTF8Text(self, PageIteratorLevel level):
@@ -1019,6 +1024,10 @@ def iterate_choices(citerator):
 def iterate_level(iterator, PageIteratorLevel level):
     """Helper generator function to iterate a :class:`PyPageIterator`
     level.
+
+    Args:
+        iterator: Instance of :class:`PyPageIterator`
+        level: Page iterator level :class:`RIL`
     """
     yield iterator
     while iterator.Next(level):
@@ -1927,9 +1936,11 @@ cdef class PyTessBaseAPI:
         :meth:`Recognize`.
 
         Returns:
-            :class:`PyResultIterator`: reading-order iterator.
+            :class:`PyResultIterator`: reading-order iterator or `None` on failure.
         """
         cdef ResultIterator *iterator = self._baseapi.GetIterator()
+        if iterator == NULL:
+            return None
         return PyResultIterator.createResultIterator(iterator)
 
     def GetUTF8Text(self):
@@ -2014,9 +2025,21 @@ cdef class PyTessBaseAPI:
         free(confidences)
         return confs
 
+    def AllWords(self):
+        """Return list of all detected words.
+
+        Returns an empty list if :meth:`Recognize` was not called first.
+        """
+        words = []
+        wi = self.GetIterator()
+        if wi:
+            for w in iterate_level(wi, RIL.WORD):
+                words.append(w.GetUTF8Text(RIL.WORD))
+        return words
+
     def MapWordConfidences(self):
         """Return list of word, confidence tuples"""
-        return zip(self.GetUTF8Text().split(' '), self.AllWordConfidences())
+        return zip(self.AllWords(), self.AllWordConfidences())
 
     def AdaptToWordStr(self, PageSegMode psm, cchar_t *word):
         """Apply the given word to the adaptive classifier if possible.
