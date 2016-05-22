@@ -20,7 +20,7 @@ with image files instead.
 Requirements
 ============
 
-Requires libtesseract (>=3.04) and libleptonica.
+Requires libtesseract (>=3.04) and libleptonica (>=1.71).
 
 On Debian/Ubuntu:
 
@@ -28,8 +28,13 @@ On Debian/Ubuntu:
 
     $ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
 
-Optionally requires ``Cython`` for building (otherwise the generated
-.cpp file is compiled) and |Pillow|_ to support ``PIL.Image`` objects.
+You may need to `manually compile tesseract`_ for a more recent version.
+
+|Cython|_ is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
+
+.. _manually compile tesseract: https://github.com/tesseract-ocr/tesseract/wiki/Compiling
+.. |Cython| replace:: ``Cython``
+.. _Cython: http://cython.org/
 
 Installation
 ============
@@ -83,6 +88,7 @@ Advanced API Examples
 ---------------------
 
 GetComponentImages example:
+```````````````````````````
 
 .. code:: python
 
@@ -104,6 +110,7 @@ GetComponentImages example:
                    "confidence: {1}, text: {2}").format(i, conf, ocrResult, **box)
 
 Orientation and script detection (OSD):
+```````````````````````````````````````
 
 .. code:: python
 
@@ -122,7 +129,21 @@ Orientation and script detection (OSD):
         print "TextlineOrder: {:d}".format(order)
         print "Deskew angle: {:.4f}".format(deskew_angle)
 
+or more simply with ``OSD_ONLY`` page segmentation mode:
+
+.. code:: python
+
+    from tesserocr import PyTessBaseAPI, PSM
+
+    with PyTessBaseAPI(psm=PSM.OSD_ONLY) as api:
+        api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
+
+        os = api.DetectOS()
+        print ("Orientation: {orientation}\nOrientation confidence: {oconfidence}\n"
+               "Script: {script}\nScript confidence: {sconfidence}").format(**os)
+
 Iterator over the classifier choices for a single symbol:
+`````````````````````````````````````````````````````````
 
 .. code:: python
 
