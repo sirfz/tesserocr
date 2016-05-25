@@ -47,11 +47,13 @@ The setup script attempts to detect the include/library dirs (via |pkg-config|_ 
 can override the with your own parameters, e.g.:
 
 ::
+
     $ CPPFLAGS=-I/usr/local/include pip install tesserocr
 
 or
 
 ::
+
     $ python setup.py build_ext -I/usr/local/include
 
 Teseted on Linux and BSD/MacOS
