@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.0.2-beta.3'
+__version__ = '2.1.0-rc.1'
 
 import os
 from cStringIO import StringIO
