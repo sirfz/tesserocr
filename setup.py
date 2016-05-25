@@ -5,7 +5,8 @@ import codecs
 import re
 import subprocess
 import errno
-import os.path
+from os.path import dirname, abspath
+from os.path import split as psplit, join as pjoin
 from setuptools import setup
 from Cython.Distutils import build_ext
 from Cython.Distutils.extension import Extension
@@ -20,11 +21,11 @@ _LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 _TESSERACT_MIN_VERSION = '3.04.00'
 
 # find_version from pip https://github.com/pypa/pip/blob/1.5.6/setup.py#L33
-here = os.path.abspath(os.path.dirname(__file__))
+here = abspath(dirname(__file__))
 
 
 def read(*parts):
-    return codecs.open(os.path.join(here, *parts), 'r').read()
+    return codecs.open(pjoin(here, *parts), 'r').read()
 
 
 def find_version(*file_paths):
@@ -62,6 +63,8 @@ def package_config():
     for f in itertools.chain(flags, flags2):
         opt = options[f[:2]]
         val = f[2:]
+        if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in {'leptonica', 'tesseract'}:
+            val = dirname(val)
         config.setdefault(opt, set()).add(val)
     config = {k: list(v) for k, v in config.iteritems()}
     p = subprocess.Popen(['pkg-config', '--modversion', 'tesseract'], stdout=subprocess.PIPE)
