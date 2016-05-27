@@ -38,7 +38,7 @@ def find_version(*file_paths):
 
 
 def version_to_int(version):
-    return int("".join(version.split('.')), 16)
+    return int(''.join(version.strip('dev').split('.')), 16)
 
 
 def package_config():
