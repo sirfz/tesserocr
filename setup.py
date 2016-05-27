@@ -8,6 +8,7 @@ import errno
 from os.path import dirname, abspath
 from os.path import split as psplit, join as pjoin
 from setuptools import setup
+from pkg_resources import parse_version
 from Cython.Distutils import build_ext
 from Cython.Distutils.extension import Extension
 
@@ -38,7 +39,8 @@ def find_version(*file_paths):
 
 
 def version_to_int(version):
-    return int("".join(version.split('.')), 16)
+    version = parse_version(version)
+    return int(''.join(version.base_version.split('.')), 16)
 
 
 def package_config():
