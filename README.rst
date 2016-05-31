@@ -44,7 +44,7 @@ Installation
     $ pip install tesserocr
 
 The setup script attempts to detect the include/library dirs (via |pkg-config|_ if available) but you
-can override the with your own parameters, e.g.:
+can override them with your own parameters, e.g.:
 
 ::
 
@@ -56,7 +56,7 @@ or
 
     $ python setup.py build_ext -I/usr/local/include
 
-Teseted on Linux and BSD/MacOS
+Tested on Linux and BSD/MacOS
 
 .. |pkg-config| replace:: **pkg-config**
 .. _pkg-config: https://pkgconfig.freedesktop.org/
