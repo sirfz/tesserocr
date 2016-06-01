@@ -14,8 +14,15 @@ class TestTessBaseApi(unittest.TestCase):
         self._test_dir = os.path.abspath(os.path.dirname(__file__))
         self._image_file = os.path.join(self._test_dir, 'eurotext.tif')
         if pil_installed:
-            self._image = Image.open(self._image_file)
+            with open(self._image_file, 'rb') as f:
+                self._image = Image.open(f)
+                self._image.load()
         self._api = tesserocr.PyTessBaseAPI(init=True)
+
+    def tearDown(self):
+        if pil_installed:
+            self._image.close()
+        self._api.End()
 
     def test_init_full(self):
         """Test InitFull."""
