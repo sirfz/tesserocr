@@ -7,10 +7,9 @@ import subprocess
 import errno
 from os.path import dirname, abspath
 from os.path import split as psplit, join as pjoin
-from setuptools import setup
+from setuptools import setup, Extension
 from pkg_resources import parse_version
 from Cython.Distutils import build_ext
-from Cython.Distutils.extension import Extension
 
 _LOGGER = logging.getLogger()
 if os.environ.get('DEBUG'):
@@ -38,6 +37,14 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
+if sys.version_info >= (3, 0):
+    def _read_string(s):
+        return s.decode('UTF-8')
+else:
+    def _read_string(s):
+        return s
+
+
 def version_to_int(version):
     version = parse_version(version)
     return int(''.join(version.base_version.split('.')), 16)
@@ -53,10 +60,10 @@ def package_config():
         raise Exception(error)
     p = subprocess.Popen(['pkg-config', '--libs', '--cflags', 'tesseract'], stdout=subprocess.PIPE)
     output, _ = p.communicate()
-    flags = output.strip().split()
+    flags = _read_string(output).strip().split()
     p = subprocess.Popen(['pkg-config', '--libs', '--cflags', 'lept'], stdout=subprocess.PIPE)
     output, _ = p.communicate()
-    flags2 = output.strip().split()
+    flags2 = _read_string(output).strip().split()
     options = {'-L': 'library_dirs',
                '-I': 'include_dirs',
                '-l': 'libraries'}
@@ -65,13 +72,14 @@ def package_config():
     for f in itertools.chain(flags, flags2):
         opt = options[f[:2]]
         val = f[2:]
-        if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in {'leptonica', 'tesseract'}:
+        if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in ('leptonica', 'tesseract'):
             val = dirname(val)
         config.setdefault(opt, set()).add(val)
-    config = {k: list(v) for k, v in config.iteritems()}
+    config = {k: list(v) for k, v in config.items()}
     p = subprocess.Popen(['pkg-config', '--modversion', 'tesseract'], stdout=subprocess.PIPE)
     version, _ = p.communicate()
-    config['cython_compile_time_env'] = {'TESSERACT_VERSION': version_to_int(version.strip())}
+    version = _read_string(version).strip()
+    config['cython_compile_time_env'] = {'TESSERACT_VERSION': version_to_int(version)}
     _LOGGER.info("Configs from pkg-config: {}".format(config))
     return config
 
@@ -82,7 +90,8 @@ def get_tesseract_version():
     try:
         p = subprocess.Popen(['tesseract', '-v'], stderr=subprocess.PIPE)
         _, version = p.communicate()
-        version_match = re.search(r'^tesseract (([0-9]+\.)+[0-9]+)\n', version)
+        version = _read_string(version).strip()
+        version_match = re.search(r'^tesseract (([0-9]+\.)+[0-9]+)[^\n]*\n', version)
         if version_match:
             version = version_match.group(1)
         else:
@@ -111,7 +120,7 @@ class BuildTesseract(build_ext):
             build_args = get_tesseract_version()
 
         _LOGGER.debug('build parameters: {}'.format(build_args))
-        for k, v in build_args.iteritems():
+        for k, v in build_args.items():
             setattr(self, k, v)
 
 
@@ -136,8 +145,10 @@ setup(name='tesserocr',
           'Topic :: Scientific/Engineering :: Image Recognition',
           'License :: OSI Approved :: MIT License',
           'Operating System :: POSIX',
-          'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.3',
+          'Programming Language :: Python :: 3.4',
           'Programming Language :: Cython'
       ],
       keywords='Tesseract,tesseract-ocr,OCR,optical character recognition,PIL,Pillow,Cython',

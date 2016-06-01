@@ -18,10 +18,10 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.1.0-rc.1'
+__version__ = '2.1.1-rc.1'
 
 import os
-from cStringIO import StringIO
+from io import BytesIO
 from contextlib import closing
 from os.path import abspath, join
 try:
@@ -32,6 +32,16 @@ except ImportError:
 
 from tesseract cimport *
 from libc.stdlib cimport malloc, free
+from cpython.version cimport PY_MAJOR_VERSION
+
+
+cdef bytes _b(s):
+    if PY_MAJOR_VERSION > 3:
+        if isinstance(s, str):
+            return s.encode('UTF-8')
+    elif isinstance(s, unicode):
+        return s.encode('UTF-8')
+    return s
 
 
 # default parameters
@@ -39,10 +49,8 @@ setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
 cdef TessBaseAPI _api = TessBaseAPI()
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
-cdef unicode _abs_path = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
-cdef unicode _lang_s = _api.GetInitLanguagesAsString()
-cdef cchar_t *_DEFAULT_PATH = _abs_path
-cdef cchar_t *_DEFAULT_LANG = _lang_s
+cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
+cdef _DEFAULT_LANG = _api.GetInitLanguagesAsString()
 _api.End()
 TessBaseAPI.ClearPersistentCache()
 
@@ -288,9 +296,9 @@ cdef unicode _free_str(char *text):
         free(text)
 
 
-cdef str _image_buffer(image):
+cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
-    with closing(StringIO()) as f:
+    with closing(BytesIO()) as f:
         image.save(f, image.format or 'JPEG')
         return f.getvalue()
 
@@ -310,7 +318,7 @@ cdef _pix_to_image(Pix *pix):
 
     if result == 1:
         raise RuntimeError("Failed to convert pix image to PIL.Image")
-    with closing(StringIO(<bytes>buff[:size])) as f:
+    with closing(BytesIO(<bytes>buff[:size])) as f:
         image = Image.open(f)
         image.load()
     free(buff)
@@ -773,13 +781,15 @@ cdef class PyLTRResultIterator(PyPageIterator):
             raise RuntimeError('No text returned')
         return _free_str(text)
 
-    def SetLineSeparator(self, cchar_t *separator):
+    def SetLineSeparator(self, separator):
         """Set the string inserted at the end of each text line. "\n" by default."""
-        self._ltrriter.SetLineSeparator(separator)
+        cdef bytes py_sep = _b(separator)
+        self._ltrriter.SetLineSeparator(py_sep)
 
-    def SetParagraphSeparator(self, cchar_t *separator):
+    def SetParagraphSeparator(self, separator):
         """Set the string inserted at the end of each paragraph. "\n" by default."""
-        self._ltrriter.SetParagraphSeparator(separator)
+        cdef bytes py_sep = _b(separator)
+        self._ltrriter.SetParagraphSeparator(py_sep)
 
     def Confidence(self, PageIteratorLevel level):
         """Return the mean confidence of the current object at the given level.
@@ -877,10 +887,11 @@ cdef class PyLTRResultIterator(PyPageIterator):
         """Returns True if a truth string was recorded for the current word."""
         return self._ltrriter.HasTruthString()
 
-    def EquivalentToTruth(self, cchar_t *text):
+    def EquivalentToTruth(self, text):
         """Return True if the given string is equivalent to the truth string for
         the current word."""
-        return self._ltrriter.EquivalentToTruth(text)
+        cdef bytes py_text = _b(text)
+        return self._ltrriter.EquivalentToTruth(py_text)
 
     def WordTruthUTF8Text(self):
         """Return a UTF-8 encoded truth string for the current word."""
@@ -1087,13 +1098,18 @@ cdef class PyTessBaseAPI:
     def ClearPersistentCache():
         return TessBaseAPI.ClearPersistentCache()
 
-    def __cinit__(self, cchar_t *path=_DEFAULT_PATH,
-                  cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
+    def __cinit__(self, path=_DEFAULT_PATH,
+                  lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
                   bool init=True):
+        cdef:
+            bytes py_path = _b(path)
+            bytes py_lang = _b(lang)
+            cchar_t *cpath = py_path
+            cchar_t *clang = py_lang
         with nogil:
             self._pix = NULL
             if init:
-                self._init_api(path, lang, OEM_DEFAULT, NULL, 0, NULL, NULL, False, psm)
+                self._init_api(cpath, clang, OEM_DEFAULT, NULL, 0, NULL, NULL, False, psm)
 
     def __dealloc__(self):
         self._end_api()
@@ -1121,11 +1137,12 @@ cdef class PyTessBaseAPI:
         """Return tessdata parent directory"""
         return self._baseapi.GetDatapath()
 
-    def SetOutputName(self, cchar_t *name):
+    def SetOutputName(self, name):
         """Set the name of the bonus output files. Needed only for debugging."""
-        self._baseapi.SetOutputName(name)
+        cdef bytes py_name = _b(name)
+        self._baseapi.SetOutputName(py_name)
 
-    def SetVariable(self, cchar_t *name, cchar_t *val):
+    def SetVariable(self, name, val):
         """Set the value of an internal parameter.
 
         Supply the name of the parameter and the value as a string, just as
@@ -1144,9 +1161,12 @@ cdef class PyTessBaseAPI:
         Returns:
             bool: ``False`` if the name lookup failed.
         """
-        return self._baseapi.SetVariable(name, val)
+        cdef:
+            bytes py_name = _b(name)
+            bytes py_val = _b(val)
+        return self._baseapi.SetVariable(py_name, py_val)
 
-    def SetDebugVariable(self, cchar_t *name, cchar_t *val):
+    def SetDebugVariable(self, name, val):
         """Set the value of an internal parameter. (debug)
 
         Supply the name of the parameter and the value as a string, just as
@@ -1165,62 +1185,75 @@ cdef class PyTessBaseAPI:
         Returns:
             bool: ``False`` if the name lookup failed.
         """
-        return self._baseapi.SetDebugVariable(name, val)
+        cdef:
+            bytes py_name = _b(name)
+            bytes py_val = _b(val)
+        return self._baseapi.SetDebugVariable(py_name, py_val)
 
-    def GetIntVariable(self, cchar_t *name):
+    def GetIntVariable(self, name):
         """Return the value of the given int parameter if it exists among Tesseract parameters.
 
         Returns ``None`` if the paramter was not found.
         """
-        cdef int val
-        if self._baseapi.GetIntVariable(name, &val):
+        cdef:
+            bytes py_name = _b(name)
+            int val
+        if self._baseapi.GetIntVariable(py_name, &val):
             return val
         return None
 
-    def GetBoolVariable(self, cchar_t *name):
+    def GetBoolVariable(self, name):
         """Return the value of the given bool parameter if it exists among Tesseract parameters.
 
         Returns ``None`` if the paramter was not found.
         """
-        cdef bool val
-        if self._baseapi.GetBoolVariable(name, &val):
+        cdef:
+            bytes py_name = _b(name)
+            bool val
+        if self._baseapi.GetBoolVariable(py_name, &val):
             return val
         return None
 
-    def GetDoubleVariable(self, cchar_t *name):
+    def GetDoubleVariable(self, name):
         """Return the value of the given double parameter if it exists among Tesseract parameters.
 
         Returns ``None`` if the paramter was not found.
         """
-        cdef double val
-        if self._baseapi.GetDoubleVariable(name, &val):
+        cdef:
+            bytes py_name = _b(name)
+            double val
+        if self._baseapi.GetDoubleVariable(py_name, &val):
             return val
         return None
 
-    def GetStringVariable(self, cchar_t *name):
+    def GetStringVariable(self, name):
         """Return the value of the given string parameter if it exists among Tesseract parameters.
 
         Returns ``None`` if the paramter was not found.
         """
-        cdef cchar_t *val = self._baseapi.GetStringVariable(name)
+        cdef:
+            bytes py_name = _b(name)
+            cchar_t *val = self._baseapi.GetStringVariable(py_name)
         if val != NULL:
             return val
         return None
 
-    def GetVariableAsString(self, cchar_t *name):
+    def GetVariableAsString(self, name):
         """Return the value of named variable as a string (regardless of type),
         if it exists.
 
         Returns ``None`` if paramter was not found.
         """
-        cdef STRING val
-        if self._baseapi.GetVariableAsString(name, &val):
+        cdef:
+            bytes py_name = _b(name)
+            STRING val
+        if self._baseapi.GetVariableAsString(py_name, &val):
             return val.string()
         return None
 
-    def InitFull(self, cchar_t *path=_DEFAULT_PATH, cchar_t *lang=_DEFAULT_LANG,
-             OcrEngineMode oem=OEM_DEFAULT, list configs=[], dict variables={},
-             bool set_only_non_debug_params=False):
+    def InitFull(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
+                 OcrEngineMode oem=OEM_DEFAULT, list configs=[],
+                 dict variables={}, bool set_only_non_debug_params=False):
         """Initialize the API with the given parameters (advanced).
 
         It is entirely safe (and eventually will be efficient too) to call
@@ -1254,6 +1287,10 @@ cdef class PyTessBaseAPI:
             :exc:`RuntimeError`: If API initialization fails.
         """
         cdef:
+            bytes py_path = _b(path)
+            bytes py_lang = _b(lang)
+            cchar_t *cpath = py_path
+            cchar_t *clang = py_lang
             int configs_size = len(configs)
             char **configs_ = <char **>malloc(configs_size * sizeof(char *))
             GenericVector[STRING] vars_vec
@@ -1262,26 +1299,29 @@ cdef class PyTessBaseAPI:
             STRING sval
 
         for i, c in enumerate(configs):
+            c = _b(c)
             configs_[i] = c
 
-        for k, v in variables.iteritems():
+        for k, v in variables.items():
+            k = _b(k)
             val = k
             sval = val
             vars_vec.push_back(sval)
+            v = _b(v)
             val = v
             sval = val
             vars_vals.push_back(sval)
 
         with nogil:
             try:
-                if self._init_api(path, lang, oem, configs_, configs_size, &vars_vec, &vars_vals,
+                if self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
                                   set_only_non_debug_params, PSM_AUTO) == -1:
                     with gil:
                         raise RuntimeError('Failed to initialize API')
             finally:
                 free(configs_)
 
-    def Init(self, cchar_t *path=_DEFAULT_PATH, cchar_t *lang=_DEFAULT_LANG,
+    def Init(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
              OcrEngineMode oem=OEM_DEFAULT):
         """Initialize the API with the given data path, language and OCR engine mode.
 
@@ -1298,8 +1338,13 @@ cdef class PyTessBaseAPI:
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
         """
+        cdef:
+            bytes py_path = _b(path)
+            bytes py_lang = _b(lang)
+            cchar_t *cpath = py_path
+            cchar_t *clang = py_lang
         with nogil:
-            if self._init_api(path, lang, oem, NULL, 0, NULL, NULL, False, PSM_AUTO) == -1:
+            if self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, PSM_AUTO) == -1:
                 with gil:
                     raise RuntimeError('Failed to initialize API')
 
@@ -1341,7 +1386,7 @@ cdef class PyTessBaseAPI:
         """
         self._baseapi.InitForAnalysePage()
 
-    def ReadConfigFile(self, cchar_t *filename):
+    def ReadConfigFile(self, filename):
         """Read a "config" file containing a set of param, value pairs.
 
         Searches the standard places: tessdata/configs, tessdata/tessconfigs.
@@ -1349,7 +1394,8 @@ cdef class PyTessBaseAPI:
         Args:
             filename: config file name. Also accepts relative or absolute path name.
         """
-        self._baseapi.ReadConfigFile(filename)
+        cdef bytes py_fname = _b(filename)
+        self._baseapi.ReadConfigFile(py_fname)
 
     def SetPageSegMode(self, PageSegMode psm):
         """Set page segmentation mode.
@@ -1365,7 +1411,7 @@ cdef class PyTessBaseAPI:
         """Return the current page segmentation mode."""
         return self._baseapi.GetPageSegMode()
 
-    def TesseractRect(self, cuchar_t* imagedata,
+    def TesseractRect(self, imagedata,
                       int bytes_per_pixel, int bytes_per_line,
                       int left, int top, int width, int height):
         """Recognize a rectangle from an image and return the result as a string.
@@ -1397,9 +1443,12 @@ cdef class PyTessBaseAPI:
         Returns:
             unicode: The recognized text as UTF8.
         """
-        cdef char *text
+        cdef:
+            bytes py_imagedata = _b(imagedata)
+            cuchar_t *cimagedata = py_imagedata
+            char *text
         with nogil:
-            text = self._baseapi.TesseractRect(imagedata, bytes_per_pixel, bytes_per_line,
+            text = self._baseapi.TesseractRect(cimagedata, bytes_per_pixel, bytes_per_line,
                                                left, top, width, height)
             if text == NULL:
                 with gil:
@@ -1412,7 +1461,7 @@ cdef class PyTessBaseAPI:
         """
         self._baseapi.ClearAdaptiveClassifier()
 
-    def SetImageBytes(self, cuchar_t *imagedata, int width, int height,
+    def SetImageBytes(self, imagedata, int width, int height,
                       int bytes_per_pixel, int bytes_per_line):
         """Provide an image for Tesseract to recognize.
 
@@ -1437,9 +1486,12 @@ cdef class PyTessBaseAPI:
                 1 represents WHITE. For binary images set bytes_per_pixel=0.
             bytes_per_line (int): bytes per line.
         """
+        cdef:
+            bytes py_imagedata = _b(imagedata)
+            cuchar_t *cimagedata = py_imagedata
         with nogil:
             self._destroy_pix()
-            self._baseapi.SetImage(imagedata, width, height, bytes_per_pixel, bytes_per_line)
+            self._baseapi.SetImage(cimagedata, width, height, bytes_per_pixel, bytes_per_line)
 
     def SetImage(self, image):
         """Provide an image for Tesseract to recognize.
@@ -1456,7 +1508,7 @@ cdef class PyTessBaseAPI:
         cdef:
             cuchar_t *buff
             size_t size
-            str raw
+            bytes raw
 
         raw = _image_buffer(image)
         buff = raw
@@ -1470,7 +1522,7 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Error reading image')
             self._baseapi.SetImage(self._pix)
 
-    def SetImageFile(self, cchar_t *filename):
+    def SetImageFile(self, filename):
         """Set image from file for Tesserac to recognize.
 
         Args:
@@ -1480,9 +1532,12 @@ cdef class PyTessBaseAPI:
             :exc:`RuntimeError`: If for any reason the api failed
                 to load the given image.
         """
+        cdef:
+            bytes py_fname = _b(filename)
+            cchar_t *fname = py_fname
         with nogil:
             self._destroy_pix()
-            self._pix = pixRead(filename)
+            self._pix = pixRead(fname)
             if self._pix == NULL:
                 with gil:
                     raise RuntimeError('Error reading image')
@@ -1597,7 +1652,7 @@ cdef class PyTessBaseAPI:
             boxaDestroy(&boxa)
             pixaDestroy(&pixa)
 
-    def GetStrips(self, blockids=True):
+    def GetStrips(self, bool blockids=True):
         """Get the textlines and strips of image regions as a list
         of image, box bounds {x, y, width, height} tuples in reading order.
 
@@ -1848,8 +1903,8 @@ cdef class PyTessBaseAPI:
 
         return renderer
 
-    def ProcessPages(self, cchar_t *outputbase, cchar_t *filename,
-                     cchar_t *retry_config=NULL, int timeout=0):
+    def ProcessPages(self, outputbase, filename,
+                     retry_config=None, int timeout=0):
         """Turns images into symbolic text.
 
         Set at least one of the following variables to enable renderers
@@ -1885,16 +1940,27 @@ cdef class PyTessBaseAPI:
         Raises:
             :exc:`RuntimeError`: If no renderers enabled in api variables.
         """
-        cdef TessResultRenderer *renderer = self._get_renderer(outputbase)
+        cdef:
+            bytes py_outputbase = _b(outputbase)
+            TessResultRenderer *renderer = self._get_renderer(py_outputbase)
+            bytes py_fname = _b(filename)
+            bytes py_config
+            cchar_t *cconfig
+
         if renderer != NULL:
+            if retry_config is not None:
+                py_config = _b(retry_config)
+                cconfig = py_config
+            else:
+                cconfig = NULL
             try:
-                return self._baseapi.ProcessPages(filename, retry_config, timeout, renderer)
+                return self._baseapi.ProcessPages(py_fname, cconfig, timeout, renderer)
             finally:
                 del renderer
         raise RuntimeError('No renderers enabled')
 
-    def ProcessPage(self, cchar_t *outputbase, image, int page_index, cchar_t *filename,
-                    cchar_t *retry_config=NULL, int timeout=0):
+    def ProcessPage(self, outputbase, image, int page_index, filename,
+                    retry_config=None, int timeout=0):
         """Turn a single image into symbolic text.
 
         See :meth:`ProcessPages` for desciptions of the keyword arguments
@@ -1913,7 +1979,12 @@ cdef class PyTessBaseAPI:
             RuntimeError: If `image` is invalid or no renderers are enabled.
         """
         cdef:
-            TessResultRenderer *renderer = self._get_renderer(outputbase)
+            bytes py_fname = _b(filename)
+            cchar_t *cfname = py_fname
+            bytes py_outputbase = _b(outputbase)
+            TessResultRenderer *renderer = self._get_renderer(py_outputbase)
+            bytes py_config
+            cchar_t *cconfig
             cuchar_t *buff
             size_t size
             Pix *pix
@@ -1924,8 +1995,13 @@ cdef class PyTessBaseAPI:
         if pix == NULL:
             raise RuntimeError('Failed to read image')
         if renderer != NULL:
+            if retry_config is not None:
+                py_config = _b(retry_config)
+                cconfig = py_config
+            else:
+                cconfig = NULL
             try:
-                return self._baseapi.ProcessPage(pix, page_index, filename, retry_config, timeout, renderer)
+                return self._baseapi.ProcessPage(pix, page_index, cfname, cconfig, timeout, renderer)
             finally:
                 pixDestroy(&pix)
                 del renderer
@@ -2039,9 +2115,9 @@ cdef class PyTessBaseAPI:
 
     def MapWordConfidences(self):
         """Return list of word, confidence tuples"""
-        return zip(self.AllWords(), self.AllWordConfidences())
+        return list(zip(self.AllWords(), self.AllWordConfidences()))
 
-    def AdaptToWordStr(self, PageSegMode psm, cchar_t *word):
+    def AdaptToWordStr(self, PageSegMode psm, word):
         """Apply the given word to the adaptive classifier if possible.
 
         Assumes that :meth:`SetImage` / :meth:`SetRectangle` have been used to set the image
@@ -2057,7 +2133,8 @@ cdef class PyTessBaseAPI:
         Returns:
             bool: ``False`` if adaption was not possible for some reason.
         """
-        return self._baseapi.AdaptToWordStr(psm, word)
+        cdef bytes py_word = _b(word)
+        return self._baseapi.AdaptToWordStr(psm, py_word)
 
     def Clear(self):
         """Free up recognition results and any stored image data, without actually
@@ -2072,13 +2149,14 @@ cdef class PyTessBaseAPI:
         with nogil:
             self._end_api()
 
-    def IsValidCharacter(self, cchar_t *character):
+    def IsValidCharacter(self, character):
         """Return True if character is defined in the UniCharset.
 
         Args:
             character: UTF-8 encoded character.
         """
-        return self._baseapi.IsValidCharacter(character)
+        cdef bytes py_character = _b(character)
+        return self._baseapi.IsValidCharacter(py_character)
 
     def GetTextDirection(self):
         """Get text direction.
@@ -2159,8 +2237,8 @@ cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode
     return text
 
 
-def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                  cchar_t *path=_DEFAULT_PATH):
+def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
+                  path=_DEFAULT_PATH):
     """Recognize OCR text from an image object.
 
     Args:
@@ -2180,11 +2258,15 @@ def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         :exc:`RuntimeError`: When image fails to be loaded or recognition fails.
     """
     cdef:
+        bytes py_path = _b(path)
+        bytes py_lang = _b(lang)
+        cchar_t *cpath = py_path
+        cchar_t *clang = py_lang
         Pix *pix
         cuchar_t *buff
         size_t size
         char *text
-        str raw
+        bytes raw
 
     raw = _image_buffer(image)
     buff = raw
@@ -2195,7 +2277,7 @@ def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        text = _image_to_text(pix, lang, psm, path)
+        text = _image_to_text(pix, clang, psm, cpath)
         if text == NULL:
             with gil:
                 raise RuntimeError('Failed recognize picture')
@@ -2203,8 +2285,8 @@ def image_to_text(image, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
     return _free_str(text)
 
 
-def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                 cchar_t *path=_DEFAULT_PATH):
+def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
+                 path=_DEFAULT_PATH):
     """Extract OCR text from an image file.
 
     Args:
@@ -2224,15 +2306,21 @@ def file_to_text(cchar_t *filename, cchar_t *lang=_DEFAULT_LANG, PageSegMode psm
         :exc:`RuntimeError`: When image fails to be loaded or recognition fails.
     """
     cdef:
+        bytes py_fname = _b(filename)
+        bytes py_lang = _b(lang)
+        bytes py_path = _b(path)
+        cchar_t *cfname = py_fname
+        cchar_t *clang = py_lang
+        cchar_t *cpath = py_path
         Pix *pix
         char *text
 
     with nogil:
-        pix = pixRead(filename)
+        pix = pixRead(cfname)
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        text = _image_to_text(pix, lang, psm, path)
+        text = _image_to_text(pix, clang, psm, cpath)
         if text == NULL:
             with gil:
                 raise RuntimeError('Failed recognize picture')
@@ -2249,7 +2337,7 @@ def tesseract_version():
     return version_str.format(tess_v, lept_v, libs_v)
 
 
-def get_languages(cchar_t *path=_DEFAULT_PATH):
+def get_languages(path=_DEFAULT_PATH):
     """Return available languages in the given path.
 
     Args:
@@ -2263,10 +2351,11 @@ def get_languages(cchar_t *path=_DEFAULT_PATH):
             - languages (list): list of available languages as ISO 639-3 strings.
     """
     cdef:
+        bytes py_path = _b(path)
         TessBaseAPI baseapi
         GenericVector[STRING] v
         int i
-    baseapi.Init(path, NULL)
+    baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
     baseapi.GetAvailableLanguagesAsVector(&v)
     langs = [v[i].string() for i in xrange(v.size())]
