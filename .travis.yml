@@ -23,7 +23,7 @@ before_install:
     - sudo make install && sudo ldconfig
     - cd ..
     - wget https://github.com/tesseract-ocr/tessdata/archive/3.04.00.tar.gz -O /tmp/tessdata.tar.gz
-    - tar -xvf tessdata.tar.gz 
+    - tar -xvf /tmp/tessdata.tar.gz 
     - sudo mv tessdata-3.04.00 /usr/share/tesseract-ocr/tessdata
 install:
     - pip install Cython
