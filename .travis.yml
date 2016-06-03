@@ -12,6 +12,10 @@ before_install:
     - sudo apt-get install -y libjpeg62-dev
     - sudo apt-get install -y libtiff4-dev
     - sudo apt-get install -y zlib1g-dev
+install:
+    - pip install Cython
+    - pip install Pillow
+before_script:
     - wget http://www.leptonica.org/source/leptonica-1.73.tar.gz -O /tmp/leptonica.tar.gz
     - tar -xvf /tmp/leptonica.tar.gz
     - pushd leptonica-1.73 && ./configure && make && sudo make install && popd
@@ -24,8 +28,6 @@ before_install:
     - cd ..
     - wget https://github.com/tesseract-ocr/tessdata/archive/3.04.00.tar.gz -O /tmp/tessdata.tar.gz
     - tar -xvf /tmp/tessdata.tar.gz 
-    - sudo mv tessdata-3.04.00 /usr/share/tesseract-ocr/tessdata
-install:
-    - pip install Cython
-    - pip install Pillow
+    - sudo mkdir -p /usr/local/share/tessdata/
+    - sudo rsync -a tessdata-3.04.00/ /usr/local/share/tessdata
 script: python setup.py test

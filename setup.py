@@ -100,7 +100,7 @@ def get_tesseract_version():
     except OSError as e:
         _LOGGER.warn('Failed to extract tesseract version from executable: {}'.format(e))
         version = _TESSERACT_MIN_VERSION
-    _LOGGER.info("Supporting tesseract {}".format(config))
+    _LOGGER.info("Supporting tesseract v{}".format(version))
     version = version_to_int(version)
     config['cython_compile_time_env'] = {'TESSERACT_VERSION': version}
     return config
