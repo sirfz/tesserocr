@@ -8,7 +8,6 @@ import errno
 from os.path import dirname, abspath
 from os.path import split as psplit, join as pjoin
 from setuptools import setup, Extension
-from pkg_resources import parse_version
 from Cython.Distutils import build_ext
 
 _LOGGER = logging.getLogger()
@@ -46,8 +45,8 @@ else:
 
 
 def version_to_int(version):
-    version = parse_version(version)
-    return int(''.join(version.base_version.split('.')), 16)
+    version = re.search(r'((?:\d+\.)+\d+)', version).group()
+    return int(''.join(version.split('.')), 16)
 
 
 def package_config():
@@ -79,6 +78,7 @@ def package_config():
     p = subprocess.Popen(['pkg-config', '--modversion', 'tesseract'], stdout=subprocess.PIPE)
     version, _ = p.communicate()
     version = _read_string(version).strip()
+    _LOGGER.info("Supporting tesseract v{}".format(version))
     config['cython_compile_time_env'] = {'TESSERACT_VERSION': version_to_int(version)}
     _LOGGER.info("Configs from pkg-config: {}".format(config))
     return config
@@ -91,7 +91,7 @@ def get_tesseract_version():
         p = subprocess.Popen(['tesseract', '-v'], stderr=subprocess.PIPE)
         _, version = p.communicate()
         version = _read_string(version).strip()
-        version_match = re.search(r'^tesseract (([0-9]+\.)+[0-9]+)[^\n]*\n', version)
+        version_match = re.search(r'^tesseract ((?:\d+\.)+\d+).*', version, re.M)
         if version_match:
             version = version_match.group(1)
         else:
@@ -103,6 +103,7 @@ def get_tesseract_version():
     _LOGGER.info("Supporting tesseract v{}".format(version))
     version = version_to_int(version)
     config['cython_compile_time_env'] = {'TESSERACT_VERSION': version}
+    _LOGGER.info("Building with configs: {}".format(config))
     return config
 
 
