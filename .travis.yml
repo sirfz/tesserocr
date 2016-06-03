@@ -3,8 +3,14 @@ dist: trusty
 sudo: required
 language: python
 python:
+    - "2.6"
     - "2.7"
+    - "pypy"
+    - "3.2"
+    - "3.3"
     - "3.4"
+    - "3.5"
+    - "pypy3"
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y autoconf automake libtool
@@ -12,10 +18,6 @@ before_install:
     - sudo apt-get install -y libjpeg62-dev
     - sudo apt-get install -y libtiff4-dev
     - sudo apt-get install -y zlib1g-dev
-install:
-    - pip install Cython
-    - pip install Pillow
-before_script:
     - wget http://www.leptonica.org/source/leptonica-1.73.tar.gz -O /tmp/leptonica.tar.gz
     - tar -xvf /tmp/leptonica.tar.gz
     - pushd leptonica-1.73 && ./configure && make && sudo make install && popd
@@ -30,4 +32,7 @@ before_script:
     - tar -xvf /tmp/tessdata.tar.gz 
     - sudo mkdir -p /usr/local/share/tessdata/
     - sudo rsync -a tessdata-3.04.00/ /usr/local/share/tessdata
+install:
+    - pip install Cython
+    - pip install Pillow
 script: python setup.py test
