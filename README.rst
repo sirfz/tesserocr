@@ -6,6 +6,9 @@ A simple, |Pillow|_-friendly,
 wrapper around the ``tesseract-ocr`` API for Optical Character Recognition
 (OCR).
 
+.. image:: https://travis-ci.org/sirfz/tesserocr.svg?branch=master
+    :target: https://travis-ci.org/sirfz/tesserocr
+
 **tesserocr** integrates directly with Tesseract's C++ API using Cython
 which allows for a simple Pythonic and easy-to-read source code. It
 enables real concurrent execution when used with Python's ``threading``
