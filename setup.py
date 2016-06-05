@@ -69,7 +69,10 @@ def package_config():
     config = {}
     import itertools
     for f in itertools.chain(flags, flags2):
-        opt = options[f[:2]]
+        try:
+            opt = options[f[:2]]
+        except KeyError:
+            continue
         val = f[2:]
         if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in ('leptonica', 'tesseract'):
             val = dirname(val)
