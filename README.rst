@@ -31,7 +31,9 @@ On Debian/Ubuntu:
 
     $ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
 
-You may need to `manually compile tesseract`_ for a more recent version.
+You may need to `manually compile tesseract`_ for a more recent version. Note that you may need
+to update your `LD_LIBRARY_PATH` environment variable to point to the right library versions in
+case you have multiple tesseract/leptonica installations.
 
 |Cython|_ is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
 
