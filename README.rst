@@ -8,6 +8,14 @@ wrapper around the ``tesseract-ocr`` API for Optical Character Recognition
 
 .. image:: https://travis-ci.org/sirfz/tesserocr.svg?branch=master
     :target: https://travis-ci.org/sirfz/tesserocr
+    :alt: TravisCI build status
+
+.. image:: https://img.shields.io/pypi/v/tesserocr.svg?maxAge=2592000
+    :target: https://pypi.python.org/pypi/tesserocr
+    :alt: Latest version on PyPi
+
+.. image:: https://img.shields.io/pypi/pyversions/tesserocr.svg?maxAge=2592000
+    :alt: Supported python versions
 
 **tesserocr** integrates directly with Tesseract's C++ API using Cython
 which allows for a simple Pythonic and easy-to-read source code. It
@@ -32,7 +40,7 @@ On Debian/Ubuntu:
     $ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
 
 You may need to `manually compile tesseract`_ for a more recent version. Note that you may need
-to update your `LD_LIBRARY_PATH` environment variable to point to the right library versions in
+to update your ``LD_LIBRARY_PATH`` environment variable to point to the right library versions in
 case you have multiple tesseract/leptonica installations.
 
 |Cython|_ is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
