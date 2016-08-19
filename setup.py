@@ -118,9 +118,12 @@ class BuildTesseract(build_ext):
 
         try:
             build_args = package_config()
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                _LOGGER.warn('Failed to run pkg-config: {}'.format(e))
+        except Exception as e:
+            if isinstance(e, OSError):
+                if e.errno != errno.ENOENT:
+                    _LOGGER.warn('Failed to run pkg-config: {}'.format(e))
+            else:
+                _LOGGER.warn('pkg-config failed to find tesseract/lep libraries: {}'.format(e))
             build_args = get_tesseract_version()
 
         _LOGGER.debug('build parameters: {}'.format(build_args))

@@ -124,7 +124,7 @@ GetComponentImages example:
 .. code:: python
 
     from PIL import Image
-    from tesserocr import PyTessBaseAPI
+    from tesserocr import PyTessBaseAPI, RIL
 
     image = Image.open('/usr/src/tesseract/testing/phototest.tif')
     with PyTessBaseAPI() as api:
