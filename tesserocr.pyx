@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.1.3-rc.1'
+__version__ = '2.1.3-rc.2'
 
 import os
 from io import BytesIO
@@ -806,7 +806,7 @@ cdef class PyLTRResultIterator(PyPageIterator):
             then this will return the attributes of the first word in that textline.
 
         Returns:
-            dict: A dictionary with the font attributes::
+            dict: `None` if nothing found or a dictionary with the font attributes::
 
                 font_name: String representing a font name. Lifespan is the same as
                     the iterator itself, ie rendered invalid by various members of
@@ -834,6 +834,8 @@ cdef class PyLTRResultIterator(PyPageIterator):
         font_name = self._ltrriter.WordFontAttributes(&is_bold, &is_italic, &is_underlined,
                                                  &is_monospace, &is_serif, &is_smallcaps,
                                                  &pointsize, &font_id)
+        if font_name == NULL:
+            return None
         return {
             'font_name': font_name,
             'bold': is_bold,
