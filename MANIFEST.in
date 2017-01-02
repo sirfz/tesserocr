@@ -2,3 +2,4 @@ include README.rst
 include LICENSE
 include *.pyx *.pxd
 include tests/*.py tests/*.tif
+exclude *.cpp *.so

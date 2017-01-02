@@ -7,8 +7,10 @@ import subprocess
 import errno
 from os.path import dirname, abspath
 from os.path import split as psplit, join as pjoin
-from setuptools import setup, Extension
-from Cython.Distutils import build_ext
+from setuptools import setup
+from setuptools.command.build_ext import build_ext
+from setuptools.extension import Extension
+
 
 _LOGGER = logging.getLogger()
 if os.environ.get('DEBUG'):
@@ -18,6 +20,7 @@ else:
 _LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 
 _TESSERACT_MIN_VERSION = '3.04.00'
+_CYTHON_COMPILE_TIME_ENV = None
 
 # find_version from pip https://github.com/pypa/pip/blob/1.5.6/setup.py#L33
 here = abspath(dirname(__file__))
@@ -110,30 +113,39 @@ def get_tesseract_version():
     return config
 
 
-class BuildTesseract(build_ext):
-    """Set build parameters obtained from pkg-config if available."""
+def get_build_args():
+    """Return proper build parameters."""
+    try:
+        build_args = package_config()
+    except Exception as e:
+        if isinstance(e, OSError):
+            if e.errno != errno.ENOENT:
+                _LOGGER.warn('Failed to run pkg-config: {}'.format(e))
+        else:
+            _LOGGER.warn('pkg-config failed to find tesseract/lept libraries: {}'.format(e))
+        build_args = get_tesseract_version()
 
-    def initialize_options(self):
-        build_ext.initialize_options(self)
+    if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 4.:
+        _LOGGER.debug('tesseract >= 4.00 requires c++11 compiler support')
+        build_args['extra_compile_args'] = ['-std=c++11']
 
-        try:
-            build_args = package_config()
-        except Exception as e:
-            if isinstance(e, OSError):
-                if e.errno != errno.ENOENT:
-                    _LOGGER.warn('Failed to run pkg-config: {}'.format(e))
-            else:
-                _LOGGER.warn('pkg-config failed to find tesseract/lep libraries: {}'.format(e))
-            build_args = get_tesseract_version()
-
-        _LOGGER.debug('build parameters: {}'.format(build_args))
-        for k, v in build_args.items():
-            setattr(self, k, v)
+    _LOGGER.debug('build parameters: {}'.format(build_args))
+    return build_args
 
 
-ext_modules = [Extension("tesserocr",
-                         sources=["tesserocr.pyx"],
-                         language="c++")]
+def make_extension():
+    global _CYTHON_COMPILE_TIME_ENV
+    build_args = get_build_args()
+    _CYTHON_COMPILE_TIME_ENV = build_args.pop('cython_compile_time_env')
+    return Extension("tesserocr", sources=["tesserocr.pyx"], language="c++", **build_args)
+
+
+class my_build_ext(build_ext, object):
+    def finalize_options(self):
+        from Cython.Build.Dependencies import cythonize
+        self.distribution.ext_modules[:] = cythonize(
+            self.distribution.ext_modules, compile_time_env=_CYTHON_COMPILE_TIME_ENV)
+        super(my_build_ext, self).finalize_options()
 
 
 setup(name='tesserocr',
@@ -163,8 +175,8 @@ setup(name='tesserocr',
           'Programming Language :: Cython'
       ],
       keywords='Tesseract,tesseract-ocr,OCR,optical character recognition,PIL,Pillow,Cython',
-      # cmdclass={'build_ext': CustomBuildExit},
-      cmdclass={'build_ext': BuildTesseract},
-      ext_modules=ext_modules,
-      test_suite='tests'
+      cmdclass={'build_ext': my_build_ext},
+      ext_modules=[make_extension()],
+      test_suite='tests',
+      setup_requires=['Cython>=0.23'],
       )
