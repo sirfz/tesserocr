@@ -186,9 +186,8 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessBoxTextRenderer(TessResultRenderer):
         TessBoxTextRenderer(cchar_t *) except +
 
-    IF TESSERACT_VERSION >= 0x030401:
-        cdef cppclass TessOsdRenderer(TessResultRenderer):
-            TessOsdRenderer(cchar_t *) except +
+    cdef cppclass TessOsdRenderer(TessResultRenderer):
+        TessOsdRenderer(cchar_t *) except +
 
 cdef extern from "tesseract/osdetect.h" nogil:
     struct OSBestResult:
@@ -207,9 +206,11 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
 
     cdef enum OcrEngineMode:
         OEM_TESSERACT_ONLY
+        OEM_LSTM_ONLY
+        OEM_TESSERACT_LSTM_COMBINED
+        OEM_DEFAULT
         OEM_CUBE_ONLY
         OEM_TESSERACT_CUBE_COMBINED
-        OEM_DEFAULT
 
     cdef enum PageSegMode:
         PSM_OSD_ONLY,                # Orientation and script detection only.
@@ -297,8 +298,10 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         ResultIterator *GetIterator()
         char *GetUTF8Text()
         char *GetHOCRText(int)
+        char *GetTSVText(int)
         char *GetBoxText(int)
         char *GetUNLVText()
+        bool DetectOrientationScript(int *, float *, cchar_t **, float *)
         int MeanTextConf()
         int *AllWordConfidences()
         bool AdaptToWordStr(PageSegMode, cchar_t *)

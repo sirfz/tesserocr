@@ -18,11 +18,10 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.1.3'
+__version__ = '2.2.0-beta'
 
 import os
 from io import BytesIO
-from contextlib import closing
 from os.path import abspath, join
 try:
     from PIL import Image
@@ -30,7 +29,10 @@ except ImportError:
     # PIL.Image won't be supported
     pass
 
-from tesseract cimport *
+IF TESSERACT_VERSION >= 0x040000:
+    from tesseract4 cimport *
+ELSE:
+    from tesseract cimport *
 from libc.stdlib cimport malloc, free
 from cpython.version cimport PY_MAJOR_VERSION
 
@@ -60,10 +62,28 @@ cdef class _Enum:
     def __init__(self):
         raise TypeError('{} is an enum and cannot be instantiated'.fromat(type(self).__name__))
 
+
 cdef class OEM(_Enum):
-    """An enum that defines avaialble OCR engine modes."""
+    """An enum that defines avaialble OCR engine modes.
+
+    Attributes:
+        TESSERACT_ONLY: Run Tesseract only - fastest
+        LSTM_ONLY: Run just the LSTM line recognizer. (>=v4.00)
+        TESSERACT_LSTM_COMBINED: Run the LSTM recognizer, but allow fallback
+            to Tesseract when things get difficult. (>=v4.00)
+        CUBE_ONLY: Specify this mode when calling Init*(), to indicate that
+            any of the above modes should be automatically inferred from the
+            variables in the language-specific config, command-line configs, or
+            if not specified in any of the above should be set to the default
+            `OEM.TESSERACT_ONLY`.
+        TESSERACT_CUBE_COMBINED: Run Cube only - better accuracy, but slower.
+        DEFAULT: Run both and combine results - best accuracy.
+    """
 
     TESSERACT_ONLY = OEM_TESSERACT_ONLY
+    IF TESSERACT_VERSION >= 0x040000:
+        LSTM_ONLY = OEM_LSTM_ONLY
+        TESSERACT_LSTM_COMBINED = OEM_TESSERACT_LSTM_COMBINED
     CUBE_ONLY = OEM_CUBE_ONLY
     TESSERACT_CUBE_COMBINED = OEM_TESSERACT_CUBE_COMBINED
     DEFAULT = OEM_DEFAULT
@@ -298,7 +318,7 @@ cdef unicode _free_str(char *text):
 
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
-    with closing(BytesIO()) as f:
+    with BytesIO() as f:
         image.save(f, image.format or 'JPEG')
         return f.getvalue()
 
@@ -318,7 +338,7 @@ cdef _pix_to_image(Pix *pix):
 
     if result == 1:
         raise RuntimeError("Failed to convert pix image to PIL.Image")
-    with closing(BytesIO(<bytes>buff[:size])) as f:
+    with BytesIO(<bytes>buff[:size]) as f:
         image = Image.open(f)
         image.load()
     free(buff)
@@ -1083,6 +1103,7 @@ cdef class PyTessBaseAPI:
             See :class:`PSM` for avaialble psm values.
         init (bool): If ``False``, :meth:`Init` will not be called and has to be called
             after initialization.
+        oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
 
     Raises:
         :exc:`RuntimeError`: If `init` is ``True`` and API initialization fails.
@@ -1102,7 +1123,8 @@ cdef class PyTessBaseAPI:
 
     def __cinit__(self, path=_DEFAULT_PATH,
                   lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                  bool init=True):
+                  bool init=True,
+                  OcrEngineMode oem=OEM_DEFAULT):
         cdef:
             bytes py_path = _b(path)
             bytes py_lang = _b(lang)
@@ -1111,15 +1133,15 @@ cdef class PyTessBaseAPI:
         with nogil:
             self._pix = NULL
             if init:
-                self._init_api(cpath, clang, OEM_DEFAULT, NULL, 0, NULL, NULL, False, psm)
+                self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, psm)
 
     def __dealloc__(self):
         self._end_api()
 
     cdef int _init_api(self, cchar_t *path, cchar_t *lang,
-                        OcrEngineMode oem, char **configs, int configs_size,
-                        const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
-                        bool set_only_non_debug_params, PageSegMode psm) nogil:
+                       OcrEngineMode oem, char **configs, int configs_size,
+                       const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
+                       bool set_only_non_debug_params, PageSegMode psm) nogil:
         cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
                                           set_only_non_debug_params)
         if ret != -1:
@@ -2048,6 +2070,22 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
+    IF TESSERACT_VERSION >= 0x040000:
+        def GetTSVText(self, int page_number):
+            """Make a TSV-formatted string from the internal data structures.
+
+            Args:
+                page_number (int): Page number is 0-based but will appear in the output as 1-based.
+            """
+            cdef char *text
+            with nogil:
+                text = self._baseapi.GetTSVText(page_number)
+                self._destroy_pix()
+                if text == NULL:
+                    with gil:
+                        raise RuntimeError('Failed to recognize. No image set?')
+            return _free_str(text)
+
     def GetBoxText(self, int page_number):
         """Return recognized text coded in the same
         format as a box file used in training.
@@ -2079,6 +2117,31 @@ cdef class PyTessBaseAPI:
                 with gil:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
+
+    IF TESSERACT_VERSION >= 0x040000:
+        def DetectOrientationScript(self):
+            """Detect the orientation of the input image and apparent script (alphabet).
+
+            Returns:
+                `dict` or `None` if image was not successfully processed. dict contains:
+                    - orient_deg: Orientation of detected clockwise rotation of the input image in degrees
+                      (0, 90, 180, 270).
+                    - orient_conf: The orientation confidence (15.0 is reasonably confident).
+                    - script_name: ASCII string, the name of the script, e.g. "Latin".
+                    - script_conf: Script confidence.
+            """
+            cdef:
+                int orient_deg
+                float orient_conf
+                cchar_t *script_name
+                float script_conf
+            if self._baseapi.DetectOrientationScript(&orient_deg, &orient_conf, &script_name, &script_conf):
+                return {'orient_deg': orient_deg,
+                        'orient_conf': orient_conf,
+                        'script_name': script_name,
+                        'script_conf': script_conf}
+            return None
+
 
     def MeanTextConf(self):
         """Return the (average) confidence value between 0 and 100."""
@@ -2222,12 +2285,12 @@ cdef class PyTessBaseAPI:
 
 
 cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode,
-                          cchar_t *path) nogil:
+                          cchar_t *path, OcrEngineMode oem) nogil:
     cdef:
         TessBaseAPI baseapi
         char *text
 
-    if baseapi.Init(path, lang) == -1:
+    if baseapi.Init(path, lang, oem) == -1:
         return NULL
 
     baseapi.SetPageSegMode(pagesegmode)
@@ -2240,7 +2303,7 @@ cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode
 
 
 def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                  path=_DEFAULT_PATH):
+                  path=_DEFAULT_PATH, OcrEngineMode oem=OEM_DEFAULT):
     """Recognize OCR text from an image object.
 
     Args:
@@ -2252,6 +2315,8 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
             See :class:`PSM` for all available psm options.
         path (str): The name of the parent directory of tessdata.
             Must end in /.
+        oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
+            see :class:`OEM` for all avaialble oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2279,7 +2344,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        text = _image_to_text(pix, clang, psm, cpath)
+        text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
                 raise RuntimeError('Failed recognize picture')
@@ -2288,7 +2353,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
 
 
 def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
-                 path=_DEFAULT_PATH):
+                 path=_DEFAULT_PATH, OcrEngineMode oem=OEM_DEFAULT):
     """Extract OCR text from an image file.
 
     Args:
@@ -2300,6 +2365,8 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
             See :class:`PSM` for all available psm options.
         path (str): The name of the parent directory of tessdata.
             Must end in /.
+        oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
+            see :class:`OEM` for all avaialble oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2322,7 +2389,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        text = _image_to_text(pix, clang, psm, cpath)
+        text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
                 raise RuntimeError('Failed recognize picture')
