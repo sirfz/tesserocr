@@ -1880,6 +1880,7 @@ cdef class PyTessBaseAPI:
         cdef:
             bool b
             bool font_info
+            bool textonly            
             TessResultRenderer *temp
             TessResultRenderer *renderer = NULL
 
@@ -1895,7 +1896,8 @@ cdef class PyTessBaseAPI:
 
         self._baseapi.GetBoolVariable("tessedit_create_pdf", &b)
         if b:
-            temp = new TessPDFRenderer(outputbase, self._baseapi.GetDatapath())
+            self._baseapi.GetBoolVariable("textonly_pdf", &textonly)
+            temp = new TessPDFRenderer(outputbase, self._baseapi.GetDatapath(), textonly)
             if renderer == NULL:
                 renderer = temp
             else:
