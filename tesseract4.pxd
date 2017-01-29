@@ -178,7 +178,7 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
         TessHOcrRenderer(cchar_t *, bool) except +
 
     cdef cppclass TessPDFRenderer(TessResultRenderer):
-        TessPDFRenderer(cchar_t *, cchar_t *) except +
+        TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
 
     cdef cppclass TessUnlvRenderer(TessResultRenderer):
         TessUnlvRenderer(cchar_t *) except +
