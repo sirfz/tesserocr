@@ -43,7 +43,7 @@ You may need to `manually compile tesseract`_ for a more recent version. Note th
 to update your ``LD_LIBRARY_PATH`` environment variable to point to the right library versions in
 case you have multiple tesseract/leptonica installations.
 
-|Cython|_ is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
+|Cython|_ (>=0.23) is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
 
 .. _manually compile tesseract: https://github.com/tesseract-ocr/tesseract/wiki/Compiling
 .. |Cython| replace:: ``Cython``
@@ -172,6 +172,19 @@ or more simply with ``OSD_ONLY`` page segmentation mode:
         os = api.DetectOS()
         print ("Orientation: {orientation}\nOrientation confidence: {oconfidence}\n"
                "Script: {script}\nScript confidence: {sconfidence}").format(**os)
+
+more human-readable info with tesseract 4+ (demonstrates LSTM engine usage):
+
+.. code:: python
+
+    from tesserocr import PyTessBaseAPI, PSM, OEM
+
+    with PyTessBaseAPI(psm=PSM.OSD_ONLY, oem=OEM.LSTM_ONLY) as api:
+        api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
+
+        os = api.DetectOrientationScript()
+        print ("Orientation: {orient_deg}\nOrientation confidence: {orient_conf}\n"
+               "Script: {script_name}\nScript confidence: {script_conf}").format(**os)
 
 Iterator over the classifier choices for a single symbol:
 `````````````````````````````````````````````````````````
