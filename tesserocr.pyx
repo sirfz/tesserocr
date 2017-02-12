@@ -1580,6 +1580,12 @@ cdef class PyTessBaseAPI:
 
         Each SetRectangle clears the recogntion results so multiple rectangles
         can be recognized with the same image.
+
+        Args:
+            left (int): poisition from left
+            top (int): position from top
+            width (int): width
+            height (int): height
         """
         self._baseapi.SetRectangle(left, top, width, height)
 
