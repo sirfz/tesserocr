@@ -1,4 +1,5 @@
 import unittest
+import re
 import os.path
 import tesserocr
 try:
@@ -8,11 +9,18 @@ except ImportError:
     pil_installed = False
 
 
+def version_to_int(version):
+    version = re.search(r'((?:\d+\.)+\d+)', version).group()
+    return int(''.join(version.split('.')), 16)
+
+
 class TestTessBaseApi(unittest.TestCase):
 
+    _test_dir = os.path.abspath(os.path.dirname(__file__))
+    _image_file = os.path.join(_test_dir, 'eurotext.tif')
+    _tesseract_version = version_to_int(tesserocr.PyTessBaseAPI.Version())
+
     def setUp(self):
-        self._test_dir = os.path.abspath(os.path.dirname(__file__))
-        self._image_file = os.path.join(self._test_dir, 'eurotext.tif')
         if pil_installed:
             with open(self._image_file, 'rb') as f:
                 self._image = Image.open(f)
@@ -23,6 +31,15 @@ class TestTessBaseApi(unittest.TestCase):
         if pil_installed:
             self._image.close()
         self._api.End()
+
+    def test_context_manager(self):
+        """Test context manager behavior"""
+        with self._api as api:
+            self.assertIs(api, self._api)
+            api.SetImageFile(self._image_file)
+            self.assertEqual(api.GetUTF8Text(), self._api.GetUTF8Text())
+        # assert api has Ended
+        self.assertRaises(RuntimeError, self._api.GetUTF8Text)
 
     def test_init_full(self):
         """Test InitFull."""
@@ -50,14 +67,10 @@ class TestTessBaseApi(unittest.TestCase):
         self.assertEqual(self._api.GetInitLanguagesAsString(), 'eng')
         self._api.Init(oem=tesserocr.OEM.TESSERACT_ONLY)
         self.assertEqual(self._api.oem(), tesserocr.OEM.TESSERACT_ONLY)
-        # reset
-        self._api.End()
-        self._api.Init()
 
     @unittest.skipIf(not pil_installed, "Pillow not installed")
     def test_image(self):
         """Test SetImage and GetUTF8Text."""
-        self._api.Init()
         self._api.SetImage(self._image)
         text = self._api.GetUTF8Text()
         self.assertIn('quick', text)
@@ -66,7 +79,6 @@ class TestTessBaseApi(unittest.TestCase):
 
     def test_image_file(self):
         """Test SetImageFile and GetUTF8Text."""
-        self._api.Init()
         self._api.SetImageFile(self._image_file)
         text = self._api.GetUTF8Text()
         self.assertIn('quick', text)
@@ -76,17 +88,16 @@ class TestTessBaseApi(unittest.TestCase):
     @unittest.skipIf(not pil_installed, "Pillow not installed")
     def test_thresholded_image(self):
         """Test GetThresholdedImage and GetThresholdedImageScaleFactor."""
-        self._api.Init()
         orig_size = self._image.size
         self._api.SetImage(self._image)
         image = self._api.GetThresholdedImage()
         self.assertIsNot(image, None)
+        self.assertIsInstance(image, Image.Image)
         self.assertEqual(image.size, orig_size)
         self.assertEqual(self._api.GetThresholdedImageScaleFactor(), 1)
 
     def test_page_seg_mode(self):
         """Test SetPageSegMode and GetPageSegMode."""
-        self._api.Init()
         self._api.SetPageSegMode(tesserocr.PSM.SINGLE_WORD)
         self.assertEqual(self._api.GetPageSegMode(), tesserocr.PSM.SINGLE_WORD)
         self._api.SetPageSegMode(tesserocr.PSM.AUTO)
@@ -94,8 +105,6 @@ class TestTessBaseApi(unittest.TestCase):
 
     def test_data_path(self):
         """Test GetDatapath and Init with an invalid data path."""
-        self._api.End()
-        self._api.Init()
         path = self._api.GetDatapath()
         self._api.End()
         self.assertRaises(RuntimeError, self._api.Init, path=(self._test_dir + os.path.sep))  # no tessdata
@@ -106,7 +115,6 @@ class TestTessBaseApi(unittest.TestCase):
 
     def test_langs(self):
         """Test get langs methods."""
-        self._api.End()
         self._api.Init(lang='eng')
         lang = self._api.GetInitLanguagesAsString()
         self.assertEqual(lang, 'eng')
@@ -122,7 +130,6 @@ class TestTessBaseApi(unittest.TestCase):
     @unittest.skipIf(not pil_installed, "Pillow not installed")
     def test_rectangle(self):
         """Test SetRectangle."""
-        self._api.Init()
         self._api.SetImage(self._image)
         self._api.SetRectangle(0, 0, 100, 43)
         thresh = self._api.GetThresholdedImage()
@@ -130,7 +137,6 @@ class TestTessBaseApi(unittest.TestCase):
 
     def test_word_confidences(self):
         """Test AllWordConfidences and MapWordConfidences."""
-        self._api.Init()
         self._api.SetImageFile(self._image_file)
         words = self._api.AllWords()
         self.assertEqual(words, [])
@@ -143,16 +149,21 @@ class TestTessBaseApi(unittest.TestCase):
         self.assertEqual([v[1] for v in mapped_confidences], confidences)
 
     def test_detect_os(self):
-        self._api.Init()
+        """Test DetectOS and DetectOrientationScript (tesseract v4+)."""
         self._api.SetPageSegMode(tesserocr.PSM.OSD_ONLY)
         self._api.SetImageFile(self._image_file)
         orientation = self._api.DetectOS()
         all(self.assertIn(k, orientation) for k in ['sconfidence', 'oconfidence', 'script', 'orientation'])
         self.assertEqual(orientation['orientation'], 0)
+        self.assertEqual(orientation['script'], 1)
+        if self._tesseract_version >= 0x040000:
+            orientation = self._api.DetectOrientationScript()
+            all(self.assertIn(k, orientation) for k in ['orient_deg', 'orient_conf', 'script_name', 'script_conf'])
+            self.assertEqual(orientation['orient_deg'], 0)
+            self.assertEqual(orientation['script_name'], u'Latin')
 
     def test_clear(self):
         """Test Clear."""
-        self._api.Init()
         self._api.SetImageFile(self._image_file)
         self._api.GetUTF8Text()
         self._api.Clear()
