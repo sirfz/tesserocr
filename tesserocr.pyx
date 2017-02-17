@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.0-beta'
+__version__ = '2.2.0-beta1'
 
 import os
 from io import BytesIO
@@ -1139,13 +1139,15 @@ cdef class PyTessBaseAPI:
         self._end_api()
 
     cdef int _init_api(self, cchar_t *path, cchar_t *lang,
-                       OcrEngineMode oem, char **configs, int configs_size,
-                       const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
-                       bool set_only_non_debug_params, PageSegMode psm) nogil:
+                        OcrEngineMode oem, char **configs, int configs_size,
+                        const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
+                        bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
         cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
                                           set_only_non_debug_params)
-        if ret != -1:
-            self._baseapi.SetPageSegMode(psm)
+        if ret == -1:
+            with gil:
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path?')
+        self._baseapi.SetPageSegMode(psm)
         return ret
 
     cdef void _end_api(self) nogil:
@@ -1338,10 +1340,8 @@ cdef class PyTessBaseAPI:
 
         with nogil:
             try:
-                if self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
-                                  set_only_non_debug_params, PSM_AUTO) == -1:
-                    with gil:
-                        raise RuntimeError('Failed to initialize API')
+                self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
+                               set_only_non_debug_params, PSM_AUTO)
             finally:
                 free(configs_)
 
@@ -1368,9 +1368,7 @@ cdef class PyTessBaseAPI:
             cchar_t *cpath = py_path
             cchar_t *clang = py_lang
         with nogil:
-            if self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, PSM_AUTO) == -1:
-                with gil:
-                    raise RuntimeError('Failed to initialize API')
+            self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, PSM_AUTO)
 
     def GetInitLanguagesAsString(self):
         """Return the languages string used in the last valid initialization.

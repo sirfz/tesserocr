@@ -160,7 +160,7 @@ class TestTessBaseApi(unittest.TestCase):
             orientation = self._api.DetectOrientationScript()
             all(self.assertIn(k, orientation) for k in ['orient_deg', 'orient_conf', 'script_name', 'script_conf'])
             self.assertEqual(orientation['orient_deg'], 0)
-            self.assertEqual(orientation['script_name'], u'Latin')
+            self.assertEqual(orientation['script_name'], 'Latin')
 
     def test_clear(self):
         """Test Clear."""
