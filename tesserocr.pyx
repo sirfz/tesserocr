@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.0-beta1'
+__version__ = '2.2.0-beta2'
 
 import os
 from io import BytesIO
@@ -329,19 +329,21 @@ cdef _pix_to_image(Pix *pix):
         unsigned char *buff
         size_t size
         int result
-        int fmt = pixGetInputFormat(pix)
+        int fmt = pix.informat
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
         # write as JPEG if format is unknown
         result = pixWriteMemJpeg(&buff, &size, pix, 0, 0)
 
-    if result == 1:
-        raise RuntimeError("Failed to convert pix image to PIL.Image")
-    with BytesIO(<bytes>buff[:size]) as f:
-        image = Image.open(f)
-        image.load()
-    free(buff)
+    try:
+        if result == 1:
+            raise RuntimeError("Failed to convert pix image to PIL.Image")
+        with BytesIO(<bytes>buff[:size]) as f:
+            image = Image.open(f)
+            image.load()
+    finally:
+        free(buff)
 
     return image
 
@@ -1618,6 +1620,8 @@ cdef class PyTessBaseAPI:
             Pixa *pixa
             Boxa *boxa
         boxa = self._baseapi.GetRegions(&pixa)
+        if boxa == NULL:
+            return []
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1661,6 +1665,8 @@ cdef class PyTessBaseAPI:
         if not paraids:
             _paraids = NULL
         boxa = self._baseapi.GetTextlines(raw_image, raw_padding, &pixa, &_blockids, &_paraids)
+        if boxa == NULL:
+            return []
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:
@@ -1704,6 +1710,8 @@ cdef class PyTessBaseAPI:
         if not blockids:
             _blockids = NULL
         boxa = self._baseapi.GetStrips(&pixa, &_blockids)
+        if boxa == NULL:
+            return []
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:
@@ -1732,6 +1740,8 @@ cdef class PyTessBaseAPI:
             Boxa *boxa
             Pixa *pixa
         boxa = self._baseapi.GetWords(&pixa)
+        if boxa == NULL:
+            return []
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1756,6 +1766,8 @@ cdef class PyTessBaseAPI:
             Boxa *boxa
             Pixa *pixa
         boxa = self._baseapi.GetConnectedComponents(&pixa)
+        if boxa == NULL:
+            return []
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1805,6 +1817,9 @@ cdef class PyTessBaseAPI:
             _paraids = NULL
         boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
                                                 &pixa, &_blockids, &_paraids)
+        if boxa == NULL:
+            # no components found
+            return []
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:

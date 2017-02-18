@@ -3,7 +3,8 @@ ctypedef const char cchar_t
 ctypedef const unsigned char cuchar_t
 
 cdef extern from "leptonica/allheaders.h" nogil:
-    struct Pix
+    struct Pix:
+        int            informat
 
     struct Box:
         int            x
@@ -30,7 +31,6 @@ cdef extern from "leptonica/allheaders.h" nogil:
     Pix *pixRead(cchar_t *)
     Pix *pixReadMem(cuchar_t *, size_t)
     int pixWriteMemJpeg(unsigned char **, size_t *, Pix *, int, int)
-    int pixGetInputFormat(Pix *)
     int pixWriteMem(unsigned char **, size_t *, Pix *, int)
     void pixDestroy(Pix **)
     int setMsgSeverity(int)
