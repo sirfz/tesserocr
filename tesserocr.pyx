@@ -1592,6 +1592,10 @@ cdef class PyTessBaseAPI:
             Pixa *pixa
             Boxa *boxa
         boxa = self._baseapi.GetRegions(&pixa)
+
+        if boxa == NULL:
+            return []
+
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1635,6 +1639,10 @@ cdef class PyTessBaseAPI:
         if not paraids:
             _paraids = NULL
         boxa = self._baseapi.GetTextlines(raw_image, raw_padding, &pixa, &_blockids, &_paraids)
+
+        if boxa == NULL:
+            return []
+
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:
@@ -1678,6 +1686,10 @@ cdef class PyTessBaseAPI:
         if not blockids:
             _blockids = NULL
         boxa = self._baseapi.GetStrips(&pixa, &_blockids)
+
+        if boxa == NULL:
+            return []
+
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:
@@ -1706,6 +1718,10 @@ cdef class PyTessBaseAPI:
             Boxa *boxa
             Pixa *pixa
         boxa = self._baseapi.GetWords(&pixa)
+
+        if boxa == NULL:
+            return []
+
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1730,6 +1746,10 @@ cdef class PyTessBaseAPI:
             Boxa *boxa
             Pixa *pixa
         boxa = self._baseapi.GetConnectedComponents(&pixa)
+
+        if boxa == NULL:
+            return []
+
         try:
             return pixa_to_list(pixa)
         finally:
@@ -1779,6 +1799,9 @@ cdef class PyTessBaseAPI:
             _paraids = NULL
         boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
                                                 &pixa, &_blockids, &_paraids)
+        if boxa == NULL:
+            return []
+
         try:
             pixa_list = pixa_to_list(pixa)
             if blockids:
