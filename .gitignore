@@ -58,6 +58,8 @@ target/
 
 # vim
 *.swp
+.ycm_extra_conf.py
 
 # cpp
 *.cpp
+Makefile
