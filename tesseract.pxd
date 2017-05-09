@@ -177,8 +177,12 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessHOcrRenderer(TessResultRenderer):
         TessHOcrRenderer(cchar_t *, bool) except +
 
-    cdef cppclass TessPDFRenderer(TessResultRenderer):
-        TessPDFRenderer(cchar_t *, cchar_t *) except +
+    IF TESSERACT_VERSION >= 0x040000:
+        cdef cppclass TessPDFRenderer(TessResultRenderer):
+            TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
+    ELSE:
+        cdef cppclass TessPDFRenderer(TessResultRenderer):
+            TessPDFRenderer(cchar_t *, cchar_t *) except +
 
     cdef cppclass TessUnlvRenderer(TessResultRenderer):
         TessUnlvRenderer(cchar_t *) except +
@@ -205,11 +209,20 @@ cdef extern from "tesseract/osdetect.h" nogil:
 
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
 
-    cdef enum OcrEngineMode:
-        OEM_TESSERACT_ONLY
-        OEM_CUBE_ONLY
-        OEM_TESSERACT_CUBE_COMBINED
-        OEM_DEFAULT
+    IF TESSERACT_VERSION >= 0x040000:
+        cdef enum OcrEngineMode:
+            OEM_TESSERACT_ONLY
+            OEM_LSTM_ONLY
+            OEM_TESSERACT_LSTM_COMBINED
+            OEM_DEFAULT
+            OEM_CUBE_ONLY
+            OEM_TESSERACT_CUBE_COMBINED
+    ELSE:
+        cdef enum OcrEngineMode:
+            OEM_TESSERACT_ONLY
+            OEM_CUBE_ONLY
+            OEM_TESSERACT_CUBE_COMBINED
+            OEM_DEFAULT
 
     cdef enum PageSegMode:
         PSM_OSD_ONLY,                # Orientation and script detection only.
@@ -238,76 +251,153 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         RIL_WORD,      # within a textline.
         RIL_SYMBOL     # character within a word.
 
-    cdef cppclass TessBaseAPI:
-        TessBaseAPI() except +
-        @staticmethod
-        cchar_t *Version()
-        @staticmethod
-        void ClearPersistentCache()
-        void SetInputName(cchar_t *)
-        cchar_t *GetInputName()
-        void SetInputImage(Pix *)
-        Pix *GetInputImage()
-        int GetSourceYResolution()
-        cchar_t *GetDatapath()
-        void SetOutputName(cchar_t *)
-        bool SetVariable(cchar_t *, cchar_t *)
-        bool SetDebugVariable(cchar_t *, cchar_t *)
-        bool GetIntVariable(cchar_t *, int *) const
-        bool GetBoolVariable(cchar_t *, bool *) const
-        bool GetDoubleVariable(cchar_t *, double *) const
-        cchar_t *GetStringVariable(cchar_t *) const
-        bool GetVariableAsString(cchar_t *, STRING *)
-        int Init(cchar_t *, cchar_t *, OcrEngineMode mode,
-                 char **, int,
-                 const GenericVector[STRING] *,
-                 const GenericVector[STRING] *,
-                 bool)
-        int Init(cchar_t *, cchar_t *, OcrEngineMode)
-        int Init(cchar_t *, cchar_t *)
-        cchar_t *GetInitLanguagesAsString() const
-        void GetLoadedLanguagesAsVector(GenericVector[STRING] *) const
-        void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
-        void InitForAnalysePage()
-        void ReadConfigFile(cchar_t *)
-        void SetPageSegMode(PageSegMode)
-        PageSegMode GetPageSegMode() const
-        char *TesseractRect(cuchar_t *, int, int, int, int, int, int)
-        void ClearAdaptiveClassifier()
-        void SetImage(cuchar_t *, int, int, int, int)
-        void SetImage(Pix *)
-        void SetSourceResolution(int)
-        void SetRectangle(int, int, int, int)
-        Pix *GetThresholdedImage()
-        Boxa *GetRegions(Pixa **)
-        Boxa *GetTextlines(const bool, const int, Pixa **, int **, int **)
-        Boxa *GetStrips(Pixa **, int **)
-        Boxa *GetWords(Pixa **)
-        Boxa *GetConnectedComponents(Pixa **)
-        Boxa *GetComponentImages(const PageIteratorLevel,
-                                 const bool, const bool,
-                                 const int,
-                                 Pixa **, int **, int **)
-        int GetThresholdedImageScaleFactor() const
-        PageIterator *AnalyseLayout(bool)
-        int Recognize(ETEXT_DESC *)
-        int RecognizeForChopTest(ETEXT_DESC *)
-        bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
-        bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
-        ResultIterator *GetIterator()
-        char *GetUTF8Text()
-        char *GetHOCRText(int)
-        char *GetBoxText(int)
-        char *GetUNLVText()
-        int MeanTextConf()
-        int *AllWordConfidences()
-        bool AdaptToWordStr(PageSegMode, cchar_t *)
-        void Clear()
-        void End()
-        int IsValidWord(cchar_t *)
-        bool IsValidCharacter(cchar_t *)
-        bool GetTextDirection(int *, float *)
-        bool DetectOS(OSResults *);
-        cchar_t *GetUnichar(int)
-        const OcrEngineMode oem() const
-        void set_min_orientation_margin(double)
+    IF TESSERACT_VERSION >= 0x040000:
+        cdef cppclass TessBaseAPI:
+            TessBaseAPI() except +
+            @staticmethod
+            cchar_t *Version()
+            @staticmethod
+            void ClearPersistentCache()
+            void SetInputName(cchar_t *)
+            cchar_t *GetInputName()
+            void SetInputImage(Pix *)
+            Pix *GetInputImage()
+            int GetSourceYResolution()
+            cchar_t *GetDatapath()
+            void SetOutputName(cchar_t *)
+            bool SetVariable(cchar_t *, cchar_t *)
+            bool SetDebugVariable(cchar_t *, cchar_t *)
+            bool GetIntVariable(cchar_t *, int *) const
+            bool GetBoolVariable(cchar_t *, bool *) const
+            bool GetDoubleVariable(cchar_t *, double *) const
+            cchar_t *GetStringVariable(cchar_t *) const
+            bool GetVariableAsString(cchar_t *, STRING *)
+            int Init(cchar_t *, cchar_t *, OcrEngineMode mode,
+                    char **, int,
+                    const GenericVector[STRING] *,
+                    const GenericVector[STRING] *,
+                    bool)
+            int Init(cchar_t *, cchar_t *, OcrEngineMode)
+            int Init(cchar_t *, cchar_t *)
+            cchar_t *GetInitLanguagesAsString() const
+            void GetLoadedLanguagesAsVector(GenericVector[STRING] *) const
+            void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
+            void InitForAnalysePage()
+            void ReadConfigFile(cchar_t *)
+            void SetPageSegMode(PageSegMode)
+            PageSegMode GetPageSegMode() const
+            char *TesseractRect(cuchar_t *, int, int, int, int, int, int)
+            void ClearAdaptiveClassifier()
+            void SetImage(cuchar_t *, int, int, int, int)
+            void SetImage(Pix *)
+            void SetSourceResolution(int)
+            void SetRectangle(int, int, int, int)
+            Pix *GetThresholdedImage()
+            Boxa *GetRegions(Pixa **)
+            Boxa *GetTextlines(const bool, const int, Pixa **, int **, int **)
+            Boxa *GetStrips(Pixa **, int **)
+            Boxa *GetWords(Pixa **)
+            Boxa *GetConnectedComponents(Pixa **)
+            Boxa *GetComponentImages(const PageIteratorLevel,
+                                    const bool, const bool,
+                                    const int,
+                                    Pixa **, int **, int **)
+            int GetThresholdedImageScaleFactor() const
+            PageIterator *AnalyseLayout(bool)
+            int Recognize(ETEXT_DESC *)
+            int RecognizeForChopTest(ETEXT_DESC *)
+            bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
+            bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
+            ResultIterator *GetIterator()
+            char *GetUTF8Text()
+            char *GetHOCRText(int)
+            char *GetTSVText(int)
+            char *GetBoxText(int)
+            char *GetUNLVText()
+            bool DetectOrientationScript(int *, float *, cchar_t **, float *)
+            int MeanTextConf()
+            int *AllWordConfidences()
+            bool AdaptToWordStr(PageSegMode, cchar_t *)
+            void Clear()
+            void End()
+            int IsValidWord(cchar_t *)
+            bool IsValidCharacter(cchar_t *)
+            bool GetTextDirection(int *, float *)
+            bool DetectOS(OSResults *);
+            cchar_t *GetUnichar(int)
+            const OcrEngineMode oem() const
+            void set_min_orientation_margin(double)
+    ELSE:
+        cdef cppclass TessBaseAPI:
+            TessBaseAPI() except +
+            @staticmethod
+            cchar_t *Version()
+            @staticmethod
+            void ClearPersistentCache()
+            void SetInputName(cchar_t *)
+            cchar_t *GetInputName()
+            void SetInputImage(Pix *)
+            Pix *GetInputImage()
+            int GetSourceYResolution()
+            cchar_t *GetDatapath()
+            void SetOutputName(cchar_t *)
+            bool SetVariable(cchar_t *, cchar_t *)
+            bool SetDebugVariable(cchar_t *, cchar_t *)
+            bool GetIntVariable(cchar_t *, int *) const
+            bool GetBoolVariable(cchar_t *, bool *) const
+            bool GetDoubleVariable(cchar_t *, double *) const
+            cchar_t *GetStringVariable(cchar_t *) const
+            bool GetVariableAsString(cchar_t *, STRING *)
+            int Init(cchar_t *, cchar_t *, OcrEngineMode mode,
+                    char **, int,
+                    const GenericVector[STRING] *,
+                    const GenericVector[STRING] *,
+                    bool)
+            int Init(cchar_t *, cchar_t *, OcrEngineMode)
+            int Init(cchar_t *, cchar_t *)
+            cchar_t *GetInitLanguagesAsString() const
+            void GetLoadedLanguagesAsVector(GenericVector[STRING] *) const
+            void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
+            void InitForAnalysePage()
+            void ReadConfigFile(cchar_t *)
+            void SetPageSegMode(PageSegMode)
+            PageSegMode GetPageSegMode() const
+            char *TesseractRect(cuchar_t *, int, int, int, int, int, int)
+            void ClearAdaptiveClassifier()
+            void SetImage(cuchar_t *, int, int, int, int)
+            void SetImage(Pix *)
+            void SetSourceResolution(int)
+            void SetRectangle(int, int, int, int)
+            Pix *GetThresholdedImage()
+            Boxa *GetRegions(Pixa **)
+            Boxa *GetTextlines(const bool, const int, Pixa **, int **, int **)
+            Boxa *GetStrips(Pixa **, int **)
+            Boxa *GetWords(Pixa **)
+            Boxa *GetConnectedComponents(Pixa **)
+            Boxa *GetComponentImages(const PageIteratorLevel,
+                                    const bool, const bool,
+                                    const int,
+                                    Pixa **, int **, int **)
+            int GetThresholdedImageScaleFactor() const
+            PageIterator *AnalyseLayout(bool)
+            int Recognize(ETEXT_DESC *)
+            int RecognizeForChopTest(ETEXT_DESC *)
+            bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
+            bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
+            ResultIterator *GetIterator()
+            char *GetUTF8Text()
+            char *GetHOCRText(int)
+            char *GetBoxText(int)
+            char *GetUNLVText()
+            int MeanTextConf()
+            int *AllWordConfidences()
+            bool AdaptToWordStr(PageSegMode, cchar_t *)
+            void Clear()
+            void End()
+            int IsValidWord(cchar_t *)
+            bool IsValidCharacter(cchar_t *)
+            bool GetTextDirection(int *, float *)
+            bool DetectOS(OSResults *);
+            cchar_t *GetUnichar(int)
+            const OcrEngineMode oem() const
+            void set_min_orientation_margin(double)

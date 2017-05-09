@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.0-beta2'
+__version__ = '2.2.0-rc1'
 
 import os
 from io import BytesIO
@@ -29,10 +29,7 @@ except ImportError:
     # PIL.Image won't be supported
     pass
 
-IF TESSERACT_VERSION >= 0x040000:
-    from tesseract4 cimport *
-ELSE:
-    from tesseract cimport *
+from tesseract cimport *
 from libc.stdlib cimport malloc, free
 from cpython.version cimport PY_MAJOR_VERSION
 
