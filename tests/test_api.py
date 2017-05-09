@@ -174,3 +174,21 @@ class TestTessBaseApi(unittest.TestCase):
         self._api.End()
         self._api.SetImageFile(self._image_file)
         self.assertRaises(RuntimeError, self._api.GetUTF8Text)
+
+    @unittest.skipIf(not pil_installed, "Pillow not installed")
+    def test_empty_getcomponents(self):
+        self._api.Init()
+        image = Image.new("RGB", (100, 100), (1, 1, 1))
+        self._api.SetImage(image)
+        result = self._api.GetComponentImages(tesserocr.RIL.TEXTLINE, True)
+        # Test if empty
+        self.assertFalse(result)
+
+    @unittest.skipIf(not pil_installed, "Pillow not installed")
+    def test_empty_small_getcomponents(self):
+        self._api.Init()
+        image = Image.new("RGB", (1, 1), (1, 1, 1))
+        self._api.SetImage(image)
+        result = self._api.GetComponentImages(tesserocr.RIL.TEXTLINE, True)
+        # Test if empty
+        self.assertFalse(result)
