@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.0-rc1'
+__version__ = '2.2.0-rc2'
 
 import os
 from io import BytesIO
@@ -388,7 +388,7 @@ cdef class PyPageIterator:
         helper function:
 
         >>> for e in iterate_level(api.AnalyseLayout(), RIL.WORD):
-            ...     word = e.GetUTF8Text()
+        ...     orientation = e.Orientation()
 
     .. warning::
 
@@ -652,7 +652,8 @@ cdef class PyPageIterator:
                 If you do not supply an original image (None), you will get a binary one.
 
         Returns:
-            :class:`PIL.Image`: The image of the current object at the given level in greyscale.
+            tuple: The image (:class:`PIL.Image`) of the current object at the given level in greyscale
+                followed by its top and left positions.
         """
         cdef:
             Pix *pix
@@ -962,6 +963,14 @@ cdef class PyLTRResultIterator(PyPageIterator):
 
 cdef class PyResultIterator(PyLTRResultIterator):
     """Wrapper around Tesseract's ``ResultIterator`` class.
+
+    .. note::
+
+        You can iterate through the elements of a level using the :func:`iterate_level`
+        helper function:
+
+        >>> for e in iterate_level(api.GetIterator(), RIL.WORD):
+        ...     word = e.GetUTF8Text()
 
     See :class:`PyPageIterator` for more details.
     """
