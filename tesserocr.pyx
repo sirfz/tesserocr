@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.0-rc2'
+__version__ = '2.2.0'
 
 import os
 from io import BytesIO
