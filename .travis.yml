@@ -9,7 +9,7 @@ python:
     - "3.3"
     - "3.4"
     - "3.5"
-    - "pypy3"
+    - "3.6"
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y autoconf automake libtool

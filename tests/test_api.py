@@ -192,3 +192,7 @@ class TestTessBaseApi(unittest.TestCase):
         result = self._api.GetComponentImages(tesserocr.RIL.TEXTLINE, True)
         # Test if empty
         self.assertFalse(result)
+
+
+if __name__ == '__main__':
+    unittest.main()
