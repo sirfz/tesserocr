@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.1'
+__version__ = '2.2.2'
 
 import os
 from io import BytesIO
@@ -158,7 +158,7 @@ cdef class RIL(_Enum):
 
     Attributes:
         BLOCK: of text/image/separator line.
-        PARAr: within a block.
+        PARA: within a block.
         TEXTLINE: within a paragraph.
         WORD: within a textline.
         SYMBOL: character within a word.
@@ -1874,31 +1874,49 @@ cdef class PyTessBaseAPI:
             return None
         return PyPageIterator.createPageIterator(piter)
 
-    def Recognize(self):
+    cpdef bool Recognize(self, int timeout=0):
         """Recognize the image from :meth:`SetImage`, generating Tesseract
         internal structures. Returns ``True`` on success.
 
         Optional. The `Get*Text` methods below will call :meth:`Recognize` if needed.
 
         After :meth:`Recognize`, the output is kept internally until the next :meth:`SetImage`.
+
+        Kwargs:
+            timeout (int): time to wait in milliseconds before timing out.
+
+        Returns:
+            bool: ``True`` if the operation is successful.
         """
         cdef:
             ETEXT_DESC monitor
             int res
         with nogil:
-            res = self._baseapi.Recognize(&monitor)
+            if timeout > 0:
+                monitor.cancel = NULL
+                monitor.cancel_this = NULL
+                monitor.set_deadline_msecs(timeout)
+                res = self._baseapi.Recognize(&monitor)
+            else:
+                res = self._baseapi.Recognize(NULL)
         return res == 0
 
     """Methods to retrieve information after :meth:`SetImage`,
     :meth:`Recognize` or :meth:`TesseractRect`. (:meth:`Recognize` is called implicitly if needed.)"""
 
-    def RecognizeForChopTest(self):
+    cpdef bool RecognizeForChopTest(self, int timeout=0):
         """Variant on :meth:`Recognize` used for testing chopper."""
         cdef:
             ETEXT_DESC monitor
             int res
         with nogil:
-            res = self._baseapi.RecognizeForChopTest(&monitor)
+            if timeout > 0:
+                monitor.cancel = NULL
+                monitor.cancel_this = NULL
+                monitor.set_deadline_msecs(timeout)
+                res = self._baseapi.RecognizeForChopTest(&monitor)
+            else:
+                res = self._baseapi.RecognizeForChopTest(NULL)
         return res == 0
 
     cdef TessResultRenderer *_get_renderer(self, cchar_t *outputbase):

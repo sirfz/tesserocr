@@ -193,6 +193,21 @@ class TestTessBaseApi(unittest.TestCase):
         # Test if empty
         self.assertFalse(result)
 
+    def test_recognize(self):
+        """Test Recognize with and without timeout."""
+        self._api.SetImageFile(self._image_file)
+        # timeout after 1 milliseconds (likely)
+        res = self._api.Recognize(1)
+        self.assertFalse(res)
+        self._api.SetImageFile(self._image_file)
+        # timeout after 10 seocnds (unlikely)
+        res = self._api.Recognize(10000)
+        self.assertTrue(res)
+        self._api.SetImageFile(self._image_file)
+        # no timeout
+        res = self._api.Recognize()
+        self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()
