@@ -57,7 +57,7 @@ TessBaseAPI.ClearPersistentCache()
 cdef class _Enum:
 
     def __init__(self):
-        raise TypeError('{} is an enum and cannot be instantiated'.fromat(type(self).__name__))
+        raise TypeError('{} is an enum and cannot be instantiated'.format(type(self).__name__))
 
 
 cdef class OEM(_Enum):
