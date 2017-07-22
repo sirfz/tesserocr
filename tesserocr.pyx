@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.2.2'
+__version__ = '2.2.2-rc.1'
 
 import os
 from io import BytesIO
@@ -1154,7 +1154,7 @@ cdef class PyTessBaseAPI:
                                           set_only_non_debug_params)
         if ret == -1:
             with gil:
-                raise RuntimeError('Failed to init API, possibly an invalid tessdata path?')
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
         self._baseapi.SetPageSegMode(psm)
         return ret
 
@@ -2397,7 +2397,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
-                raise RuntimeError('Failed recognize picture')
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
 
     return _free_str(text)
 
@@ -2442,7 +2442,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
-                raise RuntimeError('Failed recognize picture')
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
 
     return _free_str(text)
 
