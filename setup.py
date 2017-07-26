@@ -96,9 +96,9 @@ def get_tesseract_version():
     try:
         p = subprocess.Popen(['tesseract', '-v'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         stdout_version, version = p.communicate()
-        if version == '':
-            version = stdout_version
         version = _read_string(version).strip()
+        if version == '':
+            version = _read_string(stdout_version).strip()
         version_match = re.search(r'^tesseract ((?:\d+\.)+\d+).*', version, re.M)
         if version_match:
             version = version_match.group(1)
