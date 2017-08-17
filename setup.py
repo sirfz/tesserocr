@@ -129,7 +129,7 @@ def get_build_args():
 
     if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x040000:
         _LOGGER.debug('tesseract >= 4.00 requires c++11 compiler support')
-        build_args['extra_compile_args'] = ['-std=c++11']
+        build_args['extra_compile_args'] = ['-std=c++11', '-DUSE_STD_NAMESPACE']
 
     _LOGGER.debug('build parameters: {}'.format(build_args))
     return build_args
