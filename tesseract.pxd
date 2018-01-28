@@ -219,8 +219,6 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             OEM_LSTM_ONLY
             OEM_TESSERACT_LSTM_COMBINED
             OEM_DEFAULT
-            OEM_CUBE_ONLY
-            OEM_TESSERACT_CUBE_COMBINED
     ELSE:
         cdef enum OcrEngineMode:
             OEM_TESSERACT_ONLY
