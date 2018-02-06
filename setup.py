@@ -149,6 +149,13 @@ class my_build_ext(build_ext, object):
             self.distribution.ext_modules, compile_time_env=_CYTHON_COMPILE_TIME_ENV)
         super(my_build_ext, self).finalize_options()
 
+if sys.platform == 'win32':
+    import tesserocr_windows_build
+    package_config = tesserocr_windows_build.package_config
+    my_build_ext = tesserocr_windows_build.my_build_ext
+    get_build_args = tesserocr_windows_build.get_build_args
+    make_extension = tesserocr_windows_build.make_extension
+
 
 setup(name='tesserocr',
       version=find_version('tesserocr.pyx'),
