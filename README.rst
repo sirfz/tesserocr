@@ -91,7 +91,7 @@ or to get **tesserocr** compiled with **tesseract 4.0.0**:
 
 pip
 ```
-Download the wheel file corresponding to your windows platform and python installation from `simonflueckiger/tesserocr-windows_build/releases <https://github.com/simonflueckiger/tesserocr-windows_build/releases>`_ and install them via:
+Download the wheel file corresponding to your Windows platform and Python installation from `simonflueckiger/tesserocr-windows_build/releases <https://github.com/simonflueckiger/tesserocr-windows_build/releases>`_ and install them via:
 ::
     > pip install <package_name>.whl
 
