@@ -49,7 +49,9 @@ else:
 
 def version_to_int(version):
     version = re.search(r'((?:\d+\.)+\d+)', version).group()
-    return int(''.join(version.split('.')), 16)
+    # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
+    version_str = "{:02}{:02}{:02}".format(*map(int, version.split('.')[:3]))
+    return int(version_str, 16)
 
 
 def package_config():
