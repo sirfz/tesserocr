@@ -50,7 +50,9 @@ else:
 def version_to_int(version):
     version = re.search(r'((?:\d+\.)+\d+)', version).group()
     # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
-    version_str = "{:02}{:02}{:02}".format(*map(int, version.split('.')[:3]))
+    # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
+    # are dropped.
+    version_str = "{:02}{:02}{:02}".format(*map(int, (version.split('.') + [0]*2)[:3]))
     return int(version_str, 16)
 
 
