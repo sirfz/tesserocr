@@ -49,7 +49,10 @@ cdef TessBaseAPI _api = TessBaseAPI()
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
 cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
-cdef _DEFAULT_LANG = _api.GetInitLanguagesAsString()
+_init_lang = _api.GetInitLanguagesAsString()
+if _init_lang == '':
+    _init_lang = 'eng'
+cdef _DEFAULT_LANG = _init_lang
 _api.End()
 TessBaseAPI.ClearPersistentCache()
 
