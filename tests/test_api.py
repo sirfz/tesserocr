@@ -112,7 +112,10 @@ class TestTessBaseApi(unittest.TestCase):
         path = self._api.GetDatapath()
         self._api.End()
         self.assertRaises(RuntimeError, self._api.Init, path=(self._test_dir + os.path.sep))  # no tessdata
-        new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
+        if self._tesseract_version >= 0x040000:
+            new_path = path
+        else:
+            new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
         self._api.End()
         self._api.Init(new_path)
         self.assertEqual(self._api.GetDatapath(), path)
