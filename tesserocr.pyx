@@ -48,7 +48,10 @@ setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
 cdef TessBaseAPI _api = TessBaseAPI()
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
-cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
+IF TESSERACT_VERSION >= 0x040000:
+    cdef _DEFAULT_PATH = _api.GetDatapath()  # "tessdata/" is not appended by tesseract since commit dba13db
+ELSE:
+    cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
 _init_lang = _api.GetInitLanguagesAsString()
 if _init_lang == '':
     _init_lang = 'eng'
