@@ -11,7 +11,11 @@ except ImportError:
 
 def version_to_int(version):
     version = re.search(r'((?:\d+\.)+\d+)', version).group()
-    return int(''.join(version.split('.')), 16)
+    # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
+    # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
+    # are dropped.
+    version_str = "{:02}{:02}{:02}".format(*map(int, (version.split('.') + [0]*2)[:3]))
+    return int(version_str, 16)
 
 
 class TestTessBaseApi(unittest.TestCase):
@@ -108,7 +112,10 @@ class TestTessBaseApi(unittest.TestCase):
         path = self._api.GetDatapath()
         self._api.End()
         self.assertRaises(RuntimeError, self._api.Init, path=(self._test_dir + os.path.sep))  # no tessdata
-        new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
+        if self._tesseract_version >= 0x040000:
+            new_path = path
+        else:
+            new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
         self._api.End()
         self._api.Init(new_path)
         self.assertEqual(self._api.GetDatapath(), path)
