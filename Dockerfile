@@ -23,7 +23,9 @@ RUN ./autogen.sh && ./configure && LDFLAGS=\"-L/usr/local/lib\" CFLAGS=\"-I/usr/
 WORKDIR /tmp
 RUN wget https://github.com/tesseract-ocr/tessdata/archive/3.04.00.tar.gz -O /tmp/tessdata.tar.gz && tar -xvf /tmp/tessdata.tar.gz --directory /tmp
 RUN  mkdir -p /usr/local/share/tessdata/ &&  rsync -a tessdata-3.04.00/ /usr/local/share/tessdata
-RUN git clone https://github.com/sirfz/tesserocr.git 
+RUN mkdir /tmp/tesserocr
+
+ADD setup.py tesseract.pxd tesserocr_experiment.pyx tesserocr.pyx tests/ tox.ini /tmp/tesserocr
 WORKDIR /tmp/tesserocr
 RUN python setup.py bdist_wheel
 RUN python setup.py install
