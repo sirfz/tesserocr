@@ -52,7 +52,8 @@ def version_to_int(version):
     # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
     # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
     # are dropped.
-    version_str = "{:02}{:02}{:02}".format(*map(int, (version.split('.') + [0]*2)[:3]))
+    version_groups = (version.split('.') + [0, 0])[:3]
+    version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
     return int(version_str, 16)
 
 
