@@ -131,8 +131,8 @@ def get_build_args():
             _LOGGER.warn('pkg-config failed to find tesseract/lept libraries: {}'.format(e))
         build_args = get_tesseract_version()
 
-    if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x040000:
-        _LOGGER.debug('tesseract >= 4.00 requires c++11 compiler support')
+    if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x030502:
+        _LOGGER.debug('tesseract >= 03.05.02 requires c++11 compiler support')
         build_args['extra_compile_args'] = ['-std=c++11', '-DUSE_STD_NAMESPACE']
 
     _LOGGER.debug('build parameters: {}'.format(build_args))
