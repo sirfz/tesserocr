@@ -95,6 +95,16 @@ Download the wheel file corresponding to your Windows platform and Python instal
 ::
     > pip install <package_name>.whl
 
+tessdata
+=====
+You may need to point to the tessdata folder if this can not be detected automatically. This can be doing by setting the `TESSDATA_PREFIX` environment variable or giving as path to `PyTessBaseAPI` like `PyTessBaseAPI(path='/usr/share/tessdata')` (or any other path that is applicable to your system). Inside the folder of this path there should be `.trainedata` files as can be found on https://github.com/tesseract-ocr/tessdata Usually tesseract comes with two trained data files `eng.traineddata` and `osd.traineddata`, so try to search for these files to locate the right folder. Additional traineddata files can be downloaded directly from github or using your package manager. For example on ubuntu there are a lot of traineddata files available through packages, you can find them with `apt-cache search tesseract-ocr-script` (these seem to be for tesseract 4.0). Make sure you have the correct version of traineddata for your `tesseract --version`! A list of traineddata files that can be found by this python package can be retreived like this:
+
+.. code:: python
+    from tesserocr import PyTessBaseAPI, get_languages
+    
+    print(get_languages('/usr/share/tessdata'))  # or any other path that applies to your system
+
+
 Usage
 =====
 
