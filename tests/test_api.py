@@ -14,15 +14,18 @@ def version_to_int(version):
     # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
     # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
     # are dropped.
-    version_str = "{:02}{:02}{:02}".format(*map(int, (version.split('.') + [0]*2)[:3]))
+    version_groups = (version.split('.') + [0, 0])[:3]
+    version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
     return int(version_str, 16)
+
+
+_TESSERACT_VERSION = version_to_int(tesserocr.PyTessBaseAPI.Version())
 
 
 class TestTessBaseApi(unittest.TestCase):
 
     _test_dir = os.path.abspath(os.path.dirname(__file__))
     _image_file = os.path.join(_test_dir, 'eurotext.tif')
-    _tesseract_version = version_to_int(tesserocr.PyTessBaseAPI.Version())
 
     def setUp(self):
         if pil_installed:
@@ -112,7 +115,7 @@ class TestTessBaseApi(unittest.TestCase):
         path = self._api.GetDatapath()
         self._api.End()
         self.assertRaises(RuntimeError, self._api.Init, path=(self._test_dir + os.path.sep))  # no tessdata
-        if self._tesseract_version >= 0x040000:
+        if _TESSERACT_VERSION >= 0x040000:
             new_path = path
         else:
             new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
@@ -163,7 +166,7 @@ class TestTessBaseApi(unittest.TestCase):
         all(self.assertIn(k, orientation) for k in ['sconfidence', 'oconfidence', 'script', 'orientation'])
         self.assertEqual(orientation['orientation'], 0)
         self.assertEqual(orientation['script'], 1)
-        if self._tesseract_version >= 0x040000:
+        if _TESSERACT_VERSION >= 0x040000:
             orientation = self._api.DetectOrientationScript()
             all(self.assertIn(k, orientation) for k in ['orient_deg', 'orient_conf', 'script_name', 'script_conf'])
             self.assertEqual(orientation['orient_deg'], 0)
