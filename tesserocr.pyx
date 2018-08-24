@@ -29,9 +29,6 @@ except ImportError:
     # PIL.Image won't be supported
     pass
 
-import locale
-locale.setlocale(locale.LC_ALL, 'C')
-
 from tesseract cimport *
 from libc.stdlib cimport malloc, free
 from cpython.version cimport PY_MAJOR_VERSION
