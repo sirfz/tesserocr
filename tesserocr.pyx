@@ -1017,6 +1017,18 @@ cdef class PyResultIterator(PyLTRResultIterator):
         """
         return self._riter.ParagraphIsLtr()
 
+    def GetGlyphConfidences(self):
+        cdef:
+            vector[vector[pair[cchar_tp, float]]]  glyphConfs    
+        glyphConfidences = []
+        output = self._riter.GetGlyphConfidences()[0]
+        for tstep in output:
+            timestep = []
+            for confpair in tstep:
+                timestep.append((confpair.first, confpair.second))
+            glyphConfidences.append(timestep)              
+        return glyphConfidences
+
 
 cdef class PyChoiceIterator:
 
@@ -2110,6 +2122,24 @@ cdef class PyTessBaseAPI:
                 with gil:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
+
+    def GetGlyphConfidences(self):
+        """Return the glyph confidences as multi-dimensional array of tupels
+        First Dimension contains words. The second dimension contains the LSTM
+        timesteps of the respective word. Either accumulated over characters or
+        pure which depends on the value set in glyph_confidences:
+        1=pure; 2=accumulated. The third dimension contains the characters and
+        their probability as tupels for the respective timestep.
+        Returns an empty list if :meth:`Recognize` was not called first.
+        """
+        if self.GetVariableAsString("glyph_confidences") == "0":
+            raise RuntimeError('glyph_confidences Parameter is 0. Set it to 1 or 2')
+        words = []
+        wi = self.GetIterator()
+        if wi:
+            for w in iterate_level(wi, RIL.WORD):
+                words.append(w.GetGlyphConfidences())
+        return words
 
     def GetHOCRText(self, int page_number):
         """Return a HTML-formatted string with hOCR markup from the internal
