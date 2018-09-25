@@ -48,12 +48,32 @@ else:
 
 
 def version_to_int(version):
+    subversion = None
+    subtrahend = 0
+    # Subtracts a certain amount from the version number to differentiate between
+    # alpha, beta and release versions.
+    if "alpha" in version:
+        version_split = version.split("alpha")
+        subversion = version_split[1]
+        subtrahend = 2
+    elif "beta" in version:
+        version_split = version.split("beta")
+        subversion = version_split[1]
+        subtrahend = 1
     version = re.search(r'((?:\d+\.)+\d+)', version).group()
     # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
     # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
     # are dropped.
     version_groups = (version.split('.') + [0, 0])[:3]
     version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
+    version_str = str((int(version_str, 10)-subtrahend))
+    # Adds a 2 digit subversion number for the subversionrelease.
+    subversion_str="00"
+    if subversion is not None and subversion is not "":
+        subversion = re.search(r'(?:\d+)', subversion).group()
+        subversion_groups = (subversion.split('-') + [0, 0])[:1]
+        subversion_str = "{:02}".format(*map(int, subversion_groups))
+    version_str+=subversion_str
     return int(version_str, 16)
 
 
@@ -132,7 +152,7 @@ def get_build_args():
             _LOGGER.warn('pkg-config failed to find tesseract/lept libraries: {}'.format(e))
         build_args = get_tesseract_version()
 
-    if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x030502:
+    if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x3050200:
         _LOGGER.debug('tesseract >= 03.05.02 requires c++11 compiler support')
         build_args['extra_compile_args'] = ['-std=c++11', '-DUSE_STD_NAMESPACE']
 
