@@ -72,7 +72,7 @@ class TestTessBaseApi(unittest.TestCase):
         self.assertEqual(self._api.GetInitLanguagesAsString(), 'eng+osd')
         self._api.Init(lang='eng')
         self.assertEqual(self._api.GetInitLanguagesAsString(), 'eng')
-        self._api.Init(oem=tesserocr.OEM.TESSERACT_ONLY)
+        self._api.Init(lang='osd', oem=tesserocr.OEM.TESSERACT_ONLY)
         self.assertEqual(self._api.oem(), tesserocr.OEM.TESSERACT_ONLY)
 
     @unittest.skipIf(not pil_installed, "Pillow not installed")
