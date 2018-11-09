@@ -5,23 +5,30 @@ language: python
 python:
     - "2.7"
     - "pypy"
+    - "pypy3.5"
     - "3.3"
     - "3.4"
     - "3.5"
     - "3.6"
-    - "3.7"
+    - "3.7-dev"
 env:
     matrix:
         - TESSERACT=3.04.01-1
         - TESSERACT=3.05.02-3
-        - TESSERACT=4.0.0-beta.4-1
+        - TESSERACT=4.0.0-1
 before_install:
     - export TESSERACT_INSTALL=$HOME/.tesseract
     - export TESSERACT_PKG=$TESSERACT_INSTALL/lib/pkgconfig
     - export LD_LIBRARY_PATH=$TESSERACT_INSTALL/lib:$LD_LIBRARY_PATH
     - export PKG_CONFIG_PATH=$TESSERACT_PKG:$PKG_CONFIG_PATH
     - wget -O - https://github.com/nijel/tesseract-ocr-build/releases/download/$TESSERACT/tesseract.tar.xz | tar -C $HOME -xJf -
+    - cd $TESSERACT_INSTALL/share/tessdata && rm -f osd.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata && cd -
+    - cd $TESSERACT_INSTALL/share/tessdata && rm -f eng.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata && cd -
 install:
     - pip install Cython
     - pip install Pillow
-script: python setup.py test
+script:
+    - export LC_ALL=C
+    - export LC_CTYPE=C
+    - export LC_NUMERIC=C
+    - python setup.py test
