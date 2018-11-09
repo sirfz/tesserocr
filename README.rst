@@ -104,6 +104,7 @@ Additional traineddata files can be downloaded directly from github or using you
 Make sure you have the correct version of traineddata for your `tesseract --version`! A list of traineddata files that can be found by this python package can be retreived like this:
 
 .. code:: python
+
     from tesserocr import PyTessBaseAPI, get_languages
     
     print(get_languages('/usr/share/tessdata'))  # or any other path that applies to your system
