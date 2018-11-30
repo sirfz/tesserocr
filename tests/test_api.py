@@ -177,27 +177,46 @@ class TestTessBaseApi(unittest.TestCase):
         mapped_confidences = self._api.MapWordConfidences()
         self.assertEqual([v[0] for v in mapped_confidences], words)
         self.assertEqual([v[1] for v in mapped_confidences], confidences)
-        
+
+    @unittest.skipIf(_TESSERACT_VERSION < 0x4000000, "tesseract < 4")
     def test_LSTM_choices(self):
-        if _TESSERACT_VERSION >= 0x4000000:
-            """Test GetBestLSTMSymbolChoices."""
-            self._api.SetVariable("lstm_choice_mode", "2")
-            self._api.SetImageFile(self._image_file)
-            self._api.Recognize()
-            LSTM_choices = self._api.GetBestLSTMSymbolChoices()
-            words = self._api.AllWords()
-            self.assertEqual(len(words), len(LSTM_choices))
-            
-            for choice, word in zip(LSTM_choices, words):
-                chosen_word = ""
-                for timestep in choice:
-                    for alternative in timestep:
-                        self.assertGreaterEqual(alternative[1], 0.0)
-                        self.assertLessEqual(alternative[1], 2.0)
-                    chosen_symbol = timestep[0][0]
-                    if chosen_symbol != " ":
-                        chosen_word += chosen_symbol
-                self.assertEqual(chosen_word, word)
+        """Test GetBestLSTMSymbolChoices."""
+        self._api.SetVariable("lstm_choice_mode", "2")
+        self._api.SetImageFile(self._image_file)
+        self._api.Recognize()
+        LSTM_choices = self._api.GetBestLSTMSymbolChoices()
+        words = self._api.AllWords()
+        self.assertEqual(len(words), len(LSTM_choices))
+
+        for choice, word in zip(LSTM_choices, words):
+            chosen_word = ""
+            for timestep in choice:
+                for alternative in timestep:
+                    self.assertGreaterEqual(alternative[1], 0.0)
+                    self.assertLessEqual(alternative[1], 2.0)
+                chosen_symbol = timestep[0][0]
+                if chosen_symbol != " ":
+                    chosen_word += chosen_symbol
+            self.assertEqual(chosen_word, word)
+
+    @unittest.skipIf(_TESSERACT_VERSION < 0x4000000, "tesseract < 4")
+    def test_result_iterator(self):
+        """Test result iterator."""
+        self._api.SetImageFile(self._image_file)
+        self._api.Recognize()
+        it = self._api.GetIterator()
+        level = tesserocr.RIL.WORD
+        for i, w in enumerate(tesserocr.iterate_level(it, level)):
+            text = w.GetUTF8Text(level)
+            blanks = w.BlanksBeforeWord()
+            if i == 0:
+                self.assertEqual(text, "The")
+                self.assertEqual(blanks, 0)
+            elif i == 1:
+                self.assertEqual(text, "(quick)")
+                self.assertEqual(blanks, 1)
+            else:
+                break
 
     def test_detect_os(self):
         """Test DetectOS and DetectOrientationScript (tesseract v4+)."""

@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.3.1'
+__version__ = '2.4.0'
 
 import os
 from io import BytesIO
@@ -895,6 +895,12 @@ cdef class PyLTRResultIterator(PyPageIterator):
     def WordIsFromDictionary(self):
         """Return True if the current word was found in a dictionary."""
         return self._ltrriter.WordIsFromDictionary()
+
+    IF TESSERACT_VERSION >= 0x4000000:
+        def BlanksBeforeWord(self):
+            """Return True if the current word is numeric."""
+            return self._ltrriter.BlanksBeforeWord()
+
 
     def WordIsNumeric(self):
         """Return True if the current word is numeric."""

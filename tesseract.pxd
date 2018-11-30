@@ -142,27 +142,51 @@ cdef extern from "tesseract/pageiterator.h" namespace "tesseract" nogil:
         void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
 
 cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
-    cdef cppclass LTRResultIterator(PageIterator):
-        char *GetUTF8Text(PageIteratorLevel) const
-        void SetLineSeparator(cchar_t *)
-        void SetParagraphSeparator(cchar_t *)
-        float Confidence(PageIteratorLevel) const
-        cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
-        cchar_t *WordRecognitionLanguage() const
-        StrongScriptDirection WordDirection() const
-        bool WordIsFromDictionary() const
-        bool WordIsNumeric() const
-        bool HasBlamerInfo() const
-        cchar_t *GetBlamerDebug() const
-        cchar_t *GetBlamerMisadaptionDebug() const
-        bool HasTruthString() const
-        bool EquivalentToTruth(cchar_t *) const
-        char *WordTruthUTF8Text() const
-        char *WordNormedUTF8Text() const
-        cchar_t *WordLattice(int *) const
-        bool SymbolIsSuperscript() const
-        bool SymbolIsSubscript() const
-        bool SymbolIsDropcap() const
+    IF TESSERACT_VERSION >= 0x4000000:
+        cdef cppclass LTRResultIterator(PageIterator):
+            char *GetUTF8Text(PageIteratorLevel) const
+            void SetLineSeparator(cchar_t *)
+            void SetParagraphSeparator(cchar_t *)
+            float Confidence(PageIteratorLevel) const
+            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
+            cchar_t *WordRecognitionLanguage() const
+            StrongScriptDirection WordDirection() const
+            bool WordIsFromDictionary() const
+            int BlanksBeforeWord() const
+            bool WordIsNumeric() const
+            bool HasBlamerInfo() const
+            cchar_t *GetBlamerDebug() const
+            cchar_t *GetBlamerMisadaptionDebug() const
+            bool HasTruthString() const
+            bool EquivalentToTruth(cchar_t *) const
+            char *WordTruthUTF8Text() const
+            char *WordNormedUTF8Text() const
+            cchar_t *WordLattice(int *) const
+            bool SymbolIsSuperscript() const
+            bool SymbolIsSubscript() const
+            bool SymbolIsDropcap() const
+    ELSE:
+        cdef cppclass LTRResultIterator(PageIterator):
+            char *GetUTF8Text(PageIteratorLevel) const
+            void SetLineSeparator(cchar_t *)
+            void SetParagraphSeparator(cchar_t *)
+            float Confidence(PageIteratorLevel) const
+            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
+            cchar_t *WordRecognitionLanguage() const
+            StrongScriptDirection WordDirection() const
+            bool WordIsFromDictionary() const
+            bool WordIsNumeric() const
+            bool HasBlamerInfo() const
+            cchar_t *GetBlamerDebug() const
+            cchar_t *GetBlamerMisadaptionDebug() const
+            bool HasTruthString() const
+            bool EquivalentToTruth(cchar_t *) const
+            char *WordTruthUTF8Text() const
+            char *WordNormedUTF8Text() const
+            cchar_t *WordLattice(int *) const
+            bool SymbolIsSuperscript() const
+            bool SymbolIsSubscript() const
+            bool SymbolIsDropcap() const
 
     cdef cppclass ChoiceIterator:
         ChoiceIterator(const LTRResultIterator &) except +
