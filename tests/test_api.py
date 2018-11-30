@@ -10,12 +10,32 @@ except ImportError:
 
 
 def version_to_int(version):
+    subversion = None
+    subtrahend = 0
+    # Subtracts a certain amount from the version number to differentiate between
+    # alpha, beta and release versions.
+    if "alpha" in version:
+        version_split = version.split("alpha")
+        subversion = version_split[1]
+        subtrahend = 2
+    elif "beta" in version:
+        version_split = version.split("beta")
+        subversion = version_split[1]
+        subtrahend = 1
     version = re.search(r'((?:\d+\.)+\d+)', version).group()
     # Split the groups on ".", take only the first one, and print each group with leading 0 if needed
     # To be safe, also handle cases where an extra group is added to the version string, or if one or two groups
     # are dropped.
     version_groups = (version.split('.') + [0, 0])[:3]
     version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
+    version_str = str((int(version_str, 10) - subtrahend))
+    # Adds a 2 digit subversion number for the subversionrelease.
+    subversion_str = "00"
+    if subversion is not None and subversion is not "":
+        subversion = re.search(r'(?:\d+)', subversion).group()
+        subversion_groups = (subversion.split('-') + [0, 0])[:1]
+        subversion_str = "{:02}".format(*map(int, subversion_groups))
+    version_str += subversion_str
     return int(version_str, 16)
 
 
@@ -115,7 +135,7 @@ class TestTessBaseApi(unittest.TestCase):
         path = self._api.GetDatapath()
         self._api.End()
         self.assertRaises(RuntimeError, self._api.Init, path=(self._test_dir + os.path.sep))  # no tessdata
-        if _TESSERACT_VERSION >= 0x040000:
+        if _TESSERACT_VERSION >= 0x3999800:
             new_path = path
         else:
             new_path = os.path.abspath(os.path.join(path, os.path.pardir)) + os.path.sep
@@ -157,6 +177,27 @@ class TestTessBaseApi(unittest.TestCase):
         mapped_confidences = self._api.MapWordConfidences()
         self.assertEqual([v[0] for v in mapped_confidences], words)
         self.assertEqual([v[1] for v in mapped_confidences], confidences)
+        
+    def test_LSTM_choices(self):
+        if _TESSERACT_VERSION >= 0x4000000:
+            """Test GetBestLSTMSymbolChoices."""
+            self._api.SetVariable("lstm_choice_mode", "2")
+            self._api.SetImageFile(self._image_file)
+            self._api.Recognize()
+            LSTM_choices = self._api.GetBestLSTMSymbolChoices()
+            words = self._api.AllWords()
+            self.assertEqual(len(words), len(LSTM_choices))
+            
+            for choice, word in zip(LSTM_choices, words):
+                chosen_word = ""
+                for timestep in choice:
+                    for alternative in timestep:
+                        self.assertGreaterEqual(alternative[1], 0.0)
+                        self.assertLessEqual(alternative[1], 2.0)
+                    chosen_symbol = timestep[0][0]
+                    if chosen_symbol != " ":
+                        chosen_word += chosen_symbol
+                self.assertEqual(chosen_word, word)
 
     def test_detect_os(self):
         """Test DetectOS and DetectOrientationScript (tesseract v4+)."""
@@ -166,7 +207,7 @@ class TestTessBaseApi(unittest.TestCase):
         all(self.assertIn(k, orientation) for k in ['sconfidence', 'oconfidence', 'script', 'orientation'])
         self.assertEqual(orientation['orientation'], 0)
         self.assertEqual(orientation['script'], 1)
-        if _TESSERACT_VERSION >= 0x040000:
+        if _TESSERACT_VERSION >= 0x3999800:
             orientation = self._api.DetectOrientationScript()
             all(self.assertIn(k, orientation) for k in ['orient_deg', 'orient_conf', 'script_name', 'script_conf'])
             self.assertEqual(orientation['orient_deg'], 0)

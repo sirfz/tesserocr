@@ -48,7 +48,7 @@ setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
 cdef TessBaseAPI _api = TessBaseAPI()
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
-IF TESSERACT_VERSION >= 0x040000:
+IF TESSERACT_VERSION >= 0x3999800:
     cdef _DEFAULT_PATH = _api.GetDatapath()  # "tessdata/" is not appended by tesseract since commit dba13db
 ELSE:
     cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
@@ -84,7 +84,7 @@ cdef class OEM(_Enum):
     """
 
     TESSERACT_ONLY = OEM_TESSERACT_ONLY
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         LSTM_ONLY = OEM_LSTM_ONLY
         TESSERACT_LSTM_COMBINED = OEM_TESSERACT_LSTM_COMBINED
     ELSE:
@@ -1017,6 +1017,17 @@ cdef class PyResultIterator(PyLTRResultIterator):
         """
         return self._riter.ParagraphIsLtr()
 
+    IF TESSERACT_VERSION >= 0x4000000:
+        def GetBestLSTMSymbolChoices(self):
+            LSTMSymbolChoices = []
+            output = self._riter.GetBestLSTMSymbolChoices()[0]
+            for tstep in output:
+                timestep = []
+                for confpair in tstep:
+                    timestep.append((confpair.first, confpair.second))
+                LSTMSymbolChoices.append(timestep)
+            return LSTMSymbolChoices
+
 
 cdef class PyChoiceIterator:
 
@@ -1930,12 +1941,12 @@ cdef class PyTessBaseAPI:
         cdef:
             bool b
             bool font_info
-            IF TESSERACT_VERSION >= 0x040000:
+            IF TESSERACT_VERSION >= 0x3999800:
                 bool textonly
             TessResultRenderer *temp
             TessResultRenderer *renderer = NULL
 
-        IF TESSERACT_VERSION >= 0x030401:
+        IF TESSERACT_VERSION >= 0x3040100:
             if self._baseapi.GetPageSegMode() == PSM.OSD_ONLY:
                 renderer = new TessOsdRenderer(outputbase)
                 return renderer
@@ -1947,7 +1958,7 @@ cdef class PyTessBaseAPI:
 
         self._baseapi.GetBoolVariable("tessedit_create_pdf", &b)
         if b:
-            IF TESSERACT_VERSION >= 0x040000:
+            IF TESSERACT_VERSION >= 0x3999800:
                 self._baseapi.GetBoolVariable("textonly_pdf", &textonly)
                 temp = new TessPDFRenderer(outputbase, self._baseapi.GetDatapath(), textonly)
             ELSE:
@@ -2111,6 +2122,25 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
+    IF TESSERACT_VERSION >= 0x4000000:
+        def GetBestLSTMSymbolChoices(self):
+            """Return Symbol choices as multi-dimensional array of tupels. The
+            first dimension contains words. The second dimension contains the LSTM
+            timesteps of the respective word. They are either accumulated over
+            characters or pure which depends on the value set in lstm_choice_mode:
+            1 = pure; 2 = accumulated. The third dimension contains the symbols
+            and their probability as tupels for the respective timestep.
+            Returns an empty list if :meth:`Recognize` was not called first.
+            """
+            if self.GetVariableAsString("lstm_choice_mode") == "0":
+                raise RuntimeError('lstm_choice_mode Parameter is 0. Set it to 1 or 2')
+            words = []
+            wi = self.GetIterator()
+            if wi:
+                for w in iterate_level(wi, RIL.WORD):
+                    words.append(w.GetBestLSTMSymbolChoices())
+            return words
+
     def GetHOCRText(self, int page_number):
         """Return a HTML-formatted string with hOCR markup from the internal
         data structures.
@@ -2127,7 +2157,7 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         def GetTSVText(self, int page_number):
             """Make a TSV-formatted string from the internal data structures.
 
@@ -2175,7 +2205,7 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         def DetectOrientationScript(self):
             """Detect the orientation of the input image and apparent script (alphabet).
 

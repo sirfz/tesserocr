@@ -1,5 +1,8 @@
 from libcpp cimport bool
+from libcpp.pair cimport pair
+from libcpp.vector cimport vector
 ctypedef const char cchar_t
+ctypedef const char * cchar_tp
 ctypedef const unsigned char cuchar_t
 
 cdef extern from "leptonica/allheaders.h" nogil:
@@ -168,8 +171,13 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         float Confidence() const
 
 cdef extern from "tesseract/resultiterator.h" namespace "tesseract" nogil:
-    cdef cppclass ResultIterator(LTRResultIterator):
-        bool ParagraphIsLtr() const
+    IF TESSERACT_VERSION >= 0x4000000:
+        cdef cppclass ResultIterator(LTRResultIterator):
+            bool ParagraphIsLtr() const
+            vector[vector[pair[cchar_tp, float]]] *GetBestLSTMSymbolChoices() const
+    ELSE:
+        cdef cppclass ResultIterator(LTRResultIterator):
+            bool ParagraphIsLtr() const
 
 cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessResultRenderer:
@@ -181,7 +189,7 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessHOcrRenderer(TessResultRenderer):
         TessHOcrRenderer(cchar_t *, bool) except +
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         cdef cppclass TessPDFRenderer(TessResultRenderer):
             TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
     ELSE:
@@ -194,7 +202,7 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessBoxTextRenderer(TessResultRenderer):
         TessBoxTextRenderer(cchar_t *) except +
 
-    IF TESSERACT_VERSION >= 0x030401:
+    IF TESSERACT_VERSION >= 0x3040100:
         cdef cppclass TessOsdRenderer(TessResultRenderer):
             TessOsdRenderer(cchar_t *) except +
 
@@ -213,7 +221,7 @@ cdef extern from "tesseract/osdetect.h" nogil:
 
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         cdef enum OcrEngineMode:
             OEM_TESSERACT_ONLY
             OEM_LSTM_ONLY
@@ -253,7 +261,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         RIL_WORD,      # within a textline.
         RIL_SYMBOL     # character within a word.
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         cdef cppclass TessBaseAPI:
             TessBaseAPI() except +
             @staticmethod
