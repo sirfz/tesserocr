@@ -37,7 +37,7 @@ On Debian/Ubuntu:
 
 ::
 
-    $ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
+    $ apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config
 
 You may need to `manually compile tesseract`_ for a more recent version. Note that you may need
 to update your ``LD_LIBRARY_PATH`` environment variable to point to the right library versions in
