@@ -362,7 +362,7 @@ cdef boxa_to_list(Boxa *boxa):
 
 cdef pixa_to_list(Pixa *pixa):
     """Convert Pixa (Array of pixes and boxes) to list of pix, box tuples."""
-    return zip((_pix_to_image(pix) for pix in pixa.pix[:pixa.n]), boxa_to_list(pixa.boxa))
+    return list(zip((_pix_to_image(pix) for pix in pixa.pix[:pixa.n]), boxa_to_list(pixa.boxa)))
 
 
 cdef class PyPageIterator:
