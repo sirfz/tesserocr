@@ -119,8 +119,8 @@ images:
     with PyTessBaseAPI() as api:
         for img in images:
             api.SetImageFile(img)
-            print api.GetUTF8Text()
-            print api.AllWordConfidences()
+            print(api.GetUTF8Text())
+            print(api.AllWordConfidences())
     # api is automatically finalized when used in a with-statement (context manager).
     # otherwise api.End() should be explicitly called when it's no longer needed.
 
@@ -134,13 +134,13 @@ Basic example using available helper functions:
     import tesserocr
     from PIL import Image
 
-    print tesserocr.tesseract_version()  # print tesseract-ocr version
-    print tesserocr.get_languages()  # prints tessdata path and list of available languages
+    print(tesserocr.tesseract_version())  # print tesseract-ocr version
+    print(tesserocr.get_languages())  # prints tessdata path and list of available languages
 
     image = Image.open('sample.jpg')
-    print tesserocr.image_to_text(image)  # print ocr text from image
+    print(tesserocr.image_to_text(image))  # print ocr text from image
     # or
-    print tesserocr.file_to_text('sample.jpg')
+    print(tesserocr.file_to_text('sample.jpg'))
 
 ``image_to_text`` and ``file_to_text`` can be used with ``threading`` to
 concurrently process multiple images which is highly efficient.
@@ -160,15 +160,15 @@ GetComponentImages example:
     with PyTessBaseAPI() as api:
         api.SetImage(image)
         boxes = api.GetComponentImages(RIL.TEXTLINE, True)
-        print 'Found {} textline image components.'.format(len(boxes))
+        print('Found {} textline image components.'.format(len(boxes)))
         for i, (im, box, _, _) in enumerate(boxes):
             # im is a PIL image object
             # box is a dict with x, y, w and h keys
             api.SetRectangle(box['x'], box['y'], box['w'], box['h'])
             ocrResult = api.GetUTF8Text()
             conf = api.MeanTextConf()
-            print (u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
-                   "confidence: {1}, text: {2}").format(i, conf, ocrResult, **box)
+            print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
+                  "confidence: {1}, text: {2}".format(i, conf, ocrResult, **box))
 
 Orientation and script detection (OSD):
 ```````````````````````````````````````
@@ -185,10 +185,10 @@ Orientation and script detection (OSD):
 
         it = api.AnalyseLayout()
         orientation, direction, order, deskew_angle = it.Orientation()
-        print "Orientation: {:d}".format(orientation)
-        print "WritingDirection: {:d}".format(direction)
-        print "TextlineOrder: {:d}".format(order)
-        print "Deskew angle: {:.4f}".format(deskew_angle)
+        print("Orientation: {:d}".format(orientation))
+        print("WritingDirection: {:d}".format(direction))
+        print("TextlineOrder: {:d}".format(order))
+        print("Deskew angle: {:.4f}".format(deskew_angle))
 
 or more simply with ``OSD_ONLY`` page segmentation mode:
 
@@ -200,8 +200,8 @@ or more simply with ``OSD_ONLY`` page segmentation mode:
         api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
 
         os = api.DetectOS()
-        print ("Orientation: {orientation}\nOrientation confidence: {oconfidence}\n"
-               "Script: {script}\nScript confidence: {sconfidence}").format(**os)
+        print("Orientation: {orientation}\nOrientation confidence: {oconfidence}\n"
+              "Script: {script}\nScript confidence: {sconfidence}".format(**os))
 
 more human-readable info with tesseract 4+ (demonstrates LSTM engine usage):
 
@@ -213,13 +213,15 @@ more human-readable info with tesseract 4+ (demonstrates LSTM engine usage):
         api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
 
         os = api.DetectOrientationScript()
-        print ("Orientation: {orient_deg}\nOrientation confidence: {orient_conf}\n"
-               "Script: {script_name}\nScript confidence: {script_conf}").format(**os)
+        print("Orientation: {orient_deg}\nOrientation confidence: {orient_conf}\n"
+              "Script: {script_name}\nScript confidence: {script_conf}".format(**os))
 
 Iterator over the classifier choices for a single symbol:
 `````````````````````````````````````````````````````````
 
 .. code:: python
+
+    from __future__ import print_function
 
     from tesserocr import PyTessBaseAPI, RIL, iterate_level
 
@@ -235,14 +237,14 @@ Iterator over the classifier choices for a single symbol:
             symbol = r.GetUTF8Text(level)  # r == ri
             conf = r.Confidence(level)
             if symbol:
-                print u'symbol {}, conf: {}'.format(symbol, conf),
+                print(u'symbol {}, conf: {}'.format(symbol, conf), end='')
             indent = False
             ci = r.GetChoiceIterator()
             for c in ci:
                 if indent:
-                    print '\t\t ',
-                print '\t- ',
+                    print('\t\t ', end='')
+                print('\t- ', end='')
                 choice = c.GetUTF8Text()  # c == ci
-                print u'{} conf: {}'.format(choice, c.Confidence())
+                print(u'{} conf: {}'.format(choice, c.Confidence()))
                 indent = True
-            print '---------------------------------------------'
+            print('---------------------------------------------')
