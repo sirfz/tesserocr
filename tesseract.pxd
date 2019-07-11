@@ -36,6 +36,7 @@ cdef extern from "leptonica/allheaders.h" nogil:
     int pixWriteMemJpeg(unsigned char **, size_t *, Pix *, int, int)
     int pixWriteMem(unsigned char **, size_t *, Pix *, int)
     void pixDestroy(Pix **)
+    void ptaDestroy(Pta **)
     int setMsgSeverity(int)
     void pixaDestroy(Pixa **)
     void boxaDestroy(Boxa **)
