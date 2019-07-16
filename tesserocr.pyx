@@ -612,12 +612,15 @@ cdef class PyPageIterator:
         if pta == NULL:
             return None
         try:
-            return zip((x for x in pta.x[:pta.n]), (y for y in pta.y[:pta.n]))
+            return list(zip((x for x in pta.x[:pta.n]), (y for y in pta.y[:pta.n])))
         finally:
-            free(pta)
+            ptaDestroy(&pta)
 
     def GetBinaryImage(self, PageIteratorLevel level):
         """Return a binary image of the current object at the given level.
+
+        The image is masked along the polygon outline of the current block, as given
+        by :meth:`BlockPolygon`. (Pixels outside the mask will be white.)
 
         The position and size match the return from :meth:`BoundingBoxInternal`, and so
         this could be upscaled with respect to the original input image.
@@ -639,6 +642,9 @@ cdef class PyPageIterator:
     def GetImage(self, PageIteratorLevel level, int padding, original_image):
         """Return an image of the current object at the given level in greyscale
         if available in the input.
+
+        The image is masked along the polygon outline of the current block, as given
+        by :meth:`BlockPolygon`. (Pixels outside the mask will be white.)
 
         To guarantee a binary image use :meth:`BinaryImage`.
 
@@ -2338,6 +2344,7 @@ cdef class PyTessBaseAPI:
                   rotation to be applied to the page for the text to be upright and readable.
                 - oconfidence: Orientation confidence.
                 - script: Index of the script with the highest score for this orientation.
+                  (This is _not_ the index of :meth:`get_languages`, which is in alphabetical order.)
                 - sconfidence: script confidence.
         """
         cdef OSResults results

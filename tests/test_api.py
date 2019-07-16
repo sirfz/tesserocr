@@ -225,7 +225,10 @@ class TestTessBaseApi(unittest.TestCase):
         orientation = self._api.DetectOS()
         all(self.assertIn(k, orientation) for k in ['sconfidence', 'oconfidence', 'script', 'orientation'])
         self.assertEqual(orientation['orientation'], 0)
-        self.assertEqual(orientation['script'], 1)
+        languages = tesserocr.get_languages()[1] # this is sorted alphabetically!
+        self.assertLess(orientation['script'], len(languages))
+        script_name = languages[orientation['script']] # therefore does not work
+        #self.assertEqual(script_name, 'Latin') # cannot test: not reliable
         if _TESSERACT_VERSION >= 0x3999800:
             orientation = self._api.DetectOrientationScript()
             all(self.assertIn(k, orientation) for k in ['orient_deg', 'orient_conf', 'script_name', 'script_conf'])
@@ -262,6 +265,51 @@ class TestTessBaseApi(unittest.TestCase):
         result = self._api.GetComponentImages(tesserocr.RIL.TEXTLINE, True)
         # Test if empty
         self.assertFalse(result)
+
+    def test_layout_getcomponents(self):
+        self._api.Init()
+        self._api.SetImageFile(self._image_file)
+        result = self._api.GetComponentImages(tesserocr.RIL.BLOCK, True)
+        # Test if not empty
+        self.assertTrue(result)
+        _, xywh, _, _ = result[0] # bbox of largest
+        self.assertIn('w', xywh)
+        self.assertIn('h', xywh)
+        area = xywh['w'] * xywh['h']
+        # Test if the largest block is quite large
+        self.assertGreater(area, 400000)
+
+    def test_layout_boundingbox(self):
+        self._api.Init()
+        self._api.SetImageFile(self._image_file)
+        layout = self._api.AnalyseLayout()
+        # Test if not empty
+        self.assertTrue(layout)
+        self.assertFalse(layout.Empty(tesserocr.RIL.BLOCK))
+        result = layout.BoundingBox(tesserocr.RIL.BLOCK) # bbox of largest
+        self.assertIsNot(result, None)
+        x0, y0, x1, y1 = result
+        area = (x1 - x0) * (y1 - y0)
+        # Test if the largest block is quite large
+        self.assertGreater(area, 400000)
+
+    def test_layout_blockpolygon(self):
+        self._api.Init()
+        self._api.SetImageFile(self._image_file)
+        layout = self._api.AnalyseLayout()
+        # Test if not empty
+        self.assertTrue(layout)
+        self.assertFalse(layout.Empty(tesserocr.RIL.BLOCK))
+        result = layout.BlockPolygon() # polygon of largest
+        # Test if not empty
+        self.assertIsNot(result, None)
+        # Test there are at least 4 contour points
+        self.assertGreaterEqual(len(result), 4)
+        xs, ys = zip(*result)
+        x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
+        area = (x1 - x0) * (y1 - y0)
+        # Test if the largest block is quite large
+        self.assertGreater(area, 400000)
 
     def test_recognize(self):
         """Test Recognize with and without timeout."""
