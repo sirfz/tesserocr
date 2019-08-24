@@ -67,7 +67,7 @@ cdef class _Enum:
 
 
 cdef class OEM(_Enum):
-    """An enum that defines avaialble OCR engine modes.
+    """An enum that defines available OCR engine modes.
 
     Attributes:
         TESSERACT_ONLY: Run Tesseract only - fastest
@@ -1138,7 +1138,7 @@ cdef class PyTessBaseAPI:
             applicable language, and there is more chance of hallucinating incorrect
             words.
         psm (int): Page segmentation mode. Defaults to :attr:`PSM.AUTO`.
-            See :class:`PSM` for avaialble psm values.
+            See :class:`PSM` for available psm values.
         init (bool): If ``False``, :meth:`Init` will not be called and has to be called
             after initialization.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
@@ -1257,7 +1257,7 @@ cdef class PyTessBaseAPI:
     def GetIntVariable(self, name):
         """Return the value of the given int parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1269,7 +1269,7 @@ cdef class PyTessBaseAPI:
     def GetBoolVariable(self, name):
         """Return the value of the given bool parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1281,7 +1281,7 @@ cdef class PyTessBaseAPI:
     def GetDoubleVariable(self, name):
         """Return the value of the given double parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1293,7 +1293,7 @@ cdef class PyTessBaseAPI:
     def GetStringVariable(self, name):
         """Return the value of the given string parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1306,7 +1306,7 @@ cdef class PyTessBaseAPI:
         """Return the value of named variable as a string (regardless of type),
         if it exists.
 
-        Returns ``None`` if paramter was not found.
+        Returns ``None`` if parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1387,7 +1387,7 @@ cdef class PyTessBaseAPI:
              OcrEngineMode oem=OEM_DEFAULT):
         """Initialize the API with the given data path, language and OCR engine mode.
 
-        See :meth:`InitFull` for more intialization info and options.
+        See :meth:`InitFull` for more initialization info and options.
 
         Args:
             path (str): The name of the parent directory of tessdata.
@@ -2416,7 +2416,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         path (str): The name of the parent directory of tessdata.
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-            see :class:`OEM` for all avaialble oem options.
+            see :class:`OEM` for all available oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2466,7 +2466,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         path (str): The name of the parent directory of tessdata.
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-            see :class:`OEM` for all avaialble oem options.
+            see :class:`OEM` for all available oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2514,7 +2514,7 @@ def get_languages(path=_DEFAULT_PATH):
             Must end in /. Default tesseract-ocr datapath is used
             if no path is provided.
 
-    Retruns
+    Returns
         tuple: Tuple with two elements:
             - path (str): tessdata parent directory path
             - languages (list): list of available languages as ISO 639-3 strings.
