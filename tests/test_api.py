@@ -326,6 +326,16 @@ class TestTessBaseApi(unittest.TestCase):
         res = self._api.Recognize()
         self.assertTrue(res)
 
+    @unittest.skipIf(_TESSERACT_VERSION < 0x3040100, "tesseract < 4")
+    def test_row_attributes(self):
+        self._api.SetImageFile(self._image_file)
+        self._api.Recognize()
+        it = self._api.GetIterator()
+        attrs = it.RowAttributes()
+        self.assertIsInstance(attrs['row_height'], float)
+        self.assertIsInstance(attrs['ascenders'], float)
+        self.assertIsInstance(attrs['descenders'], float)
+
 
 if __name__ == '__main__':
     unittest.main()

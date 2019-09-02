@@ -149,11 +149,35 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
             void SetLineSeparator(cchar_t *)
             void SetParagraphSeparator(cchar_t *)
             float Confidence(PageIteratorLevel) const
+            void RowAttributes(float *, float *, float *) const
             cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
             cchar_t *WordRecognitionLanguage() const
             StrongScriptDirection WordDirection() const
             bool WordIsFromDictionary() const
             int BlanksBeforeWord() const
+            bool WordIsNumeric() const
+            bool HasBlamerInfo() const
+            cchar_t *GetBlamerDebug() const
+            cchar_t *GetBlamerMisadaptionDebug() const
+            bool HasTruthString() const
+            bool EquivalentToTruth(cchar_t *) const
+            char *WordTruthUTF8Text() const
+            char *WordNormedUTF8Text() const
+            cchar_t *WordLattice(int *) const
+            bool SymbolIsSuperscript() const
+            bool SymbolIsSubscript() const
+            bool SymbolIsDropcap() const
+    ELIF TESSERACT_VERSION >= 0x3040100:
+        cdef cppclass LTRResultIterator(PageIterator):
+            char *GetUTF8Text(PageIteratorLevel) const
+            void SetLineSeparator(cchar_t *)
+            void SetParagraphSeparator(cchar_t *)
+            float Confidence(PageIteratorLevel) const
+            void RowAttributes(float *, float *, float *) const
+            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
+            cchar_t *WordRecognitionLanguage() const
+            StrongScriptDirection WordDirection() const
+            bool WordIsFromDictionary() const
             bool WordIsNumeric() const
             bool HasBlamerInfo() const
             cchar_t *GetBlamerDebug() const

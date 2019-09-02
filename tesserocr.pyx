@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.4.1'
+__version__ = '2.5.0'
 
 import os
 from io import BytesIO
@@ -830,6 +830,21 @@ cdef class PyLTRResultIterator(PyPageIterator):
         The number should be interpreted as a percent probability. (0.0-100.0)
         """
         return self._ltrriter.Confidence(level)
+
+    IF TESSERACT_VERSION >= 0x3040100:
+        def RowAttributes(self):
+            """Return row_height, descenders and ascenders in a dict"""
+            cdef:
+                float row_height
+                float descenders
+                float ascenders
+
+            self._ltrriter.RowAttributes(&row_height, &descenders, &ascenders)
+            return {
+                'row_height': row_height,
+                'descenders': descenders,
+                'ascenders': ascenders
+            }
 
     def WordFontAttributes(self):
         """Return the font attributes of the current word.
