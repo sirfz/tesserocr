@@ -323,7 +323,7 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
-        image.save(f, image.format or 'JPEG')
+        image.save(f, image.format or 'PNG')
         return f.getvalue()
 
 
