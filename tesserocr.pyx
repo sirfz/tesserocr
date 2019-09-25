@@ -1327,7 +1327,7 @@ cdef class PyTessBaseAPI:
             bytes py_name = _b(name)
             STRING val
         if self._baseapi.GetVariableAsString(py_name, &val):
-            return val.string()
+            return val.c_str()
         return None
 
     def InitFull(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
@@ -1441,7 +1441,7 @@ cdef class PyTessBaseAPI:
         """
         cdef GenericVector[STRING] langs
         self._baseapi.GetLoadedLanguagesAsVector(&langs)
-        return [langs[i].string() for i in xrange(langs.size())]
+        return [langs[i].c_str() for i in xrange(langs.size())]
 
     def GetAvailableLanguages(self):
         """Return list of available languages in the init data path"""
@@ -1450,7 +1450,7 @@ cdef class PyTessBaseAPI:
             int i
         langs = []
         self._baseapi.GetAvailableLanguagesAsVector(&v)
-        langs = [v[i].string() for i in xrange(v.size())]
+        langs = [v[i].c_str() for i in xrange(v.size())]
         return langs
 
     def InitForAnalysePage(self):
@@ -2542,6 +2542,6 @@ def get_languages(path=_DEFAULT_PATH):
     baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
     baseapi.GetAvailableLanguagesAsVector(&v)
-    langs = [v[i].string() for i in xrange(v.size())]
+    langs = [v[i].c_str() for i in xrange(v.size())]
     baseapi.End()
     return path, langs

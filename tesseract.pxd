@@ -110,7 +110,7 @@ cdef extern from "tesseract/genericvector.h" nogil:
 
 cdef extern from "tesseract/strngs.h" nogil:
     cdef cppclass STRING:
-       cchar_t *string() const
+       cchar_t *c_str() const
        STRING &operator=(cchar_t *)
 
 cdef extern from "tesseract/ocrclass.h" nogil:
