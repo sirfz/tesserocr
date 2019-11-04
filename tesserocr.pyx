@@ -45,7 +45,7 @@ cdef bytes _b(s):
 
 # default parameters
 setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
-cdef TessBaseAPI _api = TessBaseAPI()
+cdef TessBaseAPI _api
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
 IF TESSERACT_VERSION >= 0x3999800:
