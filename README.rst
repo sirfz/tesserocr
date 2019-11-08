@@ -80,20 +80,16 @@ Windows
 
 The proposed downloads consist of stand-alone packages containing all the Windows libraries needed for execution. This means that no additional installation of tesseract is required on your system.
 
+The recommended method of installation is via Conda as described below.
+
 Conda
 `````
 
-You can use the channel `simonflueckiger <https://anaconda.org/simonflueckiger/tesserocr>`_ to install from Conda:
+You can use the `conda-forge <https://anaconda.org/conda-forge/tesserocr>`_ channel to install from Conda:
 
 ::
 
-    > conda install -c simonflueckiger tesserocr
-
-or to get **tesserocr** compiled with **tesseract 4.0.0**:
-
-::
-
-    > conda install -c simonflueckiger/label/tesseract-4.0.0-master tesserocr
+    > conda install -c conda-forge tesserocr
 
 pip
 ```
