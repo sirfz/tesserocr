@@ -94,7 +94,9 @@ def package_config():
     options = {'-L': 'library_dirs',
                '-I': 'include_dirs',
                '-l': 'libraries'}
-    config = {}
+    config = {'library_dirs': [],
+              'include_dirs': [],
+              'libraries': []}
     import itertools
     for f in itertools.chain(flags, flags2):
         try:
@@ -104,8 +106,7 @@ def package_config():
         val = f[2:]
         if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in ('leptonica', 'tesseract'):
             val = dirname(val)
-        config.setdefault(opt, set()).add(val)
-    config = {k: list(v) for k, v in config.items()}
+        config[opt] += [val]
     p = subprocess.Popen(['pkg-config', '--modversion', 'tesseract'], stdout=subprocess.PIPE)
     version, _ = p.communicate()
     version = _read_string(version).strip()
