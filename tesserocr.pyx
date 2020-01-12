@@ -1860,14 +1860,16 @@ cdef class PyTessBaseAPI:
         cdef:
             Boxa *boxa
             Pixa *pixa
-            int *_blockids
-            int *_paraids
+            int *_blockids = NULL
+            int *_paraids = NULL
+            int **blockids_addr = &_blockids
+            int **paraids_addr = &_paraids
         if not blockids:
-            _blockids = NULL
+            blockids_addr = NULL
         if not paraids:
-            _paraids = NULL
+            paraids_addr = NULL
         boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
-                                                &pixa, &_blockids, &_paraids)
+                                                &pixa, blockids_addr, paraids_addr)
         if boxa == NULL:
             # no components found
             return []
