@@ -188,7 +188,7 @@ cdef class RIL(_Enum):
 
 
 cdef class PT(_Enum):
-    """An enum the defines available Poly Block types.
+    """An enum that defines available Poly Block types.
 
     Attributes:
         UNKNOWN: Type is not yet known. Keep as the first element.
