@@ -188,7 +188,7 @@ cdef class RIL(_Enum):
 
 
 cdef class PT(_Enum):
-    """An enum the defines avaialbe Poly Block types.
+    """An enum the defines available Poly Block types.
 
     Attributes:
         UNKNOWN: Type is not yet known. Keep as the first element.
@@ -544,7 +544,7 @@ cdef class PyPageIterator:
         See comment on coordinate system above.
 
         Args:
-            level (int): Page Iteration Level. See :class:`RIL` for avaialbe levels.
+            level (int): Page Iteration Level. See :class:`RIL` for available levels.
 
         Kwargs:
             padding (int): The padding argument to :meth:`GetImage` can be used to expand
@@ -568,7 +568,7 @@ cdef class PyPageIterator:
         respect to the original image and is scaled by a factor scale_.
 
         Args:
-            level (int): Page Iteration Level. See :class:`RIL` for avaialbe levels.
+            level (int): Page Iteration Level. See :class:`RIL` for available levels.
 
         Returns:
             tuple or None if there is no such object at the current position.
@@ -1356,7 +1356,7 @@ cdef class PyTessBaseAPI:
                 applicable language, and there is more chance of hallucinating incorrect
                 words.
             oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-                See :class:`OEM` for all avaialbe options.
+                See :class:`OEM` for all available options.
             configs (list): List of config files to load variables from.
             variables (dict): Extra variables to be set.
             set_only_non_debug_params (bool): If ``True``, only params that do not contain
@@ -1410,7 +1410,7 @@ cdef class PyTessBaseAPI:
             lang (str): An ISO 639-3 language string. Defaults to 'eng'.
                 See :meth:`InitFull` for full description of this parameter.
             oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-                See :class:`OEM` for all avaialbe options.
+                See :class:`OEM` for all available options.
 
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
@@ -1633,7 +1633,7 @@ cdef class PyTessBaseAPI:
         can be recognized with the same image.
 
         Args:
-            left (int): poisition from left
+            left (int): position from left
             top (int): position from top
             width (int): width
             height (int): height
@@ -2084,7 +2084,7 @@ cdef class PyTessBaseAPI:
                     retry_config=None, int timeout=0):
         """Turn a single image into symbolic text.
 
-        See :meth:`ProcessPages` for desciptions of the keyword arguments
+        See :meth:`ProcessPages` for descriptions of the keyword arguments
         and all other details.
 
         Args:
