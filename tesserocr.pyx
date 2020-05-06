@@ -771,6 +771,21 @@ cdef class PyPageIterator:
         self._piter.ParagraphInfo(&justification, &is_list_item, &is_crown, &first_line_indent)
         return justification, is_list_item, is_crown, first_line_indent
 
+    IF TESSERACT_VERSION >= 0x4010200:
+        def RowAttributes(self):
+            """Return row_height, descenders and ascenders in a dict"""
+            cdef:
+                float row_height
+                float descenders
+                float ascenders
+
+            self._piter.RowAttributes(&row_height, &descenders, &ascenders)
+            return {
+                'row_height': row_height,
+                'descenders': descenders,
+                'ascenders': ascenders
+            }
+
 
 cdef class PyLTRResultIterator(PyPageIterator):
 

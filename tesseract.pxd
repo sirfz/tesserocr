@@ -122,28 +122,73 @@ cdef extern from "tesseract/ocrclass.h" nogil:
         void set_deadline_msecs(int)
 
 cdef extern from "tesseract/pageiterator.h" namespace "tesseract" nogil:
-    cdef cppclass PageIterator:
-        void Begin()
-        void RestartParagraph()
-        bool IsWithinFirstTextlineOfParagraph() const
-        void RestartRow()
-        bool Next(PageIteratorLevel)
-        bool IsAtBeginningOf(PageIteratorLevel) const
-        bool IsAtFinalElement(PageIteratorLevel, PageIteratorLevel) const
-        void SetBoundingBoxComponents(bool, bool)
-        bool BoundingBox(PageIteratorLevel, const int, int *, int *, int *, int *) const
-        bool BoundingBoxInternal(PageIteratorLevel, int *, int *, int *, int *) const
-        bool Empty(PageIteratorLevel) const
-        PolyBlockType BlockType() const
-        Pta *BlockPolygon() const
-        Pix *GetBinaryImage(PageIteratorLevel) const
-        Pix *GetImage(PageIteratorLevel, int, Pix *, int *, int *) const
-        bool Baseline(PageIteratorLevel, int *, int *, int *, int *) const
-        void Orientation(TessOrientation *, TessWritingDirection *, TessTextlineOrder *, float *) const
-        void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
+    IF TESSERACT_VERSION >= 0x4010200:
+        cdef cppclass PageIterator:
+            void Begin()
+            void RestartParagraph()
+            bool IsWithinFirstTextlineOfParagraph() const
+            void RestartRow()
+            bool Next(PageIteratorLevel)
+            bool IsAtBeginningOf(PageIteratorLevel) const
+            bool IsAtFinalElement(PageIteratorLevel, PageIteratorLevel) const
+            void SetBoundingBoxComponents(bool, bool)
+            bool BoundingBox(PageIteratorLevel, const int, int *, int *, int *, int *) const
+            bool BoundingBoxInternal(PageIteratorLevel, int *, int *, int *, int *) const
+            bool Empty(PageIteratorLevel) const
+            PolyBlockType BlockType() const
+            Pta *BlockPolygon() const
+            Pix *GetBinaryImage(PageIteratorLevel) const
+            Pix *GetImage(PageIteratorLevel, int, Pix *, int *, int *) const
+            bool Baseline(PageIteratorLevel, int *, int *, int *, int *) const
+            void Orientation(TessOrientation *, TessWritingDirection *, TessTextlineOrder *, float *) const
+            void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
+            void RowAttributes(float *, float *, float *) const
+    ELSE:
+        cdef cppclass PageIterator:
+            void Begin()
+            void RestartParagraph()
+            bool IsWithinFirstTextlineOfParagraph() const
+            void RestartRow()
+            bool Next(PageIteratorLevel)
+            bool IsAtBeginningOf(PageIteratorLevel) const
+            bool IsAtFinalElement(PageIteratorLevel, PageIteratorLevel) const
+            void SetBoundingBoxComponents(bool, bool)
+            bool BoundingBox(PageIteratorLevel, const int, int *, int *, int *, int *) const
+            bool BoundingBoxInternal(PageIteratorLevel, int *, int *, int *, int *) const
+            bool Empty(PageIteratorLevel) const
+            PolyBlockType BlockType() const
+            Pta *BlockPolygon() const
+            Pix *GetBinaryImage(PageIteratorLevel) const
+            Pix *GetImage(PageIteratorLevel, int, Pix *, int *, int *) const
+            bool Baseline(PageIteratorLevel, int *, int *, int *, int *) const
+            void Orientation(TessOrientation *, TessWritingDirection *, TessTextlineOrder *, float *) const
+            void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
 
 cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
-    IF TESSERACT_VERSION >= 0x4000000:
+    IF TESSERACT_VERSION >= 0x4010200:
+        cdef cppclass LTRResultIterator(PageIterator):
+            char *GetUTF8Text(PageIteratorLevel) const
+            void SetLineSeparator(cchar_t *)
+            void SetParagraphSeparator(cchar_t *)
+            float Confidence(PageIteratorLevel) const
+            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
+            cchar_t *WordRecognitionLanguage() const
+            StrongScriptDirection WordDirection() const
+            bool WordIsFromDictionary() const
+            int BlanksBeforeWord() const
+            bool WordIsNumeric() const
+            bool HasBlamerInfo() const
+            cchar_t *GetBlamerDebug() const
+            cchar_t *GetBlamerMisadaptionDebug() const
+            bool HasTruthString() const
+            bool EquivalentToTruth(cchar_t *) const
+            char *WordTruthUTF8Text() const
+            char *WordNormedUTF8Text() const
+            cchar_t *WordLattice(int *) const
+            bool SymbolIsSuperscript() const
+            bool SymbolIsSubscript() const
+            bool SymbolIsDropcap() const
+    ELIF TESSERACT_VERSION >= 0x4000000:
         cdef cppclass LTRResultIterator(PageIterator):
             char *GetUTF8Text(PageIteratorLevel) const
             void SetLineSeparator(cchar_t *)
