@@ -69,7 +69,7 @@ def version_to_int(version):
     version_str = str((int(version_str, 10)-subtrahend))
     # Adds a 2 digit subversion number for the subversionrelease.
     subversion_str="00"
-    if subversion is not None and subversion is not "":
+    if subversion is not None and subversion != "":
         subversion = re.search(r'(?:\d+)', subversion).group()
         subversion_groups = (subversion.split('-') + [0, 0])[:1]
         subversion_str = "{:02}".format(*map(int, subversion_groups))
