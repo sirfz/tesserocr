@@ -318,7 +318,7 @@ class TestTessBaseApi(unittest.TestCase):
         res = self._api.Recognize(1)
         self.assertFalse(res)
         self._api.SetImageFile(self._image_file)
-        # timeout after 10 seocnds (unlikely)
+        # timeout after 10 seconds (unlikely)
         res = self._api.Recognize(10000)
         self.assertTrue(res)
         self._api.SetImageFile(self._image_file)
