@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.5.1'
+__version__ = '2.5.2b'
 
 import os
 from io import BytesIO
@@ -31,6 +31,9 @@ except ImportError:
 
 from tesseract cimport *
 from libc.stdlib cimport malloc, free
+from libcpp.pair cimport pair
+from libcpp.vector cimport vector
+from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
 
 
@@ -1046,13 +1049,31 @@ cdef class PyResultIterator(PyLTRResultIterator):
 
     IF TESSERACT_VERSION >= 0x4000000:
         def GetBestLSTMSymbolChoices(self):
+            """Returns the LSTM choices for every LSTM timestep for the current word."""
+            cdef:
+                vector[vector[pair[cchar_tp, float]]] *output = self._riter.GetBestLSTMSymbolChoices()
+                vector[vector[pair[cchar_tp, float]]].iterator it
+                vector[pair[cchar_tp, float]].iterator cit
+                vector[pair[cchar_tp, float]] configpairs
+                pair[cchar_tp, float] configpair
+
             LSTMSymbolChoices = []
-            output = self._riter.GetBestLSTMSymbolChoices()[0]
-            for tstep in output:
+            if output == NULL:
+                return LSTMSymbolChoices
+
+            it = output.begin()
+            while it != output.end():
                 timestep = []
-                for confpair in tstep:
-                    timestep.append((confpair.first, confpair.second))
+                configpairs = deref(it)
+                cit = configpairs.begin()
+                while cit != configpairs.end():
+                    configpair = deref(cit)
+                    timestep.append((configpair.first, configpair.second))
+                    inc(cit)
+
                 LSTMSymbolChoices.append(timestep)
+                inc(it)
+
             return LSTMSymbolChoices
 
 
@@ -2257,7 +2278,6 @@ cdef class PyTessBaseAPI:
                         'script_name': script_name,
                         'script_conf': script_conf}
             return None
-
 
     def MeanTextConf(self):
         """Return the (average) confidence value between 0 and 100."""
