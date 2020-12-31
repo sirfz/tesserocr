@@ -1,5 +1,5 @@
 #!python
-#cython: c_string_type=unicode, c_string_encoding=utf-8
+#cython: c_string_type=unicode, c_string_encoding=utf-8, language_level=3
 """Python wrapper around the Tesseract-OCR C++ API
 
 This module provides a wrapper class :class:`PyTessBaseAPI` to call
