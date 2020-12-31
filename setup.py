@@ -47,6 +47,12 @@ else:
         return s
 
 
+def major_version(version):
+    versions = version.split('.')
+    major = versions[0]
+    _LOGGER.info("Tesseract major version {}".format(major))
+    return major
+
 def version_to_int(version):
     subversion = None
     subtrahend = 0
@@ -111,7 +117,10 @@ def package_config():
     version, _ = p.communicate()
     version = _read_string(version).strip()
     _LOGGER.info("Supporting tesseract v{}".format(version))
-    config['cython_compile_time_env'] = {'TESSERACT_VERSION': version_to_int(version)}
+    config['cython_compile_time_env'] = {
+        'TESSERACT_MAJOR_VERSION': major_version(version),
+        'TESSERACT_VERSION': version_to_int(version)
+    }
     _LOGGER.info("Configs from pkg-config: {}".format(config))
     return config
 
@@ -135,8 +144,10 @@ def get_tesseract_version():
         _LOGGER.warning('Failed to extract tesseract version from executable: {}'.format(e))
         version = _TESSERACT_MIN_VERSION
     _LOGGER.info("Supporting tesseract v{}".format(version))
-    version = version_to_int(version)
-    config['cython_compile_time_env'] = {'TESSERACT_VERSION': version}
+    config['cython_compile_time_env'] = {
+        'TESSERACT_MAJOR_VERSION': major_version(version),
+        'TESSERACT_VERSION': version_to_int(version)
+    }
     _LOGGER.info("Building with configs: {}".format(config))
     return config
 

@@ -29,7 +29,10 @@ except ImportError:
     # PIL.Image won't be supported
     pass
 
-from tesseract cimport *
+IF TESSERACT_MAJOR_VERSION < 5:
+    from tesseract cimport *
+ELSE:
+    from tesseract5 cimport *
 from libc.stdlib cimport malloc, free
 from libcpp.pair cimport pair
 from libcpp.vector cimport vector
@@ -1212,7 +1215,20 @@ cdef class PyTessBaseAPI:
     def __dealloc__(self):
         self._end_api()
 
-    cdef int _init_api(self, cchar_t *path, cchar_t *lang,
+    IF TESSERACT_MAJOR_VERSION >= 5:
+      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
+                        OcrEngineMode oem, char **configs, int configs_size,
+                        const vector[string] *vars_vec, const vector[string] *vars_vals,
+                        bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
+        cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
+                                          set_only_non_debug_params)
+        if ret == -1:
+            with gil:
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+        self._baseapi.SetPageSegMode(psm)
+        return ret
+    ELSE:
+      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
                         OcrEngineMode oem, char **configs, int configs_size,
                         const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
                         bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
@@ -1344,9 +1360,14 @@ cdef class PyTessBaseAPI:
 
         Returns ``None`` if parameter was not found.
         """
-        cdef:
-            bytes py_name = _b(name)
-            STRING val
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef:
+                bytes py_name = _b(name)
+                string val
+        ELSE:
+            cdef:
+                bytes py_name = _b(name)
+                STRING val
         if self._baseapi.GetVariableAsString(py_name, &val):
             return val.c_str()
         return None
@@ -1386,7 +1407,20 @@ cdef class PyTessBaseAPI:
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
         """
-        cdef:
+        IF TESSERACT_MAJOR_VERSION >= 5:
+          cdef:
+            bytes py_path = _b(path)
+            bytes py_lang = _b(lang)
+            cchar_t *cpath = py_path
+            cchar_t *clang = py_lang
+            int configs_size = len(configs)
+            char **configs_ = <char **>malloc(configs_size * sizeof(char *))
+            vector[string] vars_vec
+            vector[string] vars_vals
+            cchar_t *val
+            string sval
+        ELSE:
+          cdef:
             bytes py_path = _b(path)
             bytes py_lang = _b(lang)
             cchar_t *cpath = py_path
@@ -1460,15 +1494,23 @@ cdef class PyTessBaseAPI:
         Includes all languages loaded by the last Init, including those loaded
         as dependencies of other loaded languages.
         """
-        cdef GenericVector[STRING] langs
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef vector[string] langs
+        ELSE:
+            cdef GenericVector[STRING] langs
         self._baseapi.GetLoadedLanguagesAsVector(&langs)
         return [langs[i].c_str() for i in xrange(langs.size())]
 
     def GetAvailableLanguages(self):
         """Return list of available languages in the init data path"""
-        cdef:
-            GenericVector[STRING] v
-            int i
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef:
+                vector[string] v
+                int i
+        ELSE:
+            cdef:
+                GenericVector[STRING] v
+                int i
         langs = []
         self._baseapi.GetAvailableLanguagesAsVector(&v)
         langs = [v[i].c_str() for i in xrange(v.size())]
@@ -1972,20 +2014,21 @@ cdef class PyTessBaseAPI:
     """Methods to retrieve information after :meth:`SetImage`,
     :meth:`Recognize` or :meth:`TesseractRect`. (:meth:`Recognize` is called implicitly if needed.)"""
 
-    cpdef bool RecognizeForChopTest(self, int timeout=0):
-        """Variant on :meth:`Recognize` used for testing chopper."""
-        cdef:
-            ETEXT_DESC monitor
-            int res
-        with nogil:
-            if timeout > 0:
-                monitor.cancel = NULL
-                monitor.cancel_this = NULL
-                monitor.set_deadline_msecs(timeout)
-                res = self._baseapi.RecognizeForChopTest(&monitor)
-            else:
-                res = self._baseapi.RecognizeForChopTest(NULL)
-        return res == 0
+    IF TESSERACT_MAJOR_VERSION < 5:
+        cpdef bool RecognizeForChopTest(self, int timeout=0):
+            """Variant on :meth:`Recognize` used for testing chopper."""
+            cdef:
+                ETEXT_DESC monitor
+                int res
+            with nogil:
+                if timeout > 0:
+                    monitor.cancel = NULL
+                    monitor.cancel_this = NULL
+                    monitor.set_deadline_msecs(timeout)
+                    res = self._baseapi.RecognizeForChopTest(&monitor)
+                else:
+                    res = self._baseapi.RecognizeForChopTest(NULL)
+            return res == 0
 
     cdef TessResultRenderer *_get_renderer(self, cchar_t *outputbase):
         cdef:
@@ -2556,11 +2599,18 @@ def get_languages(path=_DEFAULT_PATH):
             - path (str): tessdata parent directory path
             - languages (list): list of available languages as ISO 639-3 strings.
     """
-    cdef:
-        bytes py_path = _b(path)
-        TessBaseAPI baseapi
-        GenericVector[STRING] v
-        int i
+    IF TESSERACT_MAJOR_VERSION >= 5:
+        cdef:
+            bytes py_path = _b(path)
+            TessBaseAPI baseapi
+            vector[string] v
+            int i
+    ELSE:
+        cdef:
+            bytes py_path = _b(path)
+            TessBaseAPI baseapi
+            GenericVector[STRING] v
+            int i
     baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
     baseapi.GetAvailableLanguagesAsVector(&v)
