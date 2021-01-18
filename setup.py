@@ -5,6 +5,7 @@ import codecs
 import re
 import subprocess
 import errno
+import itertools
 from os.path import dirname, abspath
 from os.path import split as psplit, join as pjoin
 from setuptools import setup
@@ -49,9 +50,10 @@ else:
 
 def major_version(version):
     versions = version.split('.')
-    major = versions[0]
-    _LOGGER.info("Tesseract major version {}".format(major))
+    major = int(versions[0])
+    _LOGGER.info("Tesseract major version %s", major)
     return major
+
 
 def version_to_int(version):
     subversion = None
@@ -72,14 +74,14 @@ def version_to_int(version):
     # are dropped.
     version_groups = (version.split('.') + [0, 0])[:3]
     version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
-    version_str = str((int(version_str, 10)-subtrahend))
+    version_str = str((int(version_str, 10) - subtrahend))
     # Adds a 2 digit subversion number for the subversionrelease.
-    subversion_str="00"
+    subversion_str = "00"
     if subversion is not None and subversion != "":
         subversion = re.search(r'(?:\d+)', subversion).group()
         subversion_groups = (subversion.split('-') + [0, 0])[:1]
         subversion_str = "{:02}".format(*map(int, subversion_groups))
-    version_str+=subversion_str
+    version_str += subversion_str
     return int(version_str, 16)
 
 
@@ -91,6 +93,7 @@ def package_config():
     _, error = p.communicate()
     if p.returncode != 0:
         raise Exception(error)
+
     p = subprocess.Popen(['pkg-config', '--libs', '--cflags', 'tesseract'], stdout=subprocess.PIPE)
     output, _ = p.communicate()
     flags = _read_string(output).strip().split()
@@ -103,7 +106,7 @@ def package_config():
     config = {'library_dirs': [],
               'include_dirs': [],
               'libraries': []}
-    import itertools
+
     for f in itertools.chain(flags, flags2):
         try:
             opt = options[f[:2]]
@@ -113,15 +116,16 @@ def package_config():
         if opt == 'include_dirs' and psplit(val)[1].strip(os.sep) in ('leptonica', 'tesseract'):
             val = dirname(val)
         config[opt] += [val]
+
     p = subprocess.Popen(['pkg-config', '--modversion', 'tesseract'], stdout=subprocess.PIPE)
     version, _ = p.communicate()
     version = _read_string(version).strip()
-    _LOGGER.info("Supporting tesseract v{}".format(version))
+    _LOGGER.info("Supporting tesseract v%s", version)
     config['cython_compile_time_env'] = {
         'TESSERACT_MAJOR_VERSION': major_version(version),
         'TESSERACT_VERSION': version_to_int(version)
     }
-    _LOGGER.info("Configs from pkg-config: {}".format(config))
+    _LOGGER.info("Configs from pkg-config: %s", config)
     return config
 
 
@@ -138,17 +142,17 @@ def get_tesseract_version():
         if version_match:
             version = version_match.group(1)
         else:
-            _LOGGER.warning('Failed to extract tesseract version number from: {}'.format(version))
+            _LOGGER.warning('Failed to extract tesseract version number from: %s', version)
             version = _TESSERACT_MIN_VERSION
     except OSError as e:
-        _LOGGER.warning('Failed to extract tesseract version from executable: {}'.format(e))
+        _LOGGER.warning('Failed to extract tesseract version from executable: %s', e)
         version = _TESSERACT_MIN_VERSION
-    _LOGGER.info("Supporting tesseract v{}".format(version))
+    _LOGGER.info("Supporting tesseract v%s", version)
     config['cython_compile_time_env'] = {
         'TESSERACT_MAJOR_VERSION': major_version(version),
         'TESSERACT_VERSION': version_to_int(version)
     }
-    _LOGGER.info("Building with configs: {}".format(config))
+    _LOGGER.info("Building with configs: %s", config)
     return config
 
 
@@ -159,16 +163,16 @@ def get_build_args():
     except Exception as e:
         if isinstance(e, OSError):
             if e.errno != errno.ENOENT:
-                _LOGGER.warning('Failed to run pkg-config: {}'.format(e))
+                _LOGGER.warning('Failed to run pkg-config: %s', e)
         else:
-            _LOGGER.warning('pkg-config failed to find tesseract/lept libraries: {}'.format(e))
+            _LOGGER.warning('pkg-config failed to find tesseract/lept libraries: %s', e)
         build_args = get_tesseract_version()
 
     if build_args['cython_compile_time_env']['TESSERACT_VERSION'] >= 0x3050200:
         _LOGGER.debug('tesseract >= 03.05.02 requires c++11 compiler support')
         build_args['extra_compile_args'] = ['-std=c++11', '-DUSE_STD_NAMESPACE']
 
-    _LOGGER.debug('build parameters: {}'.format(build_args))
+    _LOGGER.debug('build parameters: %s', build_args)
     return build_args
 
 
@@ -210,6 +214,8 @@ setup(name='tesserocr',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Programming Language :: Cython'
