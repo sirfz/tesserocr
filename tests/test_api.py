@@ -45,7 +45,7 @@ _TESSERACT_VERSION = version_to_int(tesserocr.PyTessBaseAPI.Version())
 class TestTessBaseApi(unittest.TestCase):
 
     _test_dir = os.path.abspath(os.path.dirname(__file__))
-    _image_file = os.path.join(_test_dir, 'eurotext.tif')
+    _image_file = os.path.join(_test_dir, 'eurotext.png')
 
     def setUp(self):
         if pil_installed:
@@ -71,7 +71,7 @@ class TestTessBaseApi(unittest.TestCase):
     def test_init_full(self):
         """Test InitFull."""
         # check default settings
-        self.assertEqual(self._api.GetVariableAsString('file_type'), '.tif')
+        self.assertEqual(self._api.GetVariableAsString('file_type'), '.png')
         self.assertEqual(self._api.GetVariableAsString('edges_childarea'), '0.5')
         # use box.train config variables
         configs = ['box.train']
