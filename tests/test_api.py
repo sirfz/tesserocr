@@ -71,7 +71,7 @@ class TestTessBaseApi(unittest.TestCase):
     def test_init_full(self):
         """Test InitFull."""
         # check default settings
-        self.assertEqual(self._api.GetVariableAsString('file_type'), '.png')
+        self.assertEqual(self._api.GetVariableAsString('file_type'), '.tif')
         self.assertEqual(self._api.GetVariableAsString('edges_childarea'), '0.5')
         # use box.train config variables
         configs = ['box.train']
