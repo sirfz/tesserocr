@@ -343,8 +343,8 @@ cdef _pix_to_image(Pix *pix):
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
-        # write as JPEG if format is unknown
-        result = pixWriteMemJpeg(&buff, &size, pix, 0, 0)
+        # write as IFF_BMP if format is unknown
+        result = pixWriteMem(&buff, &size, pix, 1)
 
     try:
         if result == 1:
