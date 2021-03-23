@@ -45,7 +45,7 @@ _TESSERACT_VERSION = version_to_int(tesserocr.PyTessBaseAPI.Version())
 class TestTessBaseApi(unittest.TestCase):
 
     _test_dir = os.path.abspath(os.path.dirname(__file__))
-    _image_file = os.path.join(_test_dir, 'eurotext.tif')
+    _image_file = os.path.join(_test_dir, 'eurotext.png')
 
     def setUp(self):
         if pil_installed:
