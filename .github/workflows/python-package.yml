@@ -23,11 +23,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
-    - uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ hashFiles('setup.py') }}-${{ hashFiles('requirements-dev.txt') }}
         
     - name: Install dependencies
       run: |
