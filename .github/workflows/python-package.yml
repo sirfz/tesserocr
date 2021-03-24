@@ -39,7 +39,9 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Build       
       run: |
-        sudo apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config -y
+        sudo apt-get install tesseract-ocr libtesseract-dev libleptonica-dev pkg-config wget -y
+        sudo wget https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata -O /usr/share/tesseract-ocr/4.00/tessdata/osd.traineddata
+        sudo wget https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata
         python setup.py sdist bdist_wheel
         python setup.py install
         # export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
