@@ -100,6 +100,9 @@ Download the wheel file corresponding to your Windows platform and Python instal
 
     > pip install <package_name>.whl
 
+If you need Windows tessocr package and your Python version is not supported by above mention project,
+you can try to follow `step by step instructions for Windows 64bit` in <Windows.build.md> file.
+
 Usage
 =====
 
