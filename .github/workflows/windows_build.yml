@@ -1,11 +1,12 @@
 name: win64
 # build tesserocr on windows using cmake.
-on
+
+on:
   push:
     branches: [ improve_structure ]
     # tags:
       # - 'v*
-  # [push, pull_request]
+# on [push, pull_request]
   
 env:
   BUILD_TYPE: Release
@@ -19,11 +20,15 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest, MSVC",
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.7z",
             os: windows-latest,
-            test_target: RUN_TESTS,
             cc: "cl", cxx: "cl",
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          }
+        - {
+            name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
+            os: windows-latest,
+            cc: "gcc", cxx: "g++"
           }
 
     steps:
