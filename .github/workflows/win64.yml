@@ -3,6 +3,8 @@
 name: win64
 
 on:
+  workflow_dispatch:
+  
   push:
     branches: [ improve_structure ]
     # tags:
