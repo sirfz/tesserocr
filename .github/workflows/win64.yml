@@ -43,13 +43,15 @@ jobs:
              cd ${HOME}/.local/src   
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git
              cd leptonica
-             mkdir build && cd build
+             mkdir build
+             cd build
              cmake .. -DBUILD_PROG=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build . --config Release --target install
              cd ..\..
              git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git
              cd tesseract
-             mkdir build && cd build
+             mkdir build
+             cd build
              cmake .. -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build . --config Release --target install
              cd ..\..
