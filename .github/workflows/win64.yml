@@ -41,7 +41,7 @@ jobs:
              mkdir d:/a/local
              set PKG_CONFIG_PATH=d:/a/local/lib/pkgconfig
              echo "PKG_CONFIG_PATH=d:/a/local/lib/pkgconfig" >> $GITHUB_ENV
-             echo "Building webp because leptonica detect it and it failed....)
+             echo "Building webp because leptonica detect it and it failes..."
              git clone --depth 1 https://github.com/webmproject/libwebp.git && cd libwebp
              cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=d:/a/local -DCMAKE_INSTALL_PREFIX=d:/a/local
              cmake --build build --config Release --target install
