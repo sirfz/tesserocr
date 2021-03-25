@@ -38,9 +38,9 @@ jobs:
       - name: Build and Install tesserocr C/C++ dependancies
         run: |
              mkdir -p D:/a/tesserocr/Projects
-             export INSTALL_DIR=D:/a/tesserocr/Projects/win64
-             export PATH=$INSTALL_DIR/bin:$PATH
-             export INCLUDE=${INCLUDE}:${INSTALL_DIR}/include
+             env: INSTALL_DIR=D:/a/tesserocr/Projects/win64
+             env: PATH=${INSTALL_DIR}/bin:$PATH
+             env: INCLUDE=${INCLUDE}:${INSTALL_DIR}/include
              env: PKG_CONFIG_PATH=$INSTALL_DIR/lib/pkgconfig:${env:PKG_CONFIG_PATH}
              cd D:/a/tesserocr/Projects
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git
