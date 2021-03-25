@@ -1,12 +1,14 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# build tesserocr on windows using cmake.
 
 name: win64
 
 on:
   push:
-    branches: [ master ]
-
+    branches: [ improve_structure ]
+    # tags:
+      # - 'v*
+  # [push, pull_request]
+  
 env:
   BUILD_TYPE: Release
 
@@ -24,28 +26,35 @@ jobs:
             cc: "cl", cxx: "cl",
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
-        - {
-            name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
-            os: windows-latest,
-            cc: "gcc", cxx: "g++"
-          }
+        # - {
+            # name: "Windows Latest MinGW", artifact: "Windows-MinGW.7z",
+            # os: windows-latest,
+            # cc: "gcc", cxx: "g++"
+          # }
 
     steps:
       - name: Build and Install tesserocr C/C++ dependancies
         run: |
+             mkdir -p D:/a/tesserocr/Projects
+             set INSTALL_DIR=D:/a/tesserocr/Projects/win64
+             set PATH=%PATH%;%INSTALL_DIR%/bin
+             set INCLUDE=%INCLUDE%;%INSTALL_DIR%/include
+             set LIBPATH=%LIBPATH%;%INSTALL_DIR%/lib
+             set PKG_CONFIG_PATH=%INSTALL_DIR%/lib/pkgconfig;%PKG_CONFIG_PATH%
+             cd D:/a/tesserocr/Projects
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git
              cd leptonica
              mkdir build && cd build
-             cmake .. -DBUILD_PROG=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON
+             cmake .. -DBUILD_PROG=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_PREFIX_PATH=%INSTALL_DIR%
              cmake --build . --config Release --target install
              cd ..\..
              git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git
              cd tesseract
              mkdir build && cd build
-             cmake .. -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON
+             cmake .. -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_PREFIX_PATH=%INSTALL_DIR%
              cmake --build . --config Release --target install
              cd ..\..
-             
+             # D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Python
