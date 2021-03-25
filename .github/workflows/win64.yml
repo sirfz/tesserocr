@@ -38,9 +38,13 @@ jobs:
       - name: Build and Install leptonica
         shell: cmd
         run: |
-             mkdir -p ${HOME}/.local
+             mkdir ${HOME}/.local
+             git clone --depth 1 https://github.com/webmproject/libwebp.git && cd libwebp
+             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${HOME}/.local -DCMAKE_INSTALL_PREFIX=${HOME}/.local
+             cmake --build build --config Release --target install
+             cd ..
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git && cd leptonica
-             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON  -DCMAKE_PREFIX_PATH=${HOME}/.local/
+             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH=${HOME}/.local -DCMAKE_INSTALL_PREFIX=${HOME}/.local
              cmake --build build --config Release --target install
       - name: Build and Install tesseract 
         shell: cmd
