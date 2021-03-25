@@ -35,29 +35,22 @@ jobs:
           # }
 
     steps:
-      - name: Build and Install tesserocr C/C++ dependancies
+      - name: Build and Install leptonica
         run: |
              echo "${HOME}/.local/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
              echo "PKG_CONFIG_PATH=${HOME}/.local/lib/pkgconfig" >> $GITHUB_ENV
-             mkdir ${HOME}/.local/src
-             cd ${HOME}/.local/src   
+             # mkdir ${HOME}/.local/src
+             # cd ${HOME}/.local/src   
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git && cd leptonica
-      - name: Show content       
-        run: dir
-      - name: Configure and build   
-        run: |
-             cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF
-             # -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
+             cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/
+             # -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON  -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build build --config Release --target install
-             cd ..\..
-             git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git
-             cd tesseract
-             mkdir build
-             cd build
-             cmake .. -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
-             cmake --build . --config Release --target install
-             cd ..\..
-             # D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
+      - name: Build and Install tesseract 
+        run: |
+             git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git  && cd tesseract
+             cmake -Bbuild -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
+             cmake --build build --config Release --target install
+               # D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Python
