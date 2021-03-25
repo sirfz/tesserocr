@@ -4,7 +4,7 @@ name: win64
 
 on:
   push:
-    branches: [ improve_structure ]
+    branches: [ master ]
     # tags:
       # - 'v*
   # [push, pull_request]
