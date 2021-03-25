@@ -42,8 +42,10 @@ jobs:
              mkdir ${HOME}/.local/src
              cd ${HOME}/.local/src   
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git && cd leptonica
-       - run: dir
-       - run: |
+      - name: Show content       
+        run: dir
+      - name: Configure and build   
+        run: |
              cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build build --config Release --target install
              cd ..\..
