@@ -36,6 +36,7 @@ jobs:
 
     steps:
       - name: Build and Install leptonica
+        shell: cmd
         run: |
              mkdir -p ${HOME}/.local
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git && cd leptonica
@@ -43,6 +44,7 @@ jobs:
              # -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON  -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build build --config Release --target install
       - name: Build and Install tesseract 
+        shell: cmd
         run: |
              git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git  && cd tesseract
              echo "${HOME}/.local/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
