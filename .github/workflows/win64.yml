@@ -39,8 +39,8 @@ jobs:
         run: |
              mkdir -p D:/a/tesserocr/Projects
              export INSTALL_DIR=D:/a/tesserocr/Projects/win64
-             export INCLUDE=${env:INCLUDE};${env:INSTALL_DIR}/include
-             export LIBPATH=${env:LIBPATH};${env:INSTALL_DIR}/lib
+             export INCLUDE=${env.INCLUDE};${env.INSTALL_DIR}/include
+             export LIBPATH=${env.LIBPATH};${env.INSTALL_DIR}/lib
              export PKG_CONFIG_PATH=${env:INSTALL_DIR}/lib/pkgconfig;${env:PKG_CONFIG_PATH}
              cd D:/a/tesserocr/Projects
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git
