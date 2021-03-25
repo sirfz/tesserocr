@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   
   push:
-    branches: [ improve_structure ]
+    branches: [ master ]
     # tags:
       # - 'v*
   # [push, pull_request]
@@ -37,17 +37,18 @@ jobs:
     steps:
       - name: Build and Install leptonica
         run: |
-             echo "${HOME}/.local/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-             echo "PKG_CONFIG_PATH=${HOME}/.local/lib/pkgconfig" >> $GITHUB_ENV
-             # mkdir ${HOME}/.local/src
-             # cd ${HOME}/.local/src   
+             mkdir -p ${HOME}/.local
              git clone --depth 1 https://github.com/DanBloomberg/leptonica.git && cd leptonica
-             cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/
+             cmake -Bbuild -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_PROG=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local
              # -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON  -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build build --config Release --target install
       - name: Build and Install tesseract 
         run: |
              git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git  && cd tesseract
+             echo "${HOME}/.local/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+             echo "PKG_CONFIG_PATH=${HOME}/.local/lib/pkgconfig" >> $GITHUB_ENV
+             # mkdir ${HOME}/.local/src
+             # cd ${HOME}/.local/src                
              cmake -Bbuild -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_INSTALL_PREFIX=${HOME}/.local/ -DCMAKE_PREFIX_PATH=${HOME}/.local/
              cmake --build build --config Release --target install
                # D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
