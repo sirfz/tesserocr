@@ -68,11 +68,19 @@ jobs:
           python -m pip install flake8 pytest
           pip install --upgrade -r requirements.txt 
           pip install --upgrade -r requirements-dev.txt
+          SET PATH=d:/a/local/bin;%PATH%
+          SET INCLUDE=d:/a/local/include;%INCLUDE%
+          SET LIBPATH=d:/a/local/lib;%LIBPATH%
           python setup.py sdist bdist_wheel
           python setup.py install
-          SET TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
       - name: Test with pytest
         run: |
           export LC_ALL=C
-          tesseract a b -l a
+          git clone --depth 1 https://github.com/tesseract-ocr/tessconfigs tessdata
+          mkdir d:/a/local/share
+          move tessdata d:/a/local/share
+          curl -L https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata --output d:/a/local/share/tessdata/eng.traineddata
+          curl -L https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata --output d:/a/local/share/tessdata/osd.traineddata          
+          SET TESSDATA_PREFIX=d:/a/local/share/tessdata
+          tesseract -v
           pytest
