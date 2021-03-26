@@ -55,7 +55,7 @@ jobs:
              git clone -b 4.1.1 --depth 1 https://github.com/tesseract-ocr/tesseract.git  && cd tesseract
              cmake -Bbuild -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DCMAKE_PREFIX_PATH=d:/a/local -DCMAKE_INSTALL_PREFIX=d:/a/local
              cmake --build build --config Release --target install
-               # D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
+             REM D:/a/tesserocr/tesserocr/tesseract/build/CMakeFiles/CMakeOutput.log
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Python
@@ -70,7 +70,7 @@ jobs:
           pip install --upgrade -r requirements-dev.txt
           python setup.py sdist bdist_wheel
           python setup.py install
-          # export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+          SET TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
       - name: Test with pytest
         run: |
           export LC_ALL=C
