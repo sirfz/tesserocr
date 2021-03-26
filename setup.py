@@ -177,7 +177,7 @@ def get_tesseract_version():
     if sys.platform == 'win32':
         libpaths = os.getenv('LIBPATH', None)
         if libpaths:
-            libpaths = libpaths.split(";")
+            libpaths = list(filter(None, libpaths.split(";")))
         else:
             libpaths = []
         if version:
@@ -200,7 +200,7 @@ def get_tesseract_version():
             raise RuntimeError(error)
         includepaths = os.getenv('INCLUDE', None)
         if includepaths:
-            includepaths = includepaths.split(";")
+            includepaths = list(filter(None, includepaths.split(";")))
         else:
             includepaths = []
         config['libraries'] = [tess_lib, lept_lib]
