@@ -93,4 +93,4 @@ jobs:
           SET TESSDATA_PREFIX=d:/a/local/share/tessdata
           SET PATH=d:/a/local/bin;%PATH%
           tesseract -v
-          pytest
+          REM pytest
