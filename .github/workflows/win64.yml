@@ -68,9 +68,9 @@ jobs:
           python -m pip install flake8 pytest
           pip install --upgrade -r requirements.txt 
           pip install --upgrade -r requirements-dev.txt
-          SET PATH=d:/a/local/bin;%PATH%
           SET INCLUDE=d:/a/local/include;%INCLUDE%
           SET LIBPATH=d:/a/local/lib;%LIBPATH%
+          echo "d:/a/local/bin" >> $GITHUB_PATH
           python setup.py sdist bdist_wheel
           python setup.py install
       - name: Test with pytest
