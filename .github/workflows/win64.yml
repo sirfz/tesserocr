@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   
   push:
-    branches: [ master ]
+    branches: [ improve_structure ]
     # tags:
       # - 'v*
   # [push, pull_request]
@@ -74,15 +74,23 @@ jobs:
           SET PATH=d:/a/local/bin;%PATH%
           python setup.py sdist bdist_wheel
           python setup.py install
+          
+      - name: Upload distribution packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact
+          path: dist/*
+        
       - name: Test with pytest
         shell: cmd      
         run: |
-          export LC_ALL=C
+          set LC_ALL=C
           git clone --depth 1 https://github.com/tesseract-ocr/tessconfigs tessdata
           mkdir d:/a/local/share
           move tessdata d:/a/local/share
           curl -L https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata --output d:/a/local/share/tessdata/eng.traineddata
           curl -L https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata --output d:/a/local/share/tessdata/osd.traineddata          
           SET TESSDATA_PREFIX=d:/a/local/share/tessdata
+          SET PATH=d:/a/local/bin;%PATH%
           tesseract -v
           pytest
