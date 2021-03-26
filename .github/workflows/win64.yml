@@ -71,7 +71,7 @@ jobs:
           pip install --upgrade -r requirements-dev.txt
           SET INCLUDE=d:/a/local/include;%INCLUDE%
           SET LIBPATH=d:/a/local/lib;%LIBPATH%
-          echo "d:/a/local/bin" >> $GITHUB_PATH
+          SET PATH=d:/a/local/bin;%PATH%
           python setup.py sdist bdist_wheel
           python setup.py install
       - name: Test with pytest
