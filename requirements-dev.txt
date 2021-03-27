@@ -1,3 +1,4 @@
 setuptools
+Pillow
 Cython>=0.23
 wheel
