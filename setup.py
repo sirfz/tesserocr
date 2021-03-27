@@ -22,7 +22,7 @@ else:
     _LOGGER.setLevel(logging.INFO)
 _LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 
-_TESSERACT_MIN_VERSION = "3.04.00"
+_TESSERACT_MIN_VERSION = "3.05.02"
 _CYTHON_COMPILE_TIME_ENV = None
 
 # find_version from pip https://github.com/pypa/pip/blob/1.5.6/setup.py#L33
