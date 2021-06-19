@@ -31,7 +31,7 @@ with image files instead.
 Requirements
 ============
 
-Requires libtesseract (>=3.05) and libleptonica (>=1.71).
+Requires libtesseract (>=3.04) and libleptonica (>=1.71).
 
 On Debian/Ubuntu:
 
