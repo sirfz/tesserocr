@@ -109,18 +109,18 @@ you can try to follow `step by step instructions for Windows 64bit` in `Windows.
 .. _Windows.build.md: Windows.build.md
 
 tessdata
-=====
+========
 
 You may need to point to the tessdata path if it cannot be detected automatically. This can be done by setting the ``TESSDATA_PREFIX`` environment variable or by passing the path to ``PyTessBaseAPI`` (e.g.: ``PyTessBaseAPI(path='/usr/share/tessdata')``). The path should contain ``.traineddata`` files which can be found at https://github.com/tesseract-ocr/tessdata.
 
 Make sure you have the correct version of traineddata for your ``tesseract --version``.
 
-You can list the current supported languages on your system using the `get_languages` function:
+You can list the current supported languages on your system using the ``get_languages`` function:
 
 .. code:: python
 
     from tesserocr import get_languages
-    
+
     print(get_languages('/usr/share/tessdata'))  # or any other path that applies to your system
 
 Usage
