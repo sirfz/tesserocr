@@ -33,6 +33,7 @@ cdef extern from "leptonica/allheaders.h" nogil:
     char *getLeptonicaVersion()
     Pix *pixRead(cchar_t *)
     Pix *pixReadMem(cuchar_t *, size_t)
+    Pix *pixReadMemBmp(cuchar_t *, size_t)
     int pixWriteMemJpeg(unsigned char **, size_t *, Pix *, int, int)
     int pixWriteMem(unsigned char **, size_t *, Pix *, int)
     void pixDestroy(Pix **)

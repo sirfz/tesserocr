@@ -1631,6 +1631,28 @@ cdef class PyTessBaseAPI:
             self._destroy_pix()
             self._baseapi.SetImage(cimagedata, width, height, bytes_per_pixel, bytes_per_line)
 
+    def SetImageBytesBmp(self, imagedata):
+        """Provide an image for Tesseract to recognize.
+
+        Args:
+            imagedata (:bytes): Raw bytes of a BMP image.
+
+        Raises:
+            :exc:`RuntimeError`: If for any reason the api failed
+                to load the given image.
+        """
+        cdef:
+            bytes py_imagedata = _b(imagedata)
+            size_t size = len(py_imagedata)
+            cuchar_t *cimagedata = py_imagedata
+        with nogil:
+            self._destroy_pix()
+            self._pix = pixReadMemBmp(cimagedata, size)
+            if self._pix == NULL:
+                with gil:
+                    raise RuntimeError('Error reading image')
+            self._baseapi.SetImage(self._pix)
+
     def SetImage(self, image):
         """Provide an image for Tesseract to recognize.
 
