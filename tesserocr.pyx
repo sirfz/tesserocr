@@ -10,7 +10,7 @@ In addition, helper functions are provided for ocr operations:
 >>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')
 >>> text = file_to_text('./image.jpg', psm=PSM.AUTO)
 >>> print tesseract_version()
-tesseract 3.05.02
+tesseract 3.04.00
     leptonica-1.72
     libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8
 >>> get_languages()
@@ -329,7 +329,7 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
-        image.save(f, 'BMP')
+        image.save(f, image.format or 'BMP')
         return f.getvalue()
 
 
@@ -1681,6 +1681,7 @@ cdef class PyTessBaseAPI:
                     # missing leptonica support? Try PIL
                     image = Image.open(fname)
                     self.SetImage(image)
+
             self._baseapi.SetImage(self._pix)
 
     def SetSourceResolution(self, int ppi):
