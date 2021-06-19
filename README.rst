@@ -104,7 +104,7 @@ Build from source
 `````````````````
 
 If you need Windows tessocr package and your Python version is not supported by above mentioned project,
-you can try to follow `step by step instructions for Windows 64bit` in :download:`Windows.build.md <Windows.build.md>`.
+you can try to follow `step by step instructions for Windows 64bit` in Windows.build.md_.
 
 Usage
 =====
