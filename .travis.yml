@@ -3,17 +3,16 @@ dist: xenial
 sudo: false
 language: python
 python:
-    - "2.7"
     - "pypy"
     - "pypy3.5"
     - "3.4"
     - "3.5"
     - "3.6"
     - "3.7"
-    - "3.8-dev"
+    - "3.8"
+    - "3.9"
 env:
     matrix:
-        - TESSERACT=3.04.01-1
         - TESSERACT=3.05.02-3
         - TESSERACT=4.1.0-1
 before_install:
@@ -25,7 +24,6 @@ before_install:
     - cd $TESSERACT_INSTALL/share/tessdata && rm -f osd.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata && cd -
     - cd $TESSERACT_INSTALL/share/tessdata && rm -f eng.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata && cd -
 install:
-    - pip install Cython
-    - pip install Pillow
+    - pip install -U -r requirements-dev.txt
 script:
     - python setup.py test

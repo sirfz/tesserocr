@@ -329,7 +329,7 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
-        image.save(f, image.format or 'PNG')
+        image.save(f, image.format or 'BMP')
         return f.getvalue()
 
 
@@ -1661,7 +1661,7 @@ cdef class PyTessBaseAPI:
             self._baseapi.SetImage(self._pix)
 
     def SetImageFile(self, filename):
-        """Set image from file for Tesserac to recognize.
+        """Set image from file for Tesseract to recognize.
 
         Args:
             filename (str): Image file relative or absolute path.
@@ -1678,7 +1678,10 @@ cdef class PyTessBaseAPI:
             self._pix = pixRead(fname)
             if self._pix == NULL:
                 with gil:
-                    raise RuntimeError('Error reading image')
+                    # missing leptonica support? Try PIL
+                    image = Image.open(fname)
+                    self.SetImage(image)
+
             self._baseapi.SetImage(self._pix)
 
     def SetSourceResolution(self, int ppi):
