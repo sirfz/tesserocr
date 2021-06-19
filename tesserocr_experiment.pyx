@@ -1,4 +1,4 @@
-# An attemp to address the PIL.Image buffer directly without copying it.
+# An attempt to address the PIL.Image buffer directly without copying it.
 #
 # This is achieved by extracting the buffer ptr from Image.im.unsafe_ptrs
 # the xsize, ysize, pixelsize and linesize are extracted as well to be used

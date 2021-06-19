@@ -1,5 +1,6 @@
 from libcpp cimport bool
 from libcpp.pair cimport pair
+from libcpp.string cimport string
 from libcpp.vector cimport vector
 ctypedef const char cchar_t
 ctypedef const char * cchar_tp
@@ -33,7 +34,6 @@ cdef extern from "leptonica/allheaders.h" nogil:
     char *getLeptonicaVersion()
     Pix *pixRead(cchar_t *)
     Pix *pixReadMem(cuchar_t *, size_t)
-    Pix *pixReadMemBmp(cuchar_t *, size_t)
     int pixWriteMemJpeg(unsigned char **, size_t *, Pix *, int, int)
     int pixWriteMem(unsigned char **, size_t *, Pix *, int)
     void pixDestroy(Pix **)
@@ -51,7 +51,7 @@ cdef extern from "leptonica/allheaders.h" nogil:
         L_SEVERITY_ERROR    = 5   # Print error and higher messages
         L_SEVERITY_NONE     = 6   # Highest severity: print no messages
 
-cdef extern from "tesseract/publictypes.h" nogil:
+cdef extern from "tesseract/publictypes.h" namespace "tesseract" nogil:
     cdef enum PolyBlockType:
         PT_UNKNOWN          # Type is not yet known. Keep as the first element.
         PT_FLOWING_TEXT     # Text that lives inside a column.
@@ -94,7 +94,7 @@ cdef extern from "tesseract/publictypes.h" namespace "tesseract" nogil:
         JUSTIFICATION_CENTER
         JUSTIFICATION_RIGHT
 
-cdef extern from "tesseract/unichar.h" nogil:
+cdef extern from "tesseract/unichar.h" namespace "tesseract" nogil:
     cdef enum StrongScriptDirection:
         DIR_NEUTRAL        # Text contains only neutral characters.
         DIR_LEFT_TO_RIGHT  # Text contains no Right-to-Left characters.
@@ -102,19 +102,7 @@ cdef extern from "tesseract/unichar.h" nogil:
         DIR_MIX            # Text contains a mixture of left-to-right
                            # and right-to-left characters.
 
-cdef extern from "tesseract/genericvector.h" nogil:
-    cdef cppclass GenericVector[T]:
-        int size() const
-        int push_back(T)
-        bool empty() const
-        T &operator[](int) const
-
-cdef extern from "tesseract/strngs.h" nogil:
-    cdef cppclass STRING:
-       cchar_t *c_str() const
-       STRING &operator=(cchar_t *)
-
-cdef extern from "tesseract/ocrclass.h" nogil:
+cdef extern from "tesseract/ocrclass.h" namespace "tesseract" nogil:
     ctypedef bool (*CANCEL_FUNC)(void *, int)
     cdef cppclass ETEXT_DESC:
         ETEXT_DESC() except +
@@ -144,8 +132,7 @@ cdef extern from "tesseract/pageiterator.h" namespace "tesseract" nogil:
         void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
 
 cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
-    IF TESSERACT_VERSION >= 0x4000000:
-        cdef cppclass LTRResultIterator(PageIterator):
+    cdef cppclass LTRResultIterator(PageIterator):
             char *GetUTF8Text(PageIteratorLevel) const
             void SetLineSeparator(cchar_t *)
             void SetParagraphSeparator(cchar_t *)
@@ -168,51 +155,6 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
             bool SymbolIsSuperscript() const
             bool SymbolIsSubscript() const
             bool SymbolIsDropcap() const
-    ELIF TESSERACT_VERSION >= 0x3040100:
-        cdef cppclass LTRResultIterator(PageIterator):
-            char *GetUTF8Text(PageIteratorLevel) const
-            void SetLineSeparator(cchar_t *)
-            void SetParagraphSeparator(cchar_t *)
-            float Confidence(PageIteratorLevel) const
-            void RowAttributes(float *, float *, float *) const
-            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
-            cchar_t *WordRecognitionLanguage() const
-            StrongScriptDirection WordDirection() const
-            bool WordIsFromDictionary() const
-            bool WordIsNumeric() const
-            bool HasBlamerInfo() const
-            cchar_t *GetBlamerDebug() const
-            cchar_t *GetBlamerMisadaptionDebug() const
-            bool HasTruthString() const
-            bool EquivalentToTruth(cchar_t *) const
-            char *WordTruthUTF8Text() const
-            char *WordNormedUTF8Text() const
-            cchar_t *WordLattice(int *) const
-            bool SymbolIsSuperscript() const
-            bool SymbolIsSubscript() const
-            bool SymbolIsDropcap() const
-    ELSE:
-        cdef cppclass LTRResultIterator(PageIterator):
-            char *GetUTF8Text(PageIteratorLevel) const
-            void SetLineSeparator(cchar_t *)
-            void SetParagraphSeparator(cchar_t *)
-            float Confidence(PageIteratorLevel) const
-            cchar_t *WordFontAttributes(bool *, bool *, bool *, bool *, bool *, bool *, int *, int *) const
-            cchar_t *WordRecognitionLanguage() const
-            StrongScriptDirection WordDirection() const
-            bool WordIsFromDictionary() const
-            bool WordIsNumeric() const
-            bool HasBlamerInfo() const
-            cchar_t *GetBlamerDebug() const
-            cchar_t *GetBlamerMisadaptionDebug() const
-            bool HasTruthString() const
-            bool EquivalentToTruth(cchar_t *) const
-            char *WordTruthUTF8Text() const
-            char *WordNormedUTF8Text() const
-            cchar_t *WordLattice(int *) const
-            bool SymbolIsSuperscript() const
-            bool SymbolIsSubscript() const
-            bool SymbolIsDropcap() const
 
     cdef cppclass ChoiceIterator:
         ChoiceIterator(const LTRResultIterator &) except +
@@ -221,13 +163,9 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         float Confidence() const
 
 cdef extern from "tesseract/resultiterator.h" namespace "tesseract" nogil:
-    IF TESSERACT_VERSION >= 0x4000000:
-        cdef cppclass ResultIterator(LTRResultIterator):
-            bool ParagraphIsLtr() const
-            vector[vector[pair[cchar_tp, float]]] *GetBestLSTMSymbolChoices() const
-    ELSE:
-        cdef cppclass ResultIterator(LTRResultIterator):
-            bool ParagraphIsLtr() const
+    cdef cppclass ResultIterator(LTRResultIterator):
+        bool ParagraphIsLtr() const
+        vector[vector[pair[cchar_tp, float]]] *GetBestLSTMSymbolChoices() const
 
 cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessResultRenderer:
@@ -239,12 +177,8 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessHOcrRenderer(TessResultRenderer):
         TessHOcrRenderer(cchar_t *, bool) except +
 
-    IF TESSERACT_VERSION >= 0x3999800:
-        cdef cppclass TessPDFRenderer(TessResultRenderer):
-            TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
-    ELSE:
-        cdef cppclass TessPDFRenderer(TessResultRenderer):
-            TessPDFRenderer(cchar_t *, cchar_t *) except +
+    cdef cppclass TessPDFRenderer(TessResultRenderer):
+        TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
 
     cdef cppclass TessUnlvRenderer(TessResultRenderer):
         TessUnlvRenderer(cchar_t *) except +
@@ -252,11 +186,10 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessBoxTextRenderer(TessResultRenderer):
         TessBoxTextRenderer(cchar_t *) except +
 
-    IF TESSERACT_VERSION >= 0x3040100:
-        cdef cppclass TessOsdRenderer(TessResultRenderer):
-            TessOsdRenderer(cchar_t *) except +
+    cdef cppclass TessOsdRenderer(TessResultRenderer):
+        TessOsdRenderer(cchar_t *) except +
 
-cdef extern from "tesseract/osdetect.h" nogil:
+cdef extern from "tesseract/osdetect.h" namespace "tesseract" nogil:
     struct OSBestResult:
         int orientation_id
         int script_id
@@ -271,18 +204,11 @@ cdef extern from "tesseract/osdetect.h" nogil:
 
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
 
-    IF TESSERACT_VERSION >= 0x3999800:
-        cdef enum OcrEngineMode:
-            OEM_TESSERACT_ONLY
-            OEM_LSTM_ONLY
-            OEM_TESSERACT_LSTM_COMBINED
-            OEM_DEFAULT
-    ELSE:
-        cdef enum OcrEngineMode:
-            OEM_TESSERACT_ONLY
-            OEM_CUBE_ONLY
-            OEM_TESSERACT_CUBE_COMBINED
-            OEM_DEFAULT
+    cdef enum OcrEngineMode:
+        OEM_TESSERACT_ONLY
+        OEM_LSTM_ONLY
+        OEM_TESSERACT_LSTM_COMBINED
+        OEM_DEFAULT
 
     cdef enum PageSegMode:
         PSM_OSD_ONLY,                # Orientation and script detection only.
@@ -311,8 +237,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         RIL_WORD,      # within a textline.
         RIL_SYMBOL     # character within a word.
 
-    IF TESSERACT_VERSION >= 0x3999800:
-        cdef cppclass TessBaseAPI:
+    cdef cppclass TessBaseAPI:
             TessBaseAPI() except +
             @staticmethod
             cchar_t *Version()
@@ -331,17 +256,17 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             bool GetBoolVariable(cchar_t *, bool *) const
             bool GetDoubleVariable(cchar_t *, double *) const
             cchar_t *GetStringVariable(cchar_t *) const
-            bool GetVariableAsString(cchar_t *, STRING *)
+            bool GetVariableAsString(cchar_t *, string *)
             int Init(cchar_t *, cchar_t *, OcrEngineMode mode,
                     char **, int,
-                    const GenericVector[STRING] *,
-                    const GenericVector[STRING] *,
+                    const vector[string] *,
+                    const vector[string] *,
                     bool)
             int Init(cchar_t *, cchar_t *, OcrEngineMode)
             int Init(cchar_t *, cchar_t *)
             cchar_t *GetInitLanguagesAsString() const
-            void GetLoadedLanguagesAsVector(GenericVector[STRING] *) const
-            void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
+            void GetLoadedLanguagesAsVector(vector[string] *) const
+            void GetAvailableLanguagesAsVector(vector[string] *) const
             void InitForAnalysePage()
             void ReadConfigFile(cchar_t *)
             void SetPageSegMode(PageSegMode)
@@ -365,7 +290,6 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             int GetThresholdedImageScaleFactor() const
             PageIterator *AnalyseLayout(bool)
             int Recognize(ETEXT_DESC *)
-            int RecognizeForChopTest(ETEXT_DESC *)
             bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
             bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
             ResultIterator *GetIterator()
@@ -375,80 +299,6 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             char *GetBoxText(int)
             char *GetUNLVText()
             bool DetectOrientationScript(int *, float *, cchar_t **, float *)
-            int MeanTextConf()
-            int *AllWordConfidences()
-            bool AdaptToWordStr(PageSegMode, cchar_t *)
-            void Clear()
-            void End()
-            int IsValidWord(cchar_t *)
-            bool IsValidCharacter(cchar_t *)
-            bool GetTextDirection(int *, float *)
-            bool DetectOS(OSResults *);
-            cchar_t *GetUnichar(int)
-            const OcrEngineMode oem() const
-            void set_min_orientation_margin(double)
-    ELSE:
-        cdef cppclass TessBaseAPI:
-            TessBaseAPI() except +
-            @staticmethod
-            cchar_t *Version()
-            @staticmethod
-            void ClearPersistentCache()
-            void SetInputName(cchar_t *)
-            cchar_t *GetInputName()
-            void SetInputImage(Pix *)
-            Pix *GetInputImage()
-            int GetSourceYResolution()
-            cchar_t *GetDatapath()
-            void SetOutputName(cchar_t *)
-            bool SetVariable(cchar_t *, cchar_t *)
-            bool SetDebugVariable(cchar_t *, cchar_t *)
-            bool GetIntVariable(cchar_t *, int *) const
-            bool GetBoolVariable(cchar_t *, bool *) const
-            bool GetDoubleVariable(cchar_t *, double *) const
-            cchar_t *GetStringVariable(cchar_t *) const
-            bool GetVariableAsString(cchar_t *, STRING *)
-            int Init(cchar_t *, cchar_t *, OcrEngineMode mode,
-                    char **, int,
-                    const GenericVector[STRING] *,
-                    const GenericVector[STRING] *,
-                    bool)
-            int Init(cchar_t *, cchar_t *, OcrEngineMode)
-            int Init(cchar_t *, cchar_t *)
-            cchar_t *GetInitLanguagesAsString() const
-            void GetLoadedLanguagesAsVector(GenericVector[STRING] *) const
-            void GetAvailableLanguagesAsVector(GenericVector[STRING] *) const
-            void InitForAnalysePage()
-            void ReadConfigFile(cchar_t *)
-            void SetPageSegMode(PageSegMode)
-            PageSegMode GetPageSegMode() const
-            char *TesseractRect(cuchar_t *, int, int, int, int, int, int)
-            void ClearAdaptiveClassifier()
-            void SetImage(cuchar_t *, int, int, int, int)
-            void SetImage(Pix *)
-            void SetSourceResolution(int)
-            void SetRectangle(int, int, int, int)
-            Pix *GetThresholdedImage()
-            Boxa *GetRegions(Pixa **)
-            Boxa *GetTextlines(const bool, const int, Pixa **, int **, int **)
-            Boxa *GetStrips(Pixa **, int **)
-            Boxa *GetWords(Pixa **)
-            Boxa *GetConnectedComponents(Pixa **)
-            Boxa *GetComponentImages(const PageIteratorLevel,
-                                    const bool, const bool,
-                                    const int,
-                                    Pixa **, int **, int **)
-            int GetThresholdedImageScaleFactor() const
-            PageIterator *AnalyseLayout(bool)
-            int Recognize(ETEXT_DESC *)
-            int RecognizeForChopTest(ETEXT_DESC *)
-            bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
-            bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
-            ResultIterator *GetIterator()
-            char *GetUTF8Text()
-            char *GetHOCRText(int)
-            char *GetBoxText(int)
-            char *GetUNLVText()
             int MeanTextConf()
             int *AllWordConfidences()
             bool AdaptToWordStr(PageSegMode, cchar_t *)

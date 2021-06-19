@@ -1,5 +1,5 @@
 #!python
-#cython: c_string_type=unicode, c_string_encoding=utf-8
+#cython: c_string_type=unicode, c_string_encoding=utf-8, language_level=3
 """Python wrapper around the Tesseract-OCR C++ API
 
 This module provides a wrapper class :class:`PyTessBaseAPI` to call
@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.3.0'
+__version__ = '2.5.2'
 
 import os
 from io import BytesIO
@@ -29,8 +29,14 @@ except ImportError:
     # PIL.Image won't be supported
     pass
 
-from tesseract cimport *
+IF TESSERACT_MAJOR_VERSION < 5:
+    from tesseract cimport *
+ELSE:
+    from tesseract5 cimport *
 from libc.stdlib cimport malloc, free
+from libcpp.pair cimport pair
+from libcpp.vector cimport vector
+from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
 
 
@@ -45,10 +51,10 @@ cdef bytes _b(s):
 
 # default parameters
 setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
-cdef TessBaseAPI _api = TessBaseAPI()
+cdef TessBaseAPI _api
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
-IF TESSERACT_VERSION >= 0x040000:
+IF TESSERACT_VERSION >= 0x3999800:
     cdef _DEFAULT_PATH = _api.GetDatapath()  # "tessdata/" is not appended by tesseract since commit dba13db
 ELSE:
     cdef _DEFAULT_PATH = abspath(join(_api.GetDatapath(), os.pardir)) + os.sep
@@ -67,7 +73,7 @@ cdef class _Enum:
 
 
 cdef class OEM(_Enum):
-    """An enum that defines avaialble OCR engine modes.
+    """An enum that defines available OCR engine modes.
 
     Attributes:
         TESSERACT_ONLY: Run Tesseract only - fastest
@@ -84,7 +90,7 @@ cdef class OEM(_Enum):
     """
 
     TESSERACT_ONLY = OEM_TESSERACT_ONLY
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         LSTM_ONLY = OEM_LSTM_ONLY
         TESSERACT_LSTM_COMBINED = OEM_TESSERACT_LSTM_COMBINED
     ELSE:
@@ -188,7 +194,7 @@ cdef class RIL(_Enum):
 
 
 cdef class PT(_Enum):
-    """An enum the defines avaialbe Poly Block types.
+    """An enum that defines available Poly Block types.
 
     Attributes:
         UNKNOWN: Type is not yet known. Keep as the first element.
@@ -323,7 +329,7 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
-        image.save(f, image.format or 'JPEG')
+        image.save(f, image.format or 'BMP')
         return f.getvalue()
 
 
@@ -337,8 +343,8 @@ cdef _pix_to_image(Pix *pix):
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
-        # write as JPEG if format is unknown
-        result = pixWriteMemJpeg(&buff, &size, pix, 0, 0)
+        # write as IFF_BMP if format is unknown
+        result = pixWriteMem(&buff, &size, pix, 1)
 
     try:
         if result == 1:
@@ -362,7 +368,7 @@ cdef boxa_to_list(Boxa *boxa):
 
 cdef pixa_to_list(Pixa *pixa):
     """Convert Pixa (Array of pixes and boxes) to list of pix, box tuples."""
-    return zip((_pix_to_image(pix) for pix in pixa.pix[:pixa.n]), boxa_to_list(pixa.boxa))
+    return list(zip((_pix_to_image(pix) for pix in pixa.pix[:pixa.n]), boxa_to_list(pixa.boxa)))
 
 
 cdef class PyPageIterator:
@@ -544,7 +550,7 @@ cdef class PyPageIterator:
         See comment on coordinate system above.
 
         Args:
-            level (int): Page Iteration Level. See :class:`RIL` for avaialbe levels.
+            level (int): Page Iteration Level. See :class:`RIL` for available levels.
 
         Kwargs:
             padding (int): The padding argument to :meth:`GetImage` can be used to expand
@@ -568,7 +574,7 @@ cdef class PyPageIterator:
         respect to the original image and is scaled by a factor scale_.
 
         Args:
-            level (int): Page Iteration Level. See :class:`RIL` for avaialbe levels.
+            level (int): Page Iteration Level. See :class:`RIL` for available levels.
 
         Returns:
             tuple or None if there is no such object at the current position.
@@ -612,12 +618,15 @@ cdef class PyPageIterator:
         if pta == NULL:
             return None
         try:
-            return zip((x for x in pta.x[:pta.n]), (y for y in pta.y[:pta.n]))
+            return list(zip((x for x in pta.x[:pta.n]), (y for y in pta.y[:pta.n])))
         finally:
-            free(pta)
+            ptaDestroy(&pta)
 
     def GetBinaryImage(self, PageIteratorLevel level):
         """Return a binary image of the current object at the given level.
+
+        The image is masked along the polygon outline of the current block, as given
+        by :meth:`BlockPolygon`. (Pixels outside the mask will be white.)
 
         The position and size match the return from :meth:`BoundingBoxInternal`, and so
         this could be upscaled with respect to the original input image.
@@ -639,6 +648,9 @@ cdef class PyPageIterator:
     def GetImage(self, PageIteratorLevel level, int padding, original_image):
         """Return an image of the current object at the given level in greyscale
         if available in the input.
+
+        The image is masked along the polygon outline of the current block, as given
+        by :meth:`BlockPolygon`. (Pixels outside the mask will be white.)
 
         To guarantee a binary image use :meth:`BinaryImage`.
 
@@ -825,6 +837,21 @@ cdef class PyLTRResultIterator(PyPageIterator):
         """
         return self._ltrriter.Confidence(level)
 
+    IF TESSERACT_VERSION >= 0x3040100:
+        def RowAttributes(self):
+            """Return row_height, descenders and ascenders in a dict"""
+            cdef:
+                float row_height
+                float descenders
+                float ascenders
+
+            self._ltrriter.RowAttributes(&row_height, &descenders, &ascenders)
+            return {
+                'row_height': row_height,
+                'descenders': descenders,
+                'ascenders': ascenders
+            }
+
     def WordFontAttributes(self):
         """Return the font attributes of the current word.
 
@@ -895,6 +922,12 @@ cdef class PyLTRResultIterator(PyPageIterator):
     def WordIsFromDictionary(self):
         """Return True if the current word was found in a dictionary."""
         return self._ltrriter.WordIsFromDictionary()
+
+    IF TESSERACT_VERSION >= 0x4000000:
+        def BlanksBeforeWord(self):
+            """Return True if the current word is numeric."""
+            return self._ltrriter.BlanksBeforeWord()
+
 
     def WordIsNumeric(self):
         """Return True if the current word is numeric."""
@@ -1017,6 +1050,35 @@ cdef class PyResultIterator(PyLTRResultIterator):
         """
         return self._riter.ParagraphIsLtr()
 
+    IF TESSERACT_VERSION >= 0x4000000:
+        def GetBestLSTMSymbolChoices(self):
+            """Returns the LSTM choices for every LSTM timestep for the current word."""
+            cdef:
+                vector[vector[pair[cchar_tp, float]]] *output = self._riter.GetBestLSTMSymbolChoices()
+                vector[vector[pair[cchar_tp, float]]].iterator it
+                vector[pair[cchar_tp, float]].iterator cit
+                vector[pair[cchar_tp, float]] configpairs
+                pair[cchar_tp, float] configpair
+
+            LSTMSymbolChoices = []
+            if output == NULL:
+                return LSTMSymbolChoices
+
+            it = output.begin()
+            while it != output.end():
+                timestep = []
+                configpairs = deref(it)
+                cit = configpairs.begin()
+                while cit != configpairs.end():
+                    configpair = deref(cit)
+                    timestep.append((configpair.first, configpair.second))
+                    inc(cit)
+
+                LSTMSymbolChoices.append(timestep)
+                inc(it)
+
+            return LSTMSymbolChoices
+
 
 cdef class PyChoiceIterator:
 
@@ -1115,7 +1177,7 @@ cdef class PyTessBaseAPI:
             applicable language, and there is more chance of hallucinating incorrect
             words.
         psm (int): Page segmentation mode. Defaults to :attr:`PSM.AUTO`.
-            See :class:`PSM` for avaialble psm values.
+            See :class:`PSM` for available psm values.
         init (bool): If ``False``, :meth:`Init` will not be called and has to be called
             after initialization.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
@@ -1153,7 +1215,20 @@ cdef class PyTessBaseAPI:
     def __dealloc__(self):
         self._end_api()
 
-    cdef int _init_api(self, cchar_t *path, cchar_t *lang,
+    IF TESSERACT_MAJOR_VERSION >= 5:
+      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
+                        OcrEngineMode oem, char **configs, int configs_size,
+                        const vector[string] *vars_vec, const vector[string] *vars_vals,
+                        bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
+        cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
+                                          set_only_non_debug_params)
+        if ret == -1:
+            with gil:
+                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+        self._baseapi.SetPageSegMode(psm)
+        return ret
+    ELSE:
+      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
                         OcrEngineMode oem, char **configs, int configs_size,
                         const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
                         bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
@@ -1234,7 +1309,7 @@ cdef class PyTessBaseAPI:
     def GetIntVariable(self, name):
         """Return the value of the given int parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1246,7 +1321,7 @@ cdef class PyTessBaseAPI:
     def GetBoolVariable(self, name):
         """Return the value of the given bool parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1258,7 +1333,7 @@ cdef class PyTessBaseAPI:
     def GetDoubleVariable(self, name):
         """Return the value of the given double parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1270,7 +1345,7 @@ cdef class PyTessBaseAPI:
     def GetStringVariable(self, name):
         """Return the value of the given string parameter if it exists among Tesseract parameters.
 
-        Returns ``None`` if the paramter was not found.
+        Returns ``None`` if the parameter was not found.
         """
         cdef:
             bytes py_name = _b(name)
@@ -1283,13 +1358,18 @@ cdef class PyTessBaseAPI:
         """Return the value of named variable as a string (regardless of type),
         if it exists.
 
-        Returns ``None`` if paramter was not found.
+        Returns ``None`` if parameter was not found.
         """
-        cdef:
-            bytes py_name = _b(name)
-            STRING val
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef:
+                bytes py_name = _b(name)
+                string val
+        ELSE:
+            cdef:
+                bytes py_name = _b(name)
+                STRING val
         if self._baseapi.GetVariableAsString(py_name, &val):
-            return val.string()
+            return val.c_str()
         return None
 
     def InitFull(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
@@ -1318,7 +1398,7 @@ cdef class PyTessBaseAPI:
                 applicable language, and there is more chance of hallucinating incorrect
                 words.
             oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-                See :class:`OEM` for all avaialbe options.
+                See :class:`OEM` for all available options.
             configs (list): List of config files to load variables from.
             variables (dict): Extra variables to be set.
             set_only_non_debug_params (bool): If ``True``, only params that do not contain
@@ -1327,7 +1407,20 @@ cdef class PyTessBaseAPI:
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
         """
-        cdef:
+        IF TESSERACT_MAJOR_VERSION >= 5:
+          cdef:
+            bytes py_path = _b(path)
+            bytes py_lang = _b(lang)
+            cchar_t *cpath = py_path
+            cchar_t *clang = py_lang
+            int configs_size = len(configs)
+            char **configs_ = <char **>malloc(configs_size * sizeof(char *))
+            vector[string] vars_vec
+            vector[string] vars_vals
+            cchar_t *val
+            string sval
+        ELSE:
+          cdef:
             bytes py_path = _b(path)
             bytes py_lang = _b(lang)
             cchar_t *cpath = py_path
@@ -1364,7 +1457,7 @@ cdef class PyTessBaseAPI:
              OcrEngineMode oem=OEM_DEFAULT):
         """Initialize the API with the given data path, language and OCR engine mode.
 
-        See :meth:`InitFull` for more intialization info and options.
+        See :meth:`InitFull` for more initialization info and options.
 
         Args:
             path (str): The name of the parent directory of tessdata.
@@ -1372,7 +1465,7 @@ cdef class PyTessBaseAPI:
             lang (str): An ISO 639-3 language string. Defaults to 'eng'.
                 See :meth:`InitFull` for full description of this parameter.
             oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-                See :class:`OEM` for all avaialbe options.
+                See :class:`OEM` for all available options.
 
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
@@ -1401,18 +1494,26 @@ cdef class PyTessBaseAPI:
         Includes all languages loaded by the last Init, including those loaded
         as dependencies of other loaded languages.
         """
-        cdef GenericVector[STRING] langs
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef vector[string] langs
+        ELSE:
+            cdef GenericVector[STRING] langs
         self._baseapi.GetLoadedLanguagesAsVector(&langs)
-        return [langs[i].string() for i in xrange(langs.size())]
+        return [langs[i].c_str() for i in xrange(langs.size())]
 
     def GetAvailableLanguages(self):
         """Return list of available languages in the init data path"""
-        cdef:
-            GenericVector[STRING] v
-            int i
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef:
+                vector[string] v
+                int i
+        ELSE:
+            cdef:
+                GenericVector[STRING] v
+                int i
         langs = []
         self._baseapi.GetAvailableLanguagesAsVector(&v)
-        langs = [v[i].string() for i in xrange(v.size())]
+        langs = [v[i].c_str() for i in xrange(v.size())]
         return langs
 
     def InitForAnalysePage(self):
@@ -1530,6 +1631,28 @@ cdef class PyTessBaseAPI:
             self._destroy_pix()
             self._baseapi.SetImage(cimagedata, width, height, bytes_per_pixel, bytes_per_line)
 
+    def SetImageBytesBmp(self, imagedata):
+        """Provide an image for Tesseract to recognize.
+
+        Args:
+            imagedata (:bytes): Raw bytes of a BMP image.
+
+        Raises:
+            :exc:`RuntimeError`: If for any reason the api failed
+                to load the given image.
+        """
+        cdef:
+            bytes py_imagedata = _b(imagedata)
+            size_t size = len(py_imagedata)
+            cuchar_t *cimagedata = py_imagedata
+        with nogil:
+            self._destroy_pix()
+            self._pix = pixReadMemBmp(cimagedata, size)
+            if self._pix == NULL:
+                with gil:
+                    raise RuntimeError('Error reading image')
+            self._baseapi.SetImage(self._pix)
+
     def SetImage(self, image):
         """Provide an image for Tesseract to recognize.
 
@@ -1560,7 +1683,7 @@ cdef class PyTessBaseAPI:
             self._baseapi.SetImage(self._pix)
 
     def SetImageFile(self, filename):
-        """Set image from file for Tesserac to recognize.
+        """Set image from file for Tesseract to recognize.
 
         Args:
             filename (str): Image file relative or absolute path.
@@ -1577,7 +1700,10 @@ cdef class PyTessBaseAPI:
             self._pix = pixRead(fname)
             if self._pix == NULL:
                 with gil:
-                    raise RuntimeError('Error reading image')
+                    # missing leptonica support? Try PIL
+                    image = Image.open(fname)
+                    self.SetImage(image)
+
             self._baseapi.SetImage(self._pix)
 
     def SetSourceResolution(self, int ppi):
@@ -1595,7 +1721,7 @@ cdef class PyTessBaseAPI:
         can be recognized with the same image.
 
         Args:
-            left (int): poisition from left
+            left (int): position from left
             top (int): position from top
             width (int): width
             height (int): height
@@ -1822,14 +1948,16 @@ cdef class PyTessBaseAPI:
         cdef:
             Boxa *boxa
             Pixa *pixa
-            int *_blockids
-            int *_paraids
+            int *_blockids = NULL
+            int *_paraids = NULL
+            int **blockids_addr = &_blockids
+            int **paraids_addr = &_paraids
         if not blockids:
-            _blockids = NULL
+            blockids_addr = NULL
         if not paraids:
-            _paraids = NULL
+            paraids_addr = NULL
         boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
-                                                &pixa, &_blockids, &_paraids)
+                                                &pixa, blockids_addr, paraids_addr)
         if boxa == NULL:
             # no components found
             return []
@@ -1911,31 +2039,32 @@ cdef class PyTessBaseAPI:
     """Methods to retrieve information after :meth:`SetImage`,
     :meth:`Recognize` or :meth:`TesseractRect`. (:meth:`Recognize` is called implicitly if needed.)"""
 
-    cpdef bool RecognizeForChopTest(self, int timeout=0):
-        """Variant on :meth:`Recognize` used for testing chopper."""
-        cdef:
-            ETEXT_DESC monitor
-            int res
-        with nogil:
-            if timeout > 0:
-                monitor.cancel = NULL
-                monitor.cancel_this = NULL
-                monitor.set_deadline_msecs(timeout)
-                res = self._baseapi.RecognizeForChopTest(&monitor)
-            else:
-                res = self._baseapi.RecognizeForChopTest(NULL)
-        return res == 0
+    IF TESSERACT_MAJOR_VERSION < 5:
+        cpdef bool RecognizeForChopTest(self, int timeout=0):
+            """Variant on :meth:`Recognize` used for testing chopper."""
+            cdef:
+                ETEXT_DESC monitor
+                int res
+            with nogil:
+                if timeout > 0:
+                    monitor.cancel = NULL
+                    monitor.cancel_this = NULL
+                    monitor.set_deadline_msecs(timeout)
+                    res = self._baseapi.RecognizeForChopTest(&monitor)
+                else:
+                    res = self._baseapi.RecognizeForChopTest(NULL)
+            return res == 0
 
     cdef TessResultRenderer *_get_renderer(self, cchar_t *outputbase):
         cdef:
             bool b
             bool font_info
-            IF TESSERACT_VERSION >= 0x040000:
+            IF TESSERACT_VERSION >= 0x3999800:
                 bool textonly
             TessResultRenderer *temp
             TessResultRenderer *renderer = NULL
 
-        IF TESSERACT_VERSION >= 0x030401:
+        IF TESSERACT_VERSION >= 0x3040100:
             if self._baseapi.GetPageSegMode() == PSM.OSD_ONLY:
                 renderer = new TessOsdRenderer(outputbase)
                 return renderer
@@ -1947,7 +2076,7 @@ cdef class PyTessBaseAPI:
 
         self._baseapi.GetBoolVariable("tessedit_create_pdf", &b)
         if b:
-            IF TESSERACT_VERSION >= 0x040000:
+            IF TESSERACT_VERSION >= 0x3999800:
                 self._baseapi.GetBoolVariable("textonly_pdf", &textonly)
                 temp = new TessPDFRenderer(outputbase, self._baseapi.GetDatapath(), textonly)
             ELSE:
@@ -2044,7 +2173,7 @@ cdef class PyTessBaseAPI:
                     retry_config=None, int timeout=0):
         """Turn a single image into symbolic text.
 
-        See :meth:`ProcessPages` for desciptions of the keyword arguments
+        See :meth:`ProcessPages` for descriptions of the keyword arguments
         and all other details.
 
         Args:
@@ -2111,6 +2240,25 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
+    IF TESSERACT_VERSION >= 0x4000000:
+        def GetBestLSTMSymbolChoices(self):
+            """Return Symbol choices as multi-dimensional array of tupels. The
+            first dimension contains words. The second dimension contains the LSTM
+            timesteps of the respective word. They are either accumulated over
+            characters or pure which depends on the value set in lstm_choice_mode:
+            1 = pure; 2 = accumulated. The third dimension contains the symbols
+            and their probability as tupels for the respective timestep.
+            Returns an empty list if :meth:`Recognize` was not called first.
+            """
+            if self.GetVariableAsString("lstm_choice_mode") == "0":
+                raise RuntimeError('lstm_choice_mode Parameter is 0. Set it to 1 or 2')
+            words = []
+            wi = self.GetIterator()
+            if wi:
+                for w in iterate_level(wi, RIL.WORD):
+                    words.append(w.GetBestLSTMSymbolChoices())
+            return words
+
     def GetHOCRText(self, int page_number):
         """Return a HTML-formatted string with hOCR markup from the internal
         data structures.
@@ -2127,7 +2275,7 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         def GetTSVText(self, int page_number):
             """Make a TSV-formatted string from the internal data structures.
 
@@ -2175,7 +2323,7 @@ cdef class PyTessBaseAPI:
                     raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
-    IF TESSERACT_VERSION >= 0x040000:
+    IF TESSERACT_VERSION >= 0x3999800:
         def DetectOrientationScript(self):
             """Detect the orientation of the input image and apparent script (alphabet).
 
@@ -2198,7 +2346,6 @@ cdef class PyTessBaseAPI:
                         'script_name': script_name,
                         'script_conf': script_conf}
             return None
-
 
     def MeanTextConf(self):
         """Return the (average) confidence value between 0 and 100."""
@@ -2302,6 +2449,7 @@ cdef class PyTessBaseAPI:
                   rotation to be applied to the page for the text to be upright and readable.
                 - oconfidence: Orientation confidence.
                 - script: Index of the script with the highest score for this orientation.
+                  (This is _not_ the index of :meth:`get_languages`, which is in alphabetical order.)
                 - sconfidence: script confidence.
         """
         cdef OSResults results
@@ -2373,7 +2521,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         path (str): The name of the parent directory of tessdata.
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-            see :class:`OEM` for all avaialble oem options.
+            see :class:`OEM` for all available oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2423,7 +2571,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         path (str): The name of the parent directory of tessdata.
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
-            see :class:`OEM` for all avaialble oem options.
+            see :class:`OEM` for all available oem options.
 
     Returns:
         unicode: The text extracted from the image.
@@ -2471,19 +2619,26 @@ def get_languages(path=_DEFAULT_PATH):
             Must end in /. Default tesseract-ocr datapath is used
             if no path is provided.
 
-    Retruns
+    Returns
         tuple: Tuple with two elements:
             - path (str): tessdata parent directory path
             - languages (list): list of available languages as ISO 639-3 strings.
     """
-    cdef:
-        bytes py_path = _b(path)
-        TessBaseAPI baseapi
-        GenericVector[STRING] v
-        int i
+    IF TESSERACT_MAJOR_VERSION >= 5:
+        cdef:
+            bytes py_path = _b(path)
+            TessBaseAPI baseapi
+            vector[string] v
+            int i
+    ELSE:
+        cdef:
+            bytes py_path = _b(path)
+            TessBaseAPI baseapi
+            GenericVector[STRING] v
+            int i
     baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
     baseapi.GetAvailableLanguagesAsVector(&v)
-    langs = [v[i].string() for i in xrange(v.size())]
+    langs = [v[i].c_str() for i in xrange(v.size())]
     baseapi.End()
     return path, langs
