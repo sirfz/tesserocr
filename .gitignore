@@ -63,3 +63,4 @@ target/
 # cpp
 *.cpp
 Makefile
+.idea/

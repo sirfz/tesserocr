@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.5.2b0'
+__version__ = '2.5.2'
 
 import os
 from io import BytesIO
@@ -329,7 +329,7 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
-        image.save(f, image.format or 'PNG')
+        image.save(f, image.format or 'BMP')
         return f.getvalue()
 
 
@@ -1631,6 +1631,28 @@ cdef class PyTessBaseAPI:
             self._destroy_pix()
             self._baseapi.SetImage(cimagedata, width, height, bytes_per_pixel, bytes_per_line)
 
+    def SetImageBytesBmp(self, imagedata):
+        """Provide an image for Tesseract to recognize.
+
+        Args:
+            imagedata (:bytes): Raw bytes of a BMP image.
+
+        Raises:
+            :exc:`RuntimeError`: If for any reason the api failed
+                to load the given image.
+        """
+        cdef:
+            bytes py_imagedata = _b(imagedata)
+            size_t size = len(py_imagedata)
+            cuchar_t *cimagedata = py_imagedata
+        with nogil:
+            self._destroy_pix()
+            self._pix = pixReadMemBmp(cimagedata, size)
+            if self._pix == NULL:
+                with gil:
+                    raise RuntimeError('Error reading image')
+            self._baseapi.SetImage(self._pix)
+
     def SetImage(self, image):
         """Provide an image for Tesseract to recognize.
 
@@ -1661,7 +1683,7 @@ cdef class PyTessBaseAPI:
             self._baseapi.SetImage(self._pix)
 
     def SetImageFile(self, filename):
-        """Set image from file for Tesserac to recognize.
+        """Set image from file for Tesseract to recognize.
 
         Args:
             filename (str): Image file relative or absolute path.
@@ -1678,7 +1700,10 @@ cdef class PyTessBaseAPI:
             self._pix = pixRead(fname)
             if self._pix == NULL:
                 with gil:
-                    raise RuntimeError('Error reading image')
+                    # missing leptonica support? Try PIL
+                    image = Image.open(fname)
+                    self.SetImage(image)
+
             self._baseapi.SetImage(self._pix)
 
     def SetSourceResolution(self, int ppi):

@@ -6,8 +6,8 @@ A simple, |Pillow|_-friendly,
 wrapper around the ``tesseract-ocr`` API for Optical Character Recognition
 (OCR).
 
-.. image:: https://travis-ci.org/sirfz/tesserocr.svg?branch=master
-    :target: https://travis-ci.org/sirfz/tesserocr
+.. image:: https://travis-ci.com/sirfz/tesserocr.svg?branch=master
+    :target: https://travis-ci.com/sirfz/tesserocr
     :alt: TravisCI build status
 
 .. image:: https://img.shields.io/pypi/v/tesserocr.svg?maxAge=2592000
@@ -100,8 +100,28 @@ Download the wheel file corresponding to your Windows platform and Python instal
 
     > pip install <package_name>.whl
 
-If you need Windows tessocr package and your Python version is not supported by above mention project,
-you can try to follow `step by step instructions for Windows 64bit` in <Windows.build.md> file.
+Build from source
+`````````````````
+
+If you need Windows tessocr package and your Python version is not supported by above mentioned project,
+you can try to follow `step by step instructions for Windows 64bit` in `Windows.build.md`_.
+
+.. _Windows.build.md: Windows.build.md
+
+tessdata
+========
+
+You may need to point to the tessdata path if it cannot be detected automatically. This can be done by setting the ``TESSDATA_PREFIX`` environment variable or by passing the path to ``PyTessBaseAPI`` (e.g.: ``PyTessBaseAPI(path='/usr/share/tessdata')``). The path should contain ``.traineddata`` files which can be found at https://github.com/tesseract-ocr/tessdata.
+
+Make sure you have the correct version of traineddata for your ``tesseract --version``.
+
+You can list the current supported languages on your system using the ``get_languages`` function:
+
+.. code:: python
+
+    from tesserocr import get_languages
+
+    print(get_languages('/usr/share/tessdata'))  # or any other path that applies to your system
 
 Usage
 =====
