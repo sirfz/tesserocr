@@ -2069,6 +2069,10 @@ cdef class PyTessBaseAPI:
                 renderer = new TessOsdRenderer(outputbase)
                 return renderer
 
+        self._baseapi.GetBoolVariable("tessedit_create_alto", &b)
+        if b:
+            renderer = new TessAltoRenderer(outputbase)
+
         self._baseapi.GetBoolVariable("tessedit_create_hocr", &b)
         if b:
             self._baseapi.GetBoolVariable("hocr_font_info", &font_info)
@@ -2120,6 +2124,9 @@ cdef class PyTessBaseAPI:
         Set at least one of the following variables to enable renderers
         before calling this method::
 
+            tessedit_create_alto (bool): ALTO Renderer
+                Make sure to set ``document_title`` to the image filename if you
+                want to have the ALTO-XML reference it.
             tessedit_create_hocr (bool): hOCR Renderer
                 if ``font_info`` is ``True`` then it'll be included in the output.
             tessedit_create_pdf (bool): PDF Renderer
@@ -2135,8 +2142,13 @@ cdef class PyTessBaseAPI:
         Args:
             outputbase (str): The name of the output file excluding
                 extension. For example, "/path/to/chocolate-chip-cookie-recipe".
+                Must not be empty. Use "-" or "stdout" to write to the current
+                process' standard output.
             filename (str): Can point to a single image, a multi-page TIFF,
-                or a plain text list of image filenames.
+                or a plain text list of image filenames. If Tesseract is built
+                with libcurl support, and ``str`` is a URL starting with "http:"
+                or "https:" then the image file is downloaded from that location
+                to the current working directory first.
 
         Kwargs:
             retry_config (str): Is useful for debugging. If specified, you can fall
@@ -2174,11 +2186,13 @@ cdef class PyTessBaseAPI:
         """Turn a single image into symbolic text.
 
         See :meth:`ProcessPages` for descriptions of the keyword arguments
-        and all other details.
+        and all other details (esp. output renderers).
 
         Args:
             outputbase (str): The name of the output file excluding
                 extension. For example, "/path/to/chocolate-chip-cookie-recipe".
+                Must not be empty. Use "-" or "stdout" to write to the current
+                process' standard output.
             image (:class:`PIL.Image`): The image processed.
             page_index (int): Page index (metadata).
             filename (str): `filename` and `page_index` are metadata
