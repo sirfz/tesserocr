@@ -178,62 +178,86 @@ GetComponentImages example:
     image = Image.open('/usr/src/tesseract/testing/phototest.tif')
     with PyTessBaseAPI() as api:
         api.SetImage(image)
-        boxes = api.GetComponentImages(RIL.TEXTLINE, True)
-        print('Found {} textline image components.'.format(len(boxes)))
-        for i, (im, box, _, _) in enumerate(boxes):
-            # im is a PIL image object
-            # box is a dict with x, y, w and h keys
-            api.SetRectangle(box['x'], box['y'], box['w'], box['h'])
-            ocrResult = api.GetUTF8Text()
-            conf = api.MeanTextConf()
-            print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
-                  "confidence: {1}, text: {2}".format(i, conf, ocrResult, **box))
+        results = api.GetComponentImages(RIL.TEXTLINE, True)
+        print('Found {} textline image components.'.format(len(results)))
+        for i, (img, box, _, _) in enumerate(results):
+            # img is a PIL image object of the binarized line
+            # box is a dict with x, y, w and h keys (w.r.t. full image)
+            img.save('phototest_line{0}_{x}x{y}+{w}x{h}.png'.format(i, **box), format='PNG')
 
-Orientation and script detection (OSD):
-```````````````````````````````````````
+GetIterator example:
+````````````````````
 
 .. code:: python
 
     from PIL import Image
-    from tesserocr import PyTessBaseAPI, PSM
+    from tesserocr import PyTessBaseAPI, RIL
 
-    with PyTessBaseAPI(psm=PSM.AUTO_OSD) as api:
-        image = Image.open("/usr/src/tesseract/testing/eurotext.tif")
+    image = Image.open('/usr/src/tesseract/testing/phototest.tif')
+    with PyTessBaseAPI() as api:
         api.SetImage(image)
         api.Recognize()
+        
+        it = api.GetIterator()
+        for line in iterate_level(it, RIL.TEXTLINE):
+            text = line.GetUTF8Text(RIL.TEXTLINE)
+            conf = line.Confidence(RIL.TEXTLINE)
+            bbox = line.BoundingBox(RIL.TEXTLINE)
+            bbox = {'x': int(bbox[0]),
+                    'y': int(bbox[1]),
+                    'w': int(bbox[2])-int(bbox[0]),
+                    'h': int(bbox[3])-int(bbox[1])}
+            print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
+                  "confidence: {1}, text: {2}".format(i, conf, text, **bbox))
 
-        it = api.AnalyseLayout()
-        orientation, direction, order, deskew_angle = it.Orientation()
-        print("Orientation: {:d}".format(orientation))
-        print("WritingDirection: {:d}".format(direction))
-        print("TextlineOrder: {:d}".format(order))
-        print("Deskew angle: {:.4f}".format(deskew_angle))
-
-or more simply with ``OSD_ONLY`` page segmentation mode:
+Layout analysis with orientation and deskewing:
+```````````````````````````````````````````````
 
 .. code:: python
 
+    import math
+    from PIL import Image
     from tesserocr import PyTessBaseAPI, PSM
+    from tesserocr import Orientation, WritingDirection, TextlineOrder
 
-    with PyTessBaseAPI(psm=PSM.OSD_ONLY) as api:
-        api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
+    with PyTessBaseAPI(psm=PSM.AUTO) as api:
+        image = Image.open("/usr/src/tesseract/testing/eurotext.tif")
+        api.SetImage(image)
 
-        os = api.DetectOS()
-        print("Orientation: {orientation}\nOrientation confidence: {oconfidence}\n"
-              "Script: {script}\nScript confidence: {sconfidence}".format(**os))
+        it = api.AnalyseLayout()
+        orientation, direction, order, deskew_angle = it.Orientation()
+        print("Orientation: {}".format(membername(Orientation, orientation)))
+        print("WritingDirection: {}".format(membername(WritingDirection, direction)))
+        print("TextlineOrder: {:d}".format(membername(TextlineOrder, order)))
+        print("Deskew angle: {:.1f}°".format(deskew_angle * 180 / math.pi))
+    
+    def membername(class_, val):
+        """Convert a member value into a member name string."""
+        return next((k for k, v in class_.__dict__.items() if v == val), str(val))
 
-more human-readable info with tesseract 4+ (demonstrates LSTM engine usage):
+Orientation and script detection legacy model:
+``````````````````````````````````````````````
 
 .. code:: python
 
     from tesserocr import PyTessBaseAPI, PSM, OEM
 
-    with PyTessBaseAPI(psm=PSM.OSD_ONLY, oem=OEM.LSTM_ONLY) as api:
+    with PyTessBaseAPI(psm=PSM.OSD_ONLY, 
+                       oem=OEM.TESSERACT_ONLY, 
+                       lang="osd") as api:
         api.SetImageFile("/usr/src/tesseract/testing/eurotext.tif")
 
+        os = api.DetectOS()
+        print("Orientation: {orientation}\n"
+              "Orientation confidence: {oconfidence}\n"
+              "Script: {script}\n"
+              "Script confidence: {sconfidence}".format(**os))
+        # the same with more human-readable info:
         os = api.DetectOrientationScript()
-        print("Orientation: {orient_deg}\nOrientation confidence: {orient_conf}\n"
-              "Script: {script_name}\nScript confidence: {script_conf}".format(**os))
+        print("Orientation: {orient_deg}°\n"
+              "Orientation confidence: {orient_conf}\n"
+              "Script: {script_name}\n"
+              "Script confidence: {script_conf}".format(**os))
 
 Iterator over the classifier choices for a single symbol:
 `````````````````````````````````````````````````````````
@@ -246,17 +270,17 @@ Iterator over the classifier choices for a single symbol:
 
     with PyTessBaseAPI() as api:
         api.SetImageFile('/usr/src/tesseract/testing/phototest.tif')
-        api.SetVariable("save_blob_choices", "T")
+        api.SetVariable("lstm_choice_mode", "2")
         api.SetRectangle(37, 228, 548, 31)
         api.Recognize()
 
         ri = api.GetIterator()
         level = RIL.SYMBOL
         for r in iterate_level(ri, level):
-            symbol = r.GetUTF8Text(level)  # r == ri
+            symb = r.GetUTF8Text(level)  # r == ri
             conf = r.Confidence(level)
             if symbol:
-                print(u'symbol {}, conf: {}'.format(symbol, conf), end='')
+                print(u'symbol {}, conf: {}'.format(symb, conf), end='')
             indent = False
             ci = r.GetChoiceIterator()
             for c in ci:
@@ -264,6 +288,7 @@ Iterator over the classifier choices for a single symbol:
                     print('\t\t ', end='')
                 print('\t- ', end='')
                 choice = c.GetUTF8Text()  # c == ci
-                print(u'{} conf: {}'.format(choice, c.Confidence()))
+                confid = c.Confidence()
+                print(u'alt {} conf: {}'.format(choice, confid))
                 indent = True
             print('---------------------------------------------')
