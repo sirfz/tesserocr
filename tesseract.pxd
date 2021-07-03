@@ -236,8 +236,9 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessTextRenderer(TessResultRenderer):
         TessTextRenderer(cchar_t *) except +
 
-    cdef cppclass TessAltoRenderer(TessResultRenderer):
-        TessAltoRenderer(cchar_t *) except +
+    IF TESSERACT_VERSION >= 0x3999800:
+        cdef cppclass TessAltoRenderer(TessResultRenderer):
+            TessAltoRenderer(cchar_t *) except +
         
     cdef cppclass TessHOcrRenderer(TessResultRenderer):
         TessHOcrRenderer(cchar_t *, bool) except +
