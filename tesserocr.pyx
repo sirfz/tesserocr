@@ -53,7 +53,7 @@ cdef bytes _b(s):
 setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
 cdef TessBaseAPI _api
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
-_api.Init(NULL, NULL)
+_init_failed = _api.Init(NULL, NULL)
 IF TESSERACT_VERSION >= 0x3999800:
     cdef _DEFAULT_PATH = _api.GetDatapath()  # "tessdata/" is not appended by tesseract since commit dba13db
 ELSE:
@@ -62,8 +62,9 @@ _init_lang = _api.GetInitLanguagesAsString()
 if _init_lang == '':
     _init_lang = 'eng'
 cdef _DEFAULT_LANG = _init_lang
-_api.End()
-TessBaseAPI.ClearPersistentCache()
+if not _init_failed:
+    _api.End()
+    TessBaseAPI.ClearPersistentCache()
 
 
 cdef class _Enum:
