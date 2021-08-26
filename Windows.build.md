@@ -18,6 +18,8 @@ Destination for dependencies
     set PATH=%PATH%;%INSTALL_DIR%\bin
 ```
 
+*NOTE:* You can use other drive/disk than "`F`" (e.g. "`C`"). Make sure that it exists before any other steps.
+
 Build tree:
 ```
     mkdir F:\Project & cd Project
@@ -82,6 +84,7 @@ or
 
 Then:
 
+    mkdir build.msvs && cd build.msvs
     "C:\Program Files\CMake\bin\cmake.exe" .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_PREFIX_PATH=%INSTALL_DIR% -DBUILD_TRAINING_TOOLS=OFF -DSW_BUILD=OFF -DBUILD_SHARED_LIBS=ON -DOPENMP_BUILD=OFF -DLeptonica_DIR=%INSTALL_DIR%\lib\cmake
     "C:\Program Files\CMake\bin\cmake.exe" --build . --config Release --target install
     cd ..\..
