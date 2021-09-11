@@ -340,6 +340,9 @@ cdef _pix_to_image(Pix *pix):
         size_t size
         int result
         int fmt = pix.informat
+    if pix.d == 1:
+        # prevent catastrophic 8-bit conversion
+        pix = pixConvertTo8(pix, 0)
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
