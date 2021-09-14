@@ -2077,7 +2077,11 @@ cdef class PyTessBaseAPI:
         self._baseapi.GetBoolVariable("tessedit_create_hocr", &b)
         if b:
             self._baseapi.GetBoolVariable("hocr_font_info", &font_info)
-            renderer = new TessHOcrRenderer(outputbase, font_info)
+            temp = new TessHOcrRenderer(outputbase, font_info)
+            if renderer == NULL:
+                renderer = temp
+            else:
+                renderer.insert(temp)
 
         self._baseapi.GetBoolVariable("tessedit_create_pdf", &b)
         if b:
