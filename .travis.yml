@@ -21,8 +21,8 @@ before_install:
     - export LD_LIBRARY_PATH=$TESSERACT_INSTALL/lib:$LD_LIBRARY_PATH
     - export PKG_CONFIG_PATH=$TESSERACT_PKG:$PKG_CONFIG_PATH
     - wget -O - https://github.com/nijel/tesseract-ocr-build/releases/download/$TESSERACT/tesseract.tar.xz | tar -C $HOME -xJf -
-    - cd $TESSERACT_INSTALL/share/tessdata && rm -f osd.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata && cd -
-    - cd $TESSERACT_INSTALL/share/tessdata && rm -f eng.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata && cd -
+    - cd $TESSERACT_INSTALL/share/tessdata && rm -f osd.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/4.1.0/osd.traineddata && cd -
+    - cd $TESSERACT_INSTALL/share/tessdata && rm -f eng.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/4.1.0/eng.traineddata && cd -
 install:
     - pip install -U -r requirements-dev.txt
 script:

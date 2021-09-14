@@ -91,8 +91,8 @@ Then:
 ```
     cd F:\Project
     git clone --depth 1 https://github.com/tesseract-ocr/tessconfigs tessdata
-    curl -L https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata --output F:\Project\tessdata\eng.traineddata
-    curl -L https://github.com/tesseract-ocr/tessdata/raw/master/osd.traineddata --output F:\Project\tessdata\osd.traineddata
+    curl -L https://github.com/tesseract-ocr/tessdata/raw/4.1.0/eng.traineddata --output F:\Project\tessdata\eng.traineddata
+    curl -L https://github.com/tesseract-ocr/tessdata/raw/4.1.0/osd.traineddata --output F:\Project\tessdata\osd.traineddata
     SET TESSDATA_PREFIX=F:\Project\tessdata
 ```
 
