@@ -2069,9 +2069,9 @@ cdef class PyTessBaseAPI:
                 renderer = new TessOsdRenderer(outputbase)
                 return renderer
 
-        self._baseapi.GetBoolVariable("tessedit_create_alto", &b)
-        if b:
-            IF TESSERACT_VERSION >= 0x3999800:
+        IF TESSERACT_VERSION >= 0x3999800:
+            self._baseapi.GetBoolVariable("tessedit_create_alto", &b)
+            if b:
                 renderer = new TessAltoRenderer(outputbase)
 
         self._baseapi.GetBoolVariable("tessedit_create_hocr", &b)
