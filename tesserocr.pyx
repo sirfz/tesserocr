@@ -329,6 +329,9 @@ cdef unicode _free_str(char *text):
 cdef bytes _image_buffer(image):
     """Return raw bytes of a PIL Image"""
     with BytesIO() as f:
+        # Pix and BMP only allow alpha as RGBA:
+        if image.mode in ['LA', 'PA', 'RGBa', 'La']:
+            image = image.convert('RGBA')
         image.save(f, image.format or 'BMP')
         return f.getvalue()
 
