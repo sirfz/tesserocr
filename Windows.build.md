@@ -134,7 +134,7 @@ Then:
 
 ## Post installation
 
-Note: _adjust to you Python instalation_
+Note: _adjust to you Python installation_
 ```
     copy F:\win64\bin\*.dll "C:\Program Files\Python38\Lib\site-packages\"
 
