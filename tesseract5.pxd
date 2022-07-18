@@ -54,6 +54,16 @@ cdef extern from "leptonica/allheaders.h" nogil:
         L_SEVERITY_ERROR    = 5   # Print error and higher messages
         L_SEVERITY_NONE     = 6   # Highest severity: print no messages
 
+cdef extern from *:
+    """
+    #if (LIBLEPT_MAJOR_VERSION > 1) || (LIBLEPT_MINOR_VERSION > 82)
+    // The public API of Leptonica 1.83.0 hides details of some data
+    // structures which are used by tesserocr (see Pix, Box, ... above).
+    // Get those details by including a private header file.
+    #include <leptonica/pix_internal.h>
+    #endif
+    """
+
 cdef extern from "tesseract/publictypes.h" namespace "tesseract" nogil:
     cdef enum PolyBlockType:
         PT_UNKNOWN          # Type is not yet known. Keep as the first element.
