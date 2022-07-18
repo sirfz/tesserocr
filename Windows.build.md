@@ -2,7 +2,7 @@
 
 * [cmake](https://cmake.org/download)
 * [Visual Studio Community](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16)
-* unzip (part of git for windows) or use [gui build-in solutions](https://support.microsoft.com/en-us/windows/zip-and-unzip-files-f6dde0a7-0fec-8294-e1d3-703ed85e7ebc)
+* unzip (part of git for windows) or use [gui built-in solutions](https://support.microsoft.com/en-us/windows/zip-and-unzip-files-f6dde0a7-0fec-8294-e1d3-703ed85e7ebc)
 * [git for windows](https://git-scm.com/download/win) (optional)
 * (optional) [curl](https://curl.se/windows/) for downloading files from internet
 
