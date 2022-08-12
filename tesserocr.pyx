@@ -895,7 +895,7 @@ cdef class PyLTRResultIterator(PyPageIterator):
                                                  &is_monospace, &is_serif, &is_smallcaps,
                                                  &pointsize, &font_id)
         if font_name == NULL:
-            return None
+            font_name = ""
         return {
             'font_name': font_name,
             'bold': is_bold,
