@@ -260,7 +260,7 @@ def make_extension():
     build_args = get_build_args()
     _CYTHON_COMPILE_TIME_ENV = build_args.pop('compile_time_env')
     return Extension(
-        'tesserocr', sources=['tesserocr.pyx'], language='c++', **build_args
+        'tesserocr.tesserocr', sources=['tesserocr.pyx'], language='c++', **build_args
     )
 
 
@@ -327,4 +327,8 @@ setup(
     ext_modules=[make_extension()],
     test_suite='tests',
     setup_requires=['Cython>=0.23'],
+    packages=["tesserocr"],
+    package_dir={"tesserocr": "src/tesserocr"},
+    package_data={"tesserocr": ["py.typed", "__init__.pyi", '*.pyd', '*.dll']},
+    data_files=[],
 )
