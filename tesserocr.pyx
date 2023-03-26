@@ -1169,7 +1169,7 @@ cdef class PyTessBaseAPI:
     ...     tesseract.End()
 
     Args:
-        path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+        path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
             Must end in /.
         lang (str): An ISO 639-3 language string. Defaults to 'eng'.
             The language may be a string of the form [~]<lang>[+[~]<lang>]* indicating
@@ -1256,7 +1256,7 @@ cdef class PyTessBaseAPI:
             self._pix = NULL
 
     def GetDatapath(self):
-        """Return tessdata directory"""
+        """Return tessdata directory(version>=4) or parent of tessdata directory(version<=3)"""
         return self._baseapi.GetDatapath()
 
     def SetOutputName(self, name):
@@ -1390,7 +1390,7 @@ cdef class PyTessBaseAPI:
         Page Segmentation Mode is set to :attr:`PSM.AUTO` after initialization by default.
 
         Args:
-            path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+            path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
                 Must end in /.
             lang (str): An ISO 639-3 language string. Defaults to 'eng'.
                 The language may be a string of the form [~]<lang>[+[~]<lang>]* indicating
@@ -1466,7 +1466,7 @@ cdef class PyTessBaseAPI:
         See :meth:`InitFull` for more initialization info and options.
 
         Args:
-            path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+            path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
                 Must end in /. Uses default installation path if not specified.
             lang (str): An ISO 639-3 language string. Defaults to 'eng'.
                 See :meth:`InitFull` for full description of this parameter.
@@ -2543,7 +2543,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         lang (str): An ISO 639-3 language string. Defaults to 'eng'.
         psm (int): Page segmentation mode. Defaults to :attr:`PSM.AUTO`.
             See :class:`PSM` for all available psm options.
-        path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+        path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
             see :class:`OEM` for all available oem options.
@@ -2593,7 +2593,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         lang (str): An ISO 639-3 language string. Defaults to 'eng'
         psm (int): Page segmentation mode. Defaults to :attr:`PSM.AUTO`
             See :class:`PSM` for all available psm options.
-        path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+        path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
             Must end in /.
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
             see :class:`OEM` for all available oem options.
@@ -2640,7 +2640,7 @@ def get_languages(path=_DEFAULT_PATH):
     """Return available languages in the given path.
 
     Args:
-        path (str): The name of the tessdata directory such as '/usr/share/tesseract/tessdata/'
+        path (str): The name of the tessdata directory (version>=4) or the parent of it (version<=3)
             Must end in /. Default tesseract-ocr datapath is used
             if no path is provided.
 
