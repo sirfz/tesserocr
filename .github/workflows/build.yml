@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build wheel for ${{ matrix.config.platform }}
+
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64 }
+          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64 }
+          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64 }
+          - { os: macos-12,     arch: arm64,  platform: macosx_arm64}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.12.1
+        env:
+          CIBW_ARCHS: "${{ matrix.config.arch }}"
+          CIBW_BUILD: "cp*-${{ matrix.config.platform }}"
+          CIBW_SKIP: "cp36* cp37*"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Build sdist
+        run: python setup.py sdist
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./dist/*

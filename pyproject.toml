@@ -1,0 +1,24 @@
+[tool.cibuildwheel]
+build-verbosity = "1"
+
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[tool.cibuildwheel.linux]
+before-all = [
+  "bash .github/build-scripts/manylinux-install-build-dependencies.sh",
+  "bash .github/build-scripts/linux-install-tesseract.sh",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = [
+  "bash .github/build-scripts/musllinux-install-build-dependencies.sh",
+  "bash .github/build-scripts/linux-install-tesseract.sh",
+]
+
+[tool.cibuildwheel.macos]
+before-all = [
+  "bash .github/build-scripts/macos-install-build-dependencies.sh",
+  "bash .github/build-scripts/macos-install-tesseract.sh",
+]
