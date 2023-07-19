@@ -328,5 +328,5 @@ setup(
     cmdclass={'build_ext': my_build_ext},
     ext_modules=[make_extension()],
     test_suite='tests',
-    setup_requires=['Cython>=0.23'],
+    setup_requires=['Cython>=0.23,<3.0.0'],
 )
