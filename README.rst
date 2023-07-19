@@ -6,9 +6,9 @@ A simple, |Pillow|_-friendly,
 wrapper around the ``tesseract-ocr`` API for Optical Character Recognition
 (OCR).
 
-.. image:: https://travis-ci.com/sirfz/tesserocr.svg?branch=master
-    :target: https://travis-ci.com/sirfz/tesserocr
-    :alt: TravisCI build status
+.. image:: https://github.com/sirfz/tesserocr/actions/workflows/build.yml/badge.svg
+    :target: https://github.com/sirfz/tesserocr/actions/workflows/build.yml
+    :alt: Github Actions build status
 
 .. image:: https://img.shields.io/pypi/v/tesserocr.svg?maxAge=2592000
     :target: https://pypi.python.org/pypi/tesserocr
