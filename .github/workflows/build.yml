@@ -9,26 +9,37 @@ on:
 
 jobs:
   build_wheels:
-    name: Build wheel for ${{ matrix.config.platform }}
+    name: Build wheel for ${{ matrix.config.build }}-${{ matrix.config.platform }}
 
     runs-on: ${{ matrix.config.os }}
     strategy:
       matrix:
         config:
-          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64 }
-          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64 }
-          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64 }
-          - { os: macos-12,     arch: arm64,  platform: macosx_arm64}
+          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64, build: cp* }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp312 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp311 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp310 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp39 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp38 }
+          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64, build: cp* }
+          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64, build: cp* }
+          - { os: macos-12,     arch: arm64,  platform: macosx_arm64, build: cp* }
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
-          CIBW_BUILD: "cp*-${{ matrix.config.platform }}"
+          CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
           CIBW_SKIP: "cp36* cp37*"
 
       - name: Upload Artifacts
