@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.6.1'
+__version__ = '2.6.2'
 
 import os
 from io import BytesIO
@@ -421,7 +421,7 @@ cdef class PyPageIterator:
     cdef PageIterator *_piter
 
     @staticmethod
-    cdef PyPageIterator createPageIterator(PageIterator *piter):
+    cdef PyPageIterator createPageIterator(PageIterator *piter) noexcept:
         cdef PyPageIterator pyiter = PyPageIterator.__new__(PyPageIterator)
         pyiter._piter = piter
         return pyiter
@@ -1091,7 +1091,7 @@ cdef class PyChoiceIterator:
     cdef ChoiceIterator *_citer
 
     @staticmethod
-    cdef PyChoiceIterator create(ChoiceIterator *citer):
+    cdef PyChoiceIterator create(ChoiceIterator *citer) noexcept:
         cdef PyChoiceIterator pyciter = PyChoiceIterator.__new__(PyChoiceIterator)
         pyciter._citer = citer
         return pyciter
@@ -1246,11 +1246,11 @@ cdef class PyTessBaseAPI:
         self._baseapi.SetPageSegMode(psm)
         return ret
 
-    cdef void _end_api(self) nogil:
+    cdef void _end_api(self) noexcept nogil:
         self._destroy_pix()
         self._baseapi.End()
 
-    cdef void _destroy_pix(self) nogil:
+    cdef void _destroy_pix(self) noexcept nogil:
         if self._pix != NULL:
             pixDestroy(&self._pix)
             self._pix = NULL
@@ -2515,7 +2515,7 @@ cdef class PyTessBaseAPI:
 
 
 cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode,
-                          cchar_t *path, OcrEngineMode oem) nogil:
+                          cchar_t *path, OcrEngineMode oem) noexcept nogil:
     cdef:
         TessBaseAPI baseapi
         char *text
