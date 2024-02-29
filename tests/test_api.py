@@ -279,6 +279,7 @@ class TestTessBaseApi(unittest.TestCase):
         # Test if empty
         self.assertFalse(result)
 
+    @unittest.skipIf(not pil_installed, "Pillow not installed")
     def test_layout_getcomponents(self):
         self._api.Init()
         self._api.SetImageFile(self._image_file)
