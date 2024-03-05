@@ -32,6 +32,10 @@ EXTRA_COMPILE_ARGS = {
     'msvc': ['/std:c11', '-DUSE_STD_NAMESPACE'],
     'gcc': ['-std=c++11', '-DUSE_STD_NAMESPACE'],
 }
+EXTRA_COMPILE_ARGS5 = {
+    'msvc': ['/std:c17', '-DUSE_STD_NAMESPACE'],
+    'gcc': ['-std=c++17', '-DUSE_STD_NAMESPACE'],
+}
 
 
 def read(*parts):
@@ -269,13 +273,17 @@ class my_build_ext(build_ext, object):
         compiler = self.compiler.compiler_type
         _LOGGER.info('Detected compiler: %s', compiler)
         extra_args = EXTRA_COMPILE_ARGS.get(compiler, EXTRA_COMPILE_ARGS['gcc'])
+        extra_args5 = EXTRA_COMPILE_ARGS5.get(compiler, EXTRA_COMPILE_ARGS5['gcc'])
         if isinstance(_CYTHON_COMPILE_TIME_ENV, dict):
             version = _CYTHON_COMPILE_TIME_ENV.get('TESSERACT_VERSION', 0)
         else:
             version = 0
 
         for extension in self.extensions:
-            if version >= 0x3050200:
+            if version >= 0x5030400:
+                _LOGGER.debug('tesseract >= 05.03.04 requires c++17 compiler support')
+                extension.extra_compile_args = extra_args5
+            elif version >= 0x3050200:
                 _LOGGER.debug('tesseract >= 03.05.02 requires c++11 compiler support')
                 extension.extra_compile_args = extra_args
 
