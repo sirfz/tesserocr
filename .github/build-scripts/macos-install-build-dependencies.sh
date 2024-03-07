@@ -2,4 +2,4 @@
 set -ex
 
 # leptonica dependencies
-brew install libpng zlib
+brew install libpng libjpeg libtiff libwebp zlib
