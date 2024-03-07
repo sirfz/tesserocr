@@ -2,4 +2,4 @@
 set -ex
 
 # leptonica dependencies
-apk add libpng-dev libjpeg-dev libtiff-dev libwebp-dev zlib-dev
+apk add libpng-dev jpeg-dev tiff-dev libwebp-dev zlib-dev
