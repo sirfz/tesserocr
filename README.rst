@@ -85,7 +85,13 @@ The recommended method of installation is via Conda as described below.
 Conda
 `````
 
-You can use the `conda-forge <https://anaconda.org/conda-forge/tesserocr>`_ channel to install from Conda:
+You can use the `simonflueckiger <https://anaconda.org/simonflueckiger/tesserocr>`_ channel to install from Conda:
+
+::
+
+    > conda install -c simonflueckiger tesserocr
+
+Or alternatively the `conda-forge <https://anaconda.org/conda-forge/tesserocr>`_ channel:
 
 ::
 
