@@ -2193,7 +2193,7 @@ cdef class PyTessBaseAPI:
         raise RuntimeError('No renderers enabled')
 
     def ProcessPage(self, outputbase, image, int page_index, filename,
-                    retry_config=None, int timeout=0):
+                    title="", retry_config=None, int timeout=0):
         """Turn a single image into symbolic text.
 
         See :meth:`ProcessPages` for descriptions of the keyword arguments
@@ -2230,6 +2230,7 @@ cdef class PyTessBaseAPI:
         if pix == NULL:
             raise RuntimeError('Failed to read image')
         if renderer != NULL:
+            renderer.BeginDocument(title)
             if retry_config is not None:
                 py_config = _b(retry_config)
                 cconfig = py_config
@@ -2238,6 +2239,7 @@ cdef class PyTessBaseAPI:
             try:
                 return self._baseapi.ProcessPage(pix, page_index, cfname, cconfig, timeout, renderer)
             finally:
+                renderer.EndDocument()
                 pixDestroy(&pix)
                 del renderer
         raise RuntimeError('No renderers enabled')
