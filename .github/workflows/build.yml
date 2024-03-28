@@ -36,7 +36,7 @@ jobs:
           platforms: all
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
@@ -45,6 +45,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
+          name: wheels-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.build }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
@@ -65,4 +66,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
+          name: source
           path: ./dist/*
