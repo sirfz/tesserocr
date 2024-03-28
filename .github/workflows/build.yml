@@ -45,7 +45,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.build }}
+          name: wheels-${{ matrix.config.os }}-${{ matrix.config.platform }}-${{ matrix.config.build }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
