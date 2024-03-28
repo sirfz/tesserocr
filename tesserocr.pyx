@@ -421,7 +421,7 @@ cdef class PyPageIterator:
     cdef PageIterator *_piter
 
     @staticmethod
-    cdef PyPageIterator createPageIterator(PageIterator *piter) noexcept:
+    cdef PyPageIterator createPageIterator(PageIterator *piter):
         cdef PyPageIterator pyiter = PyPageIterator.__new__(PyPageIterator)
         pyiter._piter = piter
         return pyiter
@@ -1091,7 +1091,7 @@ cdef class PyChoiceIterator:
     cdef ChoiceIterator *_citer
 
     @staticmethod
-    cdef PyChoiceIterator create(ChoiceIterator *citer) noexcept:
+    cdef PyChoiceIterator create(ChoiceIterator *citer):
         cdef PyChoiceIterator pyciter = PyChoiceIterator.__new__(PyChoiceIterator)
         pyciter._citer = citer
         return pyciter
@@ -1225,7 +1225,7 @@ cdef class PyTessBaseAPI:
       cdef int _init_api(self, cchar_t *path, cchar_t *lang,
                         OcrEngineMode oem, char **configs, int configs_size,
                         const vector[string] *vars_vec, const vector[string] *vars_vals,
-                        bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
+                        bool set_only_non_debug_params, PageSegMode psm) except -1 nogil:
         cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
                                           set_only_non_debug_params)
         if ret == -1:
@@ -1237,7 +1237,7 @@ cdef class PyTessBaseAPI:
       cdef int _init_api(self, cchar_t *path, cchar_t *lang,
                         OcrEngineMode oem, char **configs, int configs_size,
                         const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
-                        bool set_only_non_debug_params, PageSegMode psm) nogil except -1:
+                        bool set_only_non_debug_params, PageSegMode psm) except -1 nogil:
         cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
                                           set_only_non_debug_params)
         if ret == -1:
