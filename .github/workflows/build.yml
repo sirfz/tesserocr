@@ -15,15 +15,15 @@ jobs:
     strategy:
       matrix:
         config:
-          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64, build: cp* }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp312 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp311 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp310 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp39 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp38 }
-          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64, build: cp* }
-          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64, build: cp* }
-          - { os: macos-12,     arch: arm64,  platform: macosx_arm64, build: cp* }
+          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64, build: cp*, tag: cpall }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp312, tag: cp312 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp311, tag: cp311 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp310, tag: cp310 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp39, tag: cp39 }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp38, tag: cp38 }
+          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
+          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
+          - { os: macos-12,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
 
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.config.platform }}
+          name: "wheels-${{ matrix.config.platform }}-${{ matrix.config.tag }}"
           path: ./wheelhouse/*.whl
 
   build_sdist:
