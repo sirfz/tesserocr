@@ -183,6 +183,8 @@ cdef extern from "tesseract/resultiterator.h" namespace "tesseract" nogil:
 cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessResultRenderer:
         void insert(TessResultRenderer *)
+        bool BeginDocument(cchar_t *)
+        bool EndDocument()
 
     cdef cppclass TessTextRenderer(TessResultRenderer):
         TessTextRenderer(cchar_t *) except +
