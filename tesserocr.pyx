@@ -1204,47 +1204,107 @@ cdef class PyTessBaseAPI:
     def ClearPersistentCache():
         return TessBaseAPI.ClearPersistentCache()
 
-    def __cinit__(self, path=_DEFAULT_PATH,
-                  lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
+    def __cinit__(self,
+                  path=_DEFAULT_PATH,
+                  lang=_DEFAULT_LANG,
+                  PageSegMode psm=PSM_AUTO,
                   bool init=True,
-                  OcrEngineMode oem=OEM_DEFAULT):
-        cdef:
-            bytes py_path = _b(path)
-            bytes py_lang = _b(lang)
-            cchar_t *cpath = py_path
-            cchar_t *clang = py_lang
+                  OcrEngineMode oem=OEM_DEFAULT,
+                  list configs=None,
+                  dict variables=None,
+                  bool set_only_non_debug_params=False):
+        IF TESSERACT_MAJOR_VERSION >= 5:
+            cdef:
+                bytes py_path = _b(path)
+                bytes py_lang = _b(lang)
+                cchar_t *cpath = py_path
+                cchar_t *clang = py_lang
+                int configs_size = 0
+                char **configs_ = NULL
+                vector[string] vars_vec
+                vector[string] vars_vals
+                cchar_t *val
+                string sval
+        ELSE:
+            cdef:
+                bytes py_path = _b(path)
+                bytes py_lang = _b(lang)
+                cchar_t *cpath = py_path
+                cchar_t *clang = py_lang
+                int configs_size = 0
+                char **configs_ = NULL
+                GenericVector[STRING] vars_vec
+                GenericVector[STRING] vars_vals
+                cchar_t *val
+                STRING sval
+
+        if configs:
+            configs_size = len(configs)
+            configs_ = <char **>malloc(configs_size * sizeof(char *))
+            for i, c in enumerate(configs):
+                c = _b(c)
+                configs_[i] = c
+
+        if variables:
+            for k, v in variables.items():
+                k = _b(k)
+                val = k
+                sval = val
+                vars_vec.push_back(sval)
+                v = _b(v)
+                val = v
+                sval = val
+                vars_vals.push_back(sval)
+
         with nogil:
             self._pix = NULL
-            if init:
-                self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, psm)
+            try:
+                if init:
+                    self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
+                                   set_only_non_debug_params, psm)
+            finally:
+                if configs_size > 0:
+                    free(configs_)
 
     def __dealloc__(self):
         self._end_api()
 
     IF TESSERACT_MAJOR_VERSION >= 5:
-      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
-                        OcrEngineMode oem, char **configs, int configs_size,
-                        const vector[string] *vars_vec, const vector[string] *vars_vals,
-                        bool set_only_non_debug_params, PageSegMode psm) except -1 nogil:
-        cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
-                                          set_only_non_debug_params)
-        if ret == -1:
-            with gil:
-                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
-        self._baseapi.SetPageSegMode(psm)
-        return ret
+        cdef int _init_api(self,
+                           cchar_t *path,
+                           cchar_t *lang,
+                           OcrEngineMode oem,
+                           char **configs,
+                           int configs_size,
+                           const vector[string] *vars_vec,
+                           const vector[string] *vars_vals,
+                           bool set_only_non_debug_params,
+                           PageSegMode psm) except -1 nogil:
+            cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
+                                              set_only_non_debug_params)
+            if ret == -1:
+                with gil:
+                    raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+            self._baseapi.SetPageSegMode(psm)
+            return ret
     ELSE:
-      cdef int _init_api(self, cchar_t *path, cchar_t *lang,
-                        OcrEngineMode oem, char **configs, int configs_size,
-                        const GenericVector[STRING] *vars_vec, const GenericVector[STRING] *vars_vals,
-                        bool set_only_non_debug_params, PageSegMode psm) except -1 nogil:
-        cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
-                                          set_only_non_debug_params)
-        if ret == -1:
-            with gil:
-                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
-        self._baseapi.SetPageSegMode(psm)
-        return ret
+        cdef int _init_api(self,
+                           cchar_t *path,
+                           cchar_t *lang,
+                           OcrEngineMode oem,
+                           char **configs,
+                           int configs_size,
+                           const GenericVector[STRING] *vars_vec,
+                           const GenericVector[STRING] *vars_vals,
+                           bool set_only_non_debug_params,
+                           PageSegMode psm) except -1 nogil:
+            cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
+                                              set_only_non_debug_params)
+            if ret == -1:
+                with gil:
+                    raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+            self._baseapi.SetPageSegMode(psm)
+            return ret
 
     cdef void _end_api(self) noexcept nogil:
         self._destroy_pix()
@@ -1378,9 +1438,14 @@ cdef class PyTessBaseAPI:
             return val.c_str()
         return None
 
-    def InitFull(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
-                 OcrEngineMode oem=OEM_DEFAULT, list configs=[],
-                 dict variables={}, bool set_only_non_debug_params=False):
+    def InitFull(self,
+                 path=_DEFAULT_PATH,
+                 lang=_DEFAULT_LANG,
+                 OcrEngineMode oem=OEM_DEFAULT,
+                 list configs=None,
+                 dict variables=None,
+                 bool set_only_non_debug_params=False,
+                 PageSegMode psm=PSM_AUTO):
         """Initialize the API with the given parameters (advanced).
 
         It is entirely safe (and eventually will be efficient too) to call
@@ -1414,53 +1479,58 @@ cdef class PyTessBaseAPI:
             :exc:`RuntimeError`: If API initialization fails.
         """
         IF TESSERACT_MAJOR_VERSION >= 5:
-          cdef:
-            bytes py_path = _b(path)
-            bytes py_lang = _b(lang)
-            cchar_t *cpath = py_path
-            cchar_t *clang = py_lang
-            int configs_size = len(configs)
-            char **configs_ = <char **>malloc(configs_size * sizeof(char *))
-            vector[string] vars_vec
-            vector[string] vars_vals
-            cchar_t *val
-            string sval
+            cdef:
+                bytes py_path = _b(path)
+                bytes py_lang = _b(lang)
+                cchar_t *cpath = py_path
+                cchar_t *clang = py_lang
+                int configs_size = 0
+                char **configs_ = NULL
+                vector[string] vars_vec
+                vector[string] vars_vals
+                cchar_t *val
+                string sval
         ELSE:
-          cdef:
-            bytes py_path = _b(path)
-            bytes py_lang = _b(lang)
-            cchar_t *cpath = py_path
-            cchar_t *clang = py_lang
-            int configs_size = len(configs)
-            char **configs_ = <char **>malloc(configs_size * sizeof(char *))
-            GenericVector[STRING] vars_vec
-            GenericVector[STRING] vars_vals
-            cchar_t *val
-            STRING sval
+            cdef:
+                bytes py_path = _b(path)
+                bytes py_lang = _b(lang)
+                cchar_t *cpath = py_path
+                cchar_t *clang = py_lang
+                int configs_size = 0
+                char **configs_ = NULL
+                GenericVector[STRING] vars_vec
+                GenericVector[STRING] vars_vals
+                cchar_t *val
+                STRING sval
 
-        for i, c in enumerate(configs):
-            c = _b(c)
-            configs_[i] = c
+        if configs:
+            configs_size = len(configs)
+            configs_ = <char **>malloc(configs_size * sizeof(char *))
+            for i, c in enumerate(configs):
+                c = _b(c)
+                configs_[i] = c
 
-        for k, v in variables.items():
-            k = _b(k)
-            val = k
-            sval = val
-            vars_vec.push_back(sval)
-            v = _b(v)
-            val = v
-            sval = val
-            vars_vals.push_back(sval)
+        if variables:
+            for k, v in variables.items():
+                k = _b(k)
+                val = k
+                sval = val
+                vars_vec.push_back(sval)
+                v = _b(v)
+                val = v
+                sval = val
+                vars_vals.push_back(sval)
 
         with nogil:
             try:
                 self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
-                               set_only_non_debug_params, PSM_AUTO)
+                               set_only_non_debug_params, psm)
             finally:
-                free(configs_)
+                if configs_size > 0:
+                    free(configs_)
 
     def Init(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
-             OcrEngineMode oem=OEM_DEFAULT):
+             OcrEngineMode oem=OEM_DEFAULT, PageSegMode psm=PSM_AUTO):
         """Initialize the API with the given data path, language and OCR engine mode.
 
         See :meth:`InitFull` for more initialization info and options.
@@ -1482,7 +1552,7 @@ cdef class PyTessBaseAPI:
             cchar_t *cpath = py_path
             cchar_t *clang = py_lang
         with nogil:
-            self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, PSM_AUTO)
+            self._init_api(cpath, clang, oem, NULL, 0, NULL, NULL, False, psm)
 
     def GetInitLanguagesAsString(self):
         """Return the languages string used in the last valid initialization.
