@@ -50,7 +50,7 @@ cdef bytes _b(s):
 
 
 # default parameters
-setMsgSeverity(L_SEVERITY_NONE)  # suppress leptonica error messages
+setMsgSeverity(L_SEVERITY_ERROR)  # suppress leptonica error messages
 cdef TessBaseAPI _api
 _api.SetVariable('debug_file', '/dev/null')  # suppress tesseract debug messages
 _api.Init(NULL, NULL)
@@ -62,6 +62,7 @@ _init_lang = _api.GetInitLanguagesAsString()
 if _init_lang == '':
     _init_lang = 'eng'
 cdef _DEFAULT_LANG = _init_lang
+_api.SetVariable('debug_file', '')
 _api.End()
 TessBaseAPI.ClearPersistentCache()
 
@@ -316,6 +317,25 @@ cdef class DIR(_Enum):
     MIX = DIR_MIX
     """Text contains a mixture of left-to-right
     and right-to-left characters."""
+
+
+cdef class LeptLogLevel(_Enum):
+    """Enum for Leptonica log messages level."""
+
+    EXTERNAL = L_SEVERITY_EXTERNAL
+    """Get the severity from the environment"""
+    ALL = L_SEVERITY_ALL
+    """Lowest severity: print all messages"""
+    DEBUG = L_SEVERITY_DEBUG
+    """Print debugging and higher messages"""
+    INFO = L_SEVERITY_INFO
+    """Print informational and higher messages"""
+    WARNING = L_SEVERITY_WARNING
+    """Print warning and higher messages"""
+    ERROR = L_SEVERITY_ERROR
+    """Print error and higher messages"""
+    NONE = L_SEVERITY_NONE
+    """Highest severity: print no messages"""
 
 
 cdef unicode _free_str(char *text):
@@ -2746,3 +2766,11 @@ def get_languages(path=_DEFAULT_PATH):
     langs = [v[i].c_str() for i in xrange(v.size())]
     baseapi.End()
     return path, langs
+
+
+def set_leptonica_log_level(LeptLogLevel level):
+    """Set Leptonica's emitted log messages level.
+
+    See :class:`LeptLogLevel` for all available psm options.
+    """
+    setMsgSeverity(level)
