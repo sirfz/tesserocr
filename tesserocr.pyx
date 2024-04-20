@@ -1182,11 +1182,16 @@ cdef class PyTessBaseAPI:
             both speed and accuracy, as there is more work to do to decide on the
             applicable language, and there is more chance of hallucinating incorrect
             words.
-        psm (int): Page segmentation mode. Defaults to :attr:`PSM.AUTO`.
-            See :class:`PSM` for available psm values.
-        init (bool): If ``False``, :meth:`Init` will not be called and has to be called
-            after initialization.
+        psm (int): the desired PageSegMode. Defaults to :attr:`PSM.AUTO`
+            See :class:`PSM` for all available options.
+        init (bool): if ``False``, the tesseract API won't be initialized. You need
+            to call one of `Init` or `InitFull` to initialize the API. Defaults to ``True``
         oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
+            See :class:`OEM` for all available options.
+        configs (list): List of config files to load variables from.
+        variables (dict): Extra variables to be set.
+        set_only_non_debug_params (bool): If ``True``, only params that do not contain
+            "debug" in the name will be set.
 
     Raises:
         :exc:`RuntimeError`: If `init` is ``True`` and API initialization fails.
@@ -1474,6 +1479,8 @@ cdef class PyTessBaseAPI:
             variables (dict): Extra variables to be set.
             set_only_non_debug_params (bool): If ``True``, only params that do not contain
                 "debug" in the name will be set.
+            psm (int): the desired PageSegMode. Defaults to :attr:`PSM.AUTO`
+                See :class:`PSM` for all available options.
 
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
@@ -1542,6 +1549,8 @@ cdef class PyTessBaseAPI:
                 See :meth:`InitFull` for full description of this parameter.
             oem (int): OCR engine mode. Defaults to :attr:`OEM.DEFAULT`.
                 See :class:`OEM` for all available options.
+            psm (int): the desired PageSegMode. Defaults to :attr:`PSM.AUTO`
+                See :class:`PSM` for all available options.
 
         Raises:
             :exc:`RuntimeError`: If API initialization fails.
