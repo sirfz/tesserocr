@@ -30,9 +30,9 @@ except ImportError:
     pass
 
 IF TESSERACT_MAJOR_VERSION < 5:
-    from tesseract cimport *
+    from .tesseract cimport *
 ELSE:
-    from tesseract5 cimport *
+    from .tesseract5 cimport *
 from libc.stdlib cimport malloc, free
 from libcpp.pair cimport pair
 from libcpp.vector cimport vector
@@ -2771,6 +2771,6 @@ def get_languages(path=_DEFAULT_PATH):
 def set_leptonica_log_level(LeptLogLevel level):
     """Set Leptonica's emitted log messages level.
 
-    See :class:`LeptLogLevel` for all available psm options.
+    See :class:`LeptLogLevel` for available options.
     """
     setMsgSeverity(level)
