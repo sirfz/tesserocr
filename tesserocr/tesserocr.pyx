@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.7.0'
+__version__ = '2.7.1'
 
 import os
 from io import BytesIO
@@ -62,7 +62,6 @@ _init_lang = _api.GetInitLanguagesAsString()
 if _init_lang == '':
     _init_lang = 'eng'
 cdef _DEFAULT_LANG = _init_lang
-_api.SetVariable('debug_file', '')
 _api.End()
 TessBaseAPI.ClearPersistentCache()
 
@@ -2768,7 +2767,7 @@ def get_languages(path=_DEFAULT_PATH):
     return path, langs
 
 
-def set_leptonica_log_level(LeptLogLevel level):
+def set_leptonica_log_level(int level):
     """Set Leptonica's emitted log messages level.
 
     See :class:`LeptLogLevel` for available options.
