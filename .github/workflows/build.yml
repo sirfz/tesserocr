@@ -16,6 +16,7 @@ jobs:
       matrix:
         config:
           - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64, build: cp*, tag: cpall }
+          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp313, tag: cp313 }
           - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp312, tag: cp312 }
           - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp311, tag: cp311 }
           - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp310, tag: cp310 }
@@ -36,7 +37,7 @@ jobs:
           platforms: all
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.17.0
+        uses: pypa/cibuildwheel@v2.21.1
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
