@@ -41,6 +41,7 @@ jobs:
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
+          CIBW_ENABLE: cpython-freethreading
           CIBW_SKIP: "cp36* cp37*"
 
       - name: Upload Artifacts
