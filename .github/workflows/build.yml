@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "v*.*.*"
+    branches:
+      - "*"
+  pull_request:
 
   workflow_dispatch:
 
@@ -13,36 +16,26 @@ jobs:
 
     runs-on: ${{ matrix.config.os }}
     strategy:
+      fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-22.04, arch: x86_64, platform: manylinux_x86_64, build: cp*, tag: cpall }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp313, tag: cp313 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp312, tag: cp312 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp311, tag: cp311 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp310, tag: cp310 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp39, tag: cp39 }
-          - { os: ubuntu-22.04, arch: aarch64, platform: manylinux_aarch64, build: cp38, tag: cp38 }
-          - { os: ubuntu-22.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
-          - { os: macos-12,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
-          - { os: macos-12,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
+          - { os: ubuntu-24.04, arch: x86_64, platform: manylinux_x86_64, build: cp*, tag: cpall }
+          - { os: ubuntu-24.04-arm, arch: aarch64, platform: manylinux_aarch64, build: cp*, tag: cpall }
+          - { os: ubuntu-24.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
+          - { os: macos-13,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
+          - { os: macos-15,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
-
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.1
+        uses: pypa/cibuildwheel@v2.22.0
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
           CIBW_ENABLE: cpython-freethreading
-          CIBW_SKIP: "cp36* cp37*"
+          CIBW_SKIP: "cp36* cp37* cp38*"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
