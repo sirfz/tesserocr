@@ -16,7 +16,7 @@ cmake \
   -DENABLE_GIF=OFF \
   -DENABLE_OPENJPEG=OFF
 
-cmake \
+sudo cmake \
   --build build \
   --config Release \
   --target install
@@ -39,7 +39,7 @@ cmake \
   -DOPENMP_BUILD=OFF \
   -DBUILD_TRAINING_TOOLS=OFF
 
-cmake \
+sudo cmake \
   --build build \
   --config Release \
   --target install
