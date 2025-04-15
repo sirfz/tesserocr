@@ -83,7 +83,7 @@ class TestTessBaseApi(unittest.TestCase):
         self._api.End()
         self._api.InitFull(configs=configs, variables=vars_)
         # assert file_type from box.train and custom edges_childarea
-        self.assertEqual(self._api.GetVariableAsString("file_type"), ".bl")
+        self.assertEqual(self._api.GetVariableAsString("file_type"), ".tif")
         self.assertEqual(self._api.GetVariableAsString("edges_childarea"), "0.7")
         # reset back to default
         self._api.End()
