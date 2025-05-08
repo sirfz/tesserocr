@@ -146,7 +146,7 @@ cdef extern from "tesseract/pageiterator.h" namespace "tesseract" nogil:
 
 cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
     cdef cppclass LTRResultIterator(PageIterator):
-            char *GetUTF8Text(PageIteratorLevel) const
+            char *GetUTF8Text(PageIteratorLevel) except + # const (https://stackoverflow.com/a/29396365)
             void SetLineSeparator(cchar_t *)
             void SetParagraphSeparator(cchar_t *)
             float Confidence(PageIteratorLevel) const
@@ -172,7 +172,7 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
     cdef cppclass ChoiceIterator:
         ChoiceIterator(const LTRResultIterator &) except +
         bool Next()
-        cchar_t *GetUTF8Text() const
+        cchar_t *GetUTF8Text() except + # const (https://stackoverflow.com/a/29396365)
         float Confidence() const
 
 cdef extern from "tesseract/resultiterator.h" namespace "tesseract" nogil:
@@ -309,14 +309,14 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
             bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
             ResultIterator *GetIterator()
-            char *GetUTF8Text()
+            char *GetUTF8Text() except +
             char *GetHOCRText(int)
             char *GetTSVText(int)
             char *GetBoxText(int)
             char *GetUNLVText()
             bool DetectOrientationScript(int *, float *, cchar_t **, float *)
             int MeanTextConf()
-            int *AllWordConfidences()
+            int *AllWordConfidences() except +
             bool AdaptToWordStr(PageSegMode, cchar_t *)
             void Clear()
             void End()
