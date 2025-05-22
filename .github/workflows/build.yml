@@ -35,6 +35,10 @@ jobs:
         if: runner.os == 'macOS'
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" | tee -a $GITHUB_ENV
 
+      - name: Install Git (for Bash)
+        if: runner.os == 'Windows'
+        run: choco install git -y
+
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.22.0
         env:
