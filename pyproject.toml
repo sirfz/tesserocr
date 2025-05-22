@@ -24,4 +24,4 @@ before-all = [
 ]
 
 [tool.cibuildwheel.windows]
-before-all = "bash tools/win_build_dependencies.sh"
+before-all = "bash .github/build-scripts/win_build_dependencies.sh"
