@@ -22,3 +22,6 @@ before-all = [
   "bash .github/build-scripts/macos-install-build-dependencies.sh",
   "bash .github/build-scripts/macos-install-tesseract.sh",
 ]
+
+[tool.cibuildwheel.windows]
+before-all = "bash tools/win_build_dependencies.sh"

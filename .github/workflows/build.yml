@@ -24,6 +24,8 @@ jobs:
           - { os: ubuntu-24.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
           - { os: macos-13,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
           - { os: macos-15,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
+          - { os: windows-latest, arch: AMD64, platform: win_amd64, build: cp*, tag: cpall }
+          - { os: windows-latest, arch: x86, platform: win32, build: cp*, tag: cpall }
 
     steps:
       - name: Checkout
@@ -39,6 +41,13 @@ jobs:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
           CIBW_SKIP: "cp36* cp37* cp38*"
+          # For Windows, pass the INCLUDE, LIBPATH, TESSDATA_PREFIX, and Path from GITHUB_ENV
+          # These were set by tools/win_build_dependencies.sh
+          CIBW_ENVIRONMENT_WINDOWS: >
+            INCLUDE=${{ env.INCLUDE }}
+            LIBPATH=${{ env.LIBPATH }}
+            TESSDATA_PREFIX=${{ env.TESSDATA_PREFIX }}
+            Path=${{ env.Path }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
