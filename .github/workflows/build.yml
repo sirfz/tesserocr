@@ -13,7 +13,6 @@ on:
 jobs:
   build_wheels:
     name: Build wheel for ${{ matrix.config.build }}-${{ matrix.config.platform }}
-
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -24,6 +23,7 @@ jobs:
           - { os: ubuntu-24.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
           - { os: macos-13,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
           - { os: macos-15,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
+          - { os: windows-latest, arch: AMD64,  platform: win_amd64, build: cp*, tag: cpall } # Matched arch to platform
 
     steps:
       - name: Checkout
@@ -33,12 +33,20 @@ jobs:
         if: runner.os == 'macOS'
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" | tee -a $GITHUB_ENV
 
+      # For Windows, ensure the MSVC developer command prompt is set up
+      # This is often needed for CMake to find the compiler correctly.
+      - name: Setup MSVC developer command prompt
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.22.0
         env:
+          # CIBW_ARCHS, CIBW_BUILD, CIBW_SKIP are now in pyproject.toml for Windows
+          # For Linux/macOS, they are still picked from matrix here if not in pyproject.toml for those platforms
           CIBW_ARCHS: "${{ matrix.config.arch }}"
-          CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
-          CIBW_SKIP: "cp36* cp37* cp38*"
+          CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}" # This might be overridden by pyproject.toml for some platforms
+          CIBW_SKIP: "cp36* cp37* cp38*" # Global skip, can be overridden per platform in pyproject.toml
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -56,7 +64,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.8" # sdist build python version
 
       - name: Build sdist
         run: python setup.py sdist
