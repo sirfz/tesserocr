@@ -22,3 +22,29 @@ before-all = [
   "bash .github/build-scripts/macos-install-build-dependencies.sh",
   "bash .github/build-scripts/macos-install-tesseract.sh",
 ]
+
+[tool.cibuildwheel.windows]
+before-all = [
+  # Initialize MSVC environment. This action makes cl.exe, link.exe, etc., available.
+  "powershell -Command \"& .github/build-scripts/windows-install-dependencies.ps1 -InstallDir $env:GITHUB_WORKSPACE\\win64\"", # Use environment variable for path
+]
+# Environment variables needed by setup.py and tesserocr itself at runtime
+environment = {
+    PATH="{project}\\win64\\bin;{env_path}", # Add DLLs to PATH for the build and tests
+    INCLUDE="{project}\\win64\\include;{env_include}",
+    LIB="{project}\\win64\\lib;{env_lib}",
+    TESSDATA_PREFIX="{project}\\tessdata"
+}
+# Command to repair the wheel by copying DLLs.
+# This uses the environment variables set above by cibuildwheel.
+repair-wheel-command = "powershell -Command \"Get-ChildItem -Path $env:INSTALL_DIR\\bin\\*.dll | Copy-Item -Destination {dest_dir}\""
+
+# You might still need setup.py to point to the correct include/lib directories.
+# The environment variables set above should help, but ensure your setup.py's
+# get_tesseract_version() function for Windows correctly uses these.
+# Specifically, the parts that look for libraries and include paths:
+# os.getenv("LIBPATH") and os.getenv("INCLUDE") should now pick up the values.
+# Your setup.py already seems to try to use LIBPATH and INCLUDE.
+
+# Skip Python 3.6, 3.7, 3.8 as per your existing config
+skip = "cp36-* cp37-* cp38-*"
