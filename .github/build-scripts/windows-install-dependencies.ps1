@@ -62,22 +62,35 @@ New-Item -ItemType Directory -Path $TempBuildDir -Force | Out-Null
 function Get-Archive {
     param (
         [string]$Url,
-        [string]$OutFile,
+        [string]$OutFile, # This is the name of the file as it will be saved locally
         [string]$ExtractTo = "."
     )
     $FullOutFile = Join-Path $TempBuildDir $OutFile
     $FullExtractTo = Join-Path $TempBuildDir $ExtractTo
+
     Write-Host "Downloading $Url to $FullOutFile..."
     Invoke-WebRequest -Uri $Url -OutFile $FullOutFile
+
     Write-Host "Extracting $FullOutFile to $FullExtractTo..."
-    tar -xf $FullOutFile -C $FullExtractTo
+    if ($FullOutFile.EndsWith(".zip")) {
+        Expand-Archive -Path $FullOutFile -DestinationPath $FullExtractTo -Force
+    }
+    elseif ($FullOutFile.EndsWith(".tar.gz") -or $FullOutFile.EndsWith(".tgz") -or $FullOutFile.EndsWith(".tar.bz2") -or $FullOutFile.EndsWith(".tar")) {
+        tar -xf $FullOutFile -C $FullExtractTo
+    }
+    else {
+        Write-Error "Unrecognized archive format for file: $FullOutFile"
+        # Optionally, attempt tar as a fallback or throw an error
+        # tar -xf $FullOutFile -C $FullExtractTo # Fallback attempt
+        exit 1 # Or handle more gracefully
+    }
     Remove-Item $FullOutFile
 }
 
 # --- Build zlib ---
 Write-Host "Building zlib $ZlibVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://zlib.net/zlib-$($ZlibVersion).tar.gz" -OutFile "zlib.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://zlib.net/zlib-$($ZlibVersion).tar.gz" -OutFile "zlib-$($ZlibVersion).tar.gz" -ExtractTo "."
 Push-Location "zlib-$ZlibVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -87,15 +100,14 @@ Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libpng ---
 Write-Host "Building libpng $LibPngVersion..."
-$LibPngFileName = "lpng$($LibPngVersion -replace '\.','').zip" # e.g., lpng1648.zip
-$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"     # e.g., lpng1648
-# Use a more direct SourceForge download link
-$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngFileName)"
+$LibPngFileNameOnDisk = "libpng-$($LibPngVersion).zip" # How we save it
+$LibPngSourceFileNameInUrl = "lpng$($LibPngVersion -replace '\.','').zip" # e.g., lpng1648.zip, as in the URL
+$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"     # e.g., lpng1648, the typical extracted folder name
+$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngSourceFileNameInUrl)"
 
 Push-Location $TempBuildDir
-# Ensure the output file has a .zip extension for clarity, though Get-Archive renames it internally
-Get-Archive -Url $LibPngUrl -OutFile "libpng-$($LibPngVersion).zip" -ExtractTo "."
-Push-Location $LibPngDirName # Navigate into the correct extracted folder, e.g., lpng1648
+Get-Archive -Url $LibPngUrl -OutFile $LibPngFileNameOnDisk -ExtractTo "."
+Push-Location $LibPngDirName
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DPNG_SHARED=ON -DPNG_STATIC=OFF -DZLIB_ROOT=$env:INSTALL_DIR
@@ -105,7 +117,7 @@ Pop-Location; Pop-Location; Pop-Location
 # --- Build libjpeg-turbo ---
 Write-Host "Building libjpeg-turbo $LibJpegTurboVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/$($LibJpegTurboVersion).tar.gz" -OutFile "libjpeg-turbo.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/$($LibJpegTurboVersion).tar.gz" -OutFile "libjpeg-turbo-$($LibJpegTurboVersion).tar.gz" -ExtractTo "."
 Push-Location "libjpeg-turbo-$LibJpegTurboVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -116,7 +128,7 @@ Pop-Location; Pop-Location; Pop-Location
 # --- Build libwebp ---
 Write-Host "Building libwebp $LibWebPVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$($LibWebPVersion).tar.gz" -OutFile "libwebp.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$($LibWebPVersion).tar.gz" -OutFile "libwebp-$($LibWebPVersion).tar.gz" -ExtractTo "."
 Push-Location "libwebp-$LibWebPVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -127,7 +139,7 @@ Pop-Location; Pop-Location; Pop-Location
 # --- Build libtiff ---
 Write-Host "Building libtiff $LibTiffVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://download.osgeo.org/libtiff/tiff-$($LibTiffVersion).tar.gz" -OutFile "libtiff.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://download.osgeo.org/libtiff/tiff-$($LibTiffVersion).tar.gz" -OutFile "libtiff-$($LibTiffVersion).tar.gz" -ExtractTo "."
 Push-Location "tiff-$LibTiffVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -138,7 +150,7 @@ Pop-Location; Pop-Location; Pop-Location
 # --- Build Leptonica ---
 Write-Host "Building Leptonica $LeptonicaVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://github.com/DanBloomberg/leptonica/archive/$($LeptonicaVersion).tar.gz" -OutFile "leptonica.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://github.com/DanBloomberg/leptonica/archive/$($LeptonicaVersion).tar.gz" -OutFile "leptonica-$($LeptonicaVersion).tar.gz" -ExtractTo "."
 Push-Location "leptonica-$LeptonicaVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -155,7 +167,7 @@ Pop-Location; Pop-Location; Pop-Location
 # --- Build Tesseract ---
 Write-Host "Building Tesseract $TesseractVersion..."
 Push-Location $TempBuildDir
-Get-Archive -Url "https://github.com/tesseract-ocr/tesseract/archive/$($TesseractVersion).tar.gz" -OutFile "tesseract.tar.gz" -ExtractTo "."
+Get-Archive -Url "https://github.com/tesseract-ocr/tesseract/archive/$($TesseractVersion).tar.gz" -OutFile "tesseract-$($TesseractVersion).tar.gz" -ExtractTo "."
 Push-Location "tesseract-$TesseractVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -177,7 +189,7 @@ $TessdataRepo = "https://github.com/tesseract-ocr/tessdata_fast"
 Invoke-WebRequest -Uri "$TessdataRepo/raw/main/eng.traineddata" -OutFile "$env:TESSDATA_PREFIX\eng.traineddata"
 Invoke-WebRequest -Uri "$TessdataRepo/raw/main/osd.traineddata" -OutFile "$env:TESSDATA_PREFIX\osd.traineddata"
 
-Pop-Location
+Pop-Location # Back to original location before $TempBuildDir
 Remove-Item -Recurse -Force $TempBuildDir
 
 Write-Host "Windows dependencies installation complete."
