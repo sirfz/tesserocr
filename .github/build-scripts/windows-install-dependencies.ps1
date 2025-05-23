@@ -27,7 +27,7 @@ param (
 )
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop" # This will cause the script to exit on any terminating error
 
 Write-Host "--- Configuration ---"
 Write-Host "Install directory: $InstallDir"
@@ -54,9 +54,11 @@ $env:TESSDATA_PREFIX = "$env:GITHUB_WORKSPACE\tessdata"
 # Temporary directory for downloads and builds
 $TempBuildDir = "$env:RUNNER_TEMP\build_deps"
 if (Test-Path $TempBuildDir) {
+    Write-Host "Removing existing temporary build directory: $TempBuildDir"
     Remove-Item -Recurse -Force $TempBuildDir
 }
 New-Item -ItemType Directory -Path $TempBuildDir -Force | Out-Null
+Write-Host "Created temporary build directory: $TempBuildDir"
 
 # Helper function to download and extract
 function Get-Archive {
@@ -69,22 +71,68 @@ function Get-Archive {
     $FullExtractTo = Join-Path $TempBuildDir $ExtractTo
 
     Write-Host "Downloading $Url to $FullOutFile..."
-    Invoke-WebRequest -Uri $Url -OutFile $FullOutFile
+    try {
+        if ($Url -like "*sourceforge.net*") {
+            Invoke-WebRequest -Uri $Url -OutFile $FullOutFile -UseBasicParsing -ErrorAction Stop
+        } else {
+            Invoke-WebRequest -Uri $Url -OutFile $FullOutFile -ErrorAction Stop
+        }
+        # Check file size
+        $fileInfo = Get-Item $FullOutFile
+        if ($fileInfo.Length -eq 0) {
+            throw "Downloaded file '$FullOutFile' is empty (0 bytes)."
+        }
+        Write-Host "Downloaded '$FullOutFile' successfully. Size: $($fileInfo.Length) bytes."
+    }
+    catch {
+        Write-Error "Failed to download '$Url'. Error: $($_.Exception.Message)"
+        throw # Rethrow to stop the script as per $ErrorActionPreference = "Stop"
+    }
 
     Write-Host "Extracting $FullOutFile to $FullExtractTo..."
-    if ($FullOutFile.EndsWith(".zip")) {
-        Expand-Archive -Path $FullOutFile -DestinationPath $FullExtractTo -Force
+    try {
+        if ($FullOutFile.EndsWith(".zip")) {
+            Expand-Archive -Path $FullOutFile -DestinationPath $FullExtractTo -Force -ErrorAction Stop
+        }
+        elseif ($FullOutFile.EndsWith(".tar.gz") -or $FullOutFile.EndsWith(".tgz") -or $FullOutFile.EndsWith(".tar.bz2") -or $FullOutFile.EndsWith(".tar")) {
+            tar -xf $FullOutFile -C $FullExtractTo # tar usually gives good errors on failure
+        }
+        else {
+            throw "Unrecognized archive format for file: $FullOutFile"
+        }
+        Write-Host "Successfully extracted $FullOutFile."
     }
-    elseif ($FullOutFile.EndsWith(".tar.gz") -or $FullOutFile.EndsWith(".tgz") -or $FullOutFile.EndsWith(".tar.bz2") -or $FullOutFile.EndsWith(".tar")) {
-        tar -xf $FullOutFile -C $FullExtractTo
+    catch {
+        Write-Error "Failed to extract '$FullOutFile'."
+        Write-Error "Underlying Exception: $($_.Exception.ToString())" # More detailed exception
+        # Additional diagnostics
+        if (Test-Path $FullOutFile) {
+            $fileInfoOnFail = Get-Item $FullOutFile
+            Write-Warning "File '$FullOutFile' exists at time of extraction failure. Size: $($fileInfoOnFail.Length) bytes."
+            if ($FullOutFile.EndsWith(".zip")) {
+                Write-Host "Attempting to validate ZIP file '$FullOutFile'..."
+                try {
+                    Add-Type -AssemblyName System.IO.Compression.FileSystem
+                    $zip = [System.IO.Compression.ZipFile]::OpenRead($FullOutFile)
+                    Write-Host "ZIP file opened. Number of entries: $($zip.Entries.Count)."
+                    # foreach ($entry in $zip.Entries) { Write-Host " - $($entry.FullName)" } # Can be too verbose
+                    $zip.Dispose()
+                    Write-Host "ZIP file '$FullOutFile' appears to be structurally valid."
+                } catch {
+                    Write-Warning "Could not validate ZIP file '$FullOutFile'. Error: $($_.Exception.Message)"
+                }
+            }
+        } else {
+            Write-Warning "File '$FullOutFile' does not exist at extraction failure phase (was it removed prematurely?)."
+        }
+        throw # Rethrow to stop the script
     }
-    else {
-        Write-Error "Unrecognized archive format for file: $FullOutFile"
-        # Optionally, attempt tar as a fallback or throw an error
-        # tar -xf $FullOutFile -C $FullExtractTo # Fallback attempt
-        exit 1 # Or handle more gracefully
+    finally {
+        # Clean up the downloaded archive file
+        if (Test-Path $FullOutFile) {
+            Remove-Item $FullOutFile -Force -ErrorAction SilentlyContinue
+        }
     }
-    Remove-Item $FullOutFile
 }
 
 # --- Build zlib ---
@@ -100,9 +148,9 @@ Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libpng ---
 Write-Host "Building libpng $LibPngVersion..."
-$LibPngFileNameOnDisk = "libpng-$($LibPngVersion).zip" # How we save it
-$LibPngSourceFileNameInUrl = "lpng$($LibPngVersion -replace '\.','').zip" # e.g., lpng1648.zip, as in the URL
-$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"     # e.g., lpng1648, the typical extracted folder name
+$LibPngFileNameOnDisk = "libpng-$($LibPngVersion).zip"
+$LibPngSourceFileNameInUrl = "lpng$($LibPngVersion -replace '\.','').zip"
+$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"
 $LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngSourceFileNameInUrl)"
 
 Push-Location $TempBuildDir
@@ -190,6 +238,7 @@ Invoke-WebRequest -Uri "$TessdataRepo/raw/main/eng.traineddata" -OutFile "$env:T
 Invoke-WebRequest -Uri "$TessdataRepo/raw/main/osd.traineddata" -OutFile "$env:TESSDATA_PREFIX\osd.traineddata"
 
 Pop-Location # Back to original location before $TempBuildDir
+Write-Host "Attempting to remove temporary build directory: $TempBuildDir"
 Remove-Item -Recurse -Force $TempBuildDir
 
 Write-Host "Windows dependencies installation complete."
