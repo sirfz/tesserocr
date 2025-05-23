@@ -72,6 +72,8 @@ function Get-Archive {
 
     Write-Host "Downloading $Url to $FullOutFile..."
     try {
+        # For SourceForge, -UseBasicParsing can sometimes be more reliable.
+        # The specific link provided might not strictly need it but doesn't hurt.
         if ($Url -like "*sourceforge.net*") {
             Invoke-WebRequest -Uri $Url -OutFile $FullOutFile -UseBasicParsing -ErrorAction Stop
         } else {
@@ -126,14 +128,14 @@ Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libpng ---
 Write-Host "Building libpng $LibPngVersion..."
-# Switched to .tar.gz for libpng
 $LibPngArchiveFileName = "libpng-$($LibPngVersion).tar.gz" 
-$LibPngDirName = "libpng-$($LibPngVersion)" # Standard directory name from tar.gz
-$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngArchiveFileName)"
+$LibPngDirName = "libpng-$($LibPngVersion)" 
+# Use the specific mirror link provided by the user
+$LibPngUrl = "https://deac-riga.dl.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngArchiveFileName)?viasf=1"
 
 Push-Location $TempBuildDir
-Get-Archive -Url $LibPngUrl -OutFile $LibPngArchiveFileName -ExtractTo "." # OutFile matches the archive name
-Push-Location $LibPngDirName # Navigate into the extracted directory (e.g., libpng-1.6.48)
+Get-Archive -Url $LibPngUrl -OutFile $LibPngArchiveFileName -ExtractTo "."
+Push-Location $LibPngDirName 
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DPNG_SHARED=ON -DPNG_STATIC=OFF -DZLIB_ROOT=$env:INSTALL_DIR
