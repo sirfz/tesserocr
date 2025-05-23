@@ -77,7 +77,6 @@ function Get-Archive {
         } else {
             Invoke-WebRequest -Uri $Url -OutFile $FullOutFile -ErrorAction Stop
         }
-        # Check file size
         $fileInfo = Get-Item $FullOutFile
         if ($fileInfo.Length -eq 0) {
             throw "Downloaded file '$FullOutFile' is empty (0 bytes)."
@@ -86,49 +85,35 @@ function Get-Archive {
     }
     catch {
         Write-Error "Failed to download '$Url'. Error: $($_.Exception.Message)"
-        throw # Rethrow to stop the script as per $ErrorActionPreference = "Stop"
+        throw
     }
 
     Write-Host "Extracting $FullOutFile to $FullExtractTo..."
     try {
         if ($FullOutFile.EndsWith(".zip")) {
-            Expand-Archive -Path $FullOutFile -DestinationPath $FullExtractTo -Force -ErrorAction Stop
+            Add-Type -AssemblyName System.IO.Compression.FileSystem # Ensure ZipFile class is available
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($FullOutFile, $FullExtractTo, $true) # $true to overwrite
+            Write-Host "Successfully extracted (using .NET ZipFile) $FullOutFile to $FullExtractTo."
         }
         elseif ($FullOutFile.EndsWith(".tar.gz") -or $FullOutFile.EndsWith(".tgz") -or $FullOutFile.EndsWith(".tar.bz2") -or $FullOutFile.EndsWith(".tar")) {
             tar -xf $FullOutFile -C $FullExtractTo # tar usually gives good errors on failure
+            Write-Host "Successfully extracted (using tar) $FullOutFile to $FullExtractTo."
         }
         else {
             throw "Unrecognized archive format for file: $FullOutFile"
         }
-        Write-Host "Successfully extracted $FullOutFile."
     }
     catch {
         Write-Error "Failed to extract '$FullOutFile'."
-        Write-Error "Underlying Exception: $($_.Exception.ToString())" # More detailed exception
-        # Additional diagnostics
+        Write-Error "Underlying Exception details: $($_.Exception.ToString())"
+        # If the file still exists, it implies extraction itself failed, not the file disappearing
         if (Test-Path $FullOutFile) {
             $fileInfoOnFail = Get-Item $FullOutFile
-            Write-Warning "File '$FullOutFile' exists at time of extraction failure. Size: $($fileInfoOnFail.Length) bytes."
-            if ($FullOutFile.EndsWith(".zip")) {
-                Write-Host "Attempting to validate ZIP file '$FullOutFile'..."
-                try {
-                    Add-Type -AssemblyName System.IO.Compression.FileSystem
-                    $zip = [System.IO.Compression.ZipFile]::OpenRead($FullOutFile)
-                    Write-Host "ZIP file opened. Number of entries: $($zip.Entries.Count)."
-                    # foreach ($entry in $zip.Entries) { Write-Host " - $($entry.FullName)" } # Can be too verbose
-                    $zip.Dispose()
-                    Write-Host "ZIP file '$FullOutFile' appears to be structurally valid."
-                } catch {
-                    Write-Warning "Could not validate ZIP file '$FullOutFile'. Error: $($_.Exception.Message)"
-                }
-            }
-        } else {
-            Write-Warning "File '$FullOutFile' does not exist at extraction failure phase (was it removed prematurely?)."
+            Write-Warning "File '$FullOutFile' still exists at time of extraction failure. Size: $($fileInfoOnFail.Length) bytes."
         }
         throw # Rethrow to stop the script
     }
     finally {
-        # Clean up the downloaded archive file
         if (Test-Path $FullOutFile) {
             Remove-Item $FullOutFile -Force -ErrorAction SilentlyContinue
         }
