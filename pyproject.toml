@@ -27,23 +27,20 @@ before-all = [
 # Commands will be executed by cmd.exe by default.
 
 before-all = [
-  "echo [DEBUG] In cmd.exe (before_all). Current PATH is: %PATH%",
-  "echo [DEBUG] Attempting to locate powershell.exe using 'where':",
-  "where powershell.exe",
-  # Explicitly call powershell.exe. Using -NoProfile to prevent profile loading issues.
-  # Paths for -File and -InstallDir are quoted.
-  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"{project}/.github/build-scripts/windows-install-dependencies.ps1\" -InstallDir \"{project}\\win64\"",
+  # Use the absolute path to pwsh.exe. Paths for -File and -InstallDir are quoted.
+  "\"C:\\Program Files\\PowerShell\\7\\pwsh.EXE\" -NoProfile -ExecutionPolicy Bypass -File \"{project}/.github/build-scripts/windows-install-dependencies.ps1\" -InstallDir \"{project}\\win64\"",
 ]
 
 # Command to repair the wheel by copying DLLs.
-# This will also be executed by cmd.exe.
-# %INSTALL_DIR% is expanded by cmd.exe from the environment variables.
+# Use the absolute path to pwsh.exe. %INSTALL_DIR% is expanded by cmd.exe.
 # The PowerShell command string is quoted for cmd.exe, and internal PowerShell strings are single-quoted.
-repair-wheel-command = "powershell.exe -NoProfile -Command \"Get-ChildItem -Path '%INSTALL_DIR%\\bin\\*.dll' | Copy-Item -Destination '{dest_dir}' -ErrorAction SilentlyContinue\""
+repair-wheel-command = "\"C:\\Program Files\\PowerShell\\7\\pwsh.EXE\" -NoProfile -Command \"Get-ChildItem -Path '%INSTALL_DIR%\\bin\\*.dll' | Copy-Item -Destination '{dest_dir}' -ErrorAction SilentlyContinue\""
+
+skip = "cp36-* cp37-* cp38-*"
 
 [tool.cibuildwheel.windows.environment]
-PATH = "{project}\\win64\\bin;{env_path}" # This prepends to PATH for the build environment
+# REMOVED the PATH variable from here to prevent corruption of cmd.exe's PATH for before_all
 INCLUDE = "{project}\\win64\\include;{env_include}"
 LIB = "{project}\\win64\\lib;{env_lib}"
 TESSDATA_PREFIX = "{project}\\tessdata"
-INSTALL_DIR = "{project}\\win64" # Makes %INSTALL_DIR% available to cmd.exe
+INSTALL_DIR = "{project}\\win64" # Makes %INSTALL_DIR% available to cmd.exe for repair_command
