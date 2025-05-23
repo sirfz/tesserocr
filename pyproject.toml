@@ -23,7 +23,7 @@ before-all = [
   "bash .github/build-scripts/macos-install-tesseract.sh",
 ]
 
-tool.cibuildwheel.windows]
+[tool.cibuildwheel.windows]
 # Commands will be executed by cmd.exe by default.
 
 before-all = [
