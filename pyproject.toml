@@ -24,18 +24,18 @@ before-all = [
 ]
 
 [tool.cibuildwheel.windows]
-# Command to run before building wheels on Windows
+# Specify PowerShell (pwsh) as the shell for executing commands on Windows
+shell = "pwsh"
+
+# Command to run before building wheels on Windows.
+# Since the shell is now pwsh, we don't need to prefix the command with "pwsh".
 before-all = [
-  # Use pwsh and {project} placeholder for paths
-  "pwsh -ExecutionPolicy Bypass -File {project}/.github/build-scripts/windows-install-dependencies.ps1 -InstallDir {project}\\win64",
+  "-ExecutionPolicy Bypass -File {project}/.github/build-scripts/windows-install-dependencies.ps1 -InstallDir {project}\\win64",
 ]
 
-# Command to repair the wheel by copying DLLs
-# Use pwsh here as well. $env:INSTALL_DIR will be set from the environment table below.
-repair-wheel-command = "pwsh -Command \"Get-ChildItem -Path $env:INSTALL_DIR\\bin\\*.dll | Copy-Item -Destination {dest_dir} -ErrorAction SilentlyContinue\""
-
-# Skip specific Python versions for Windows builds, if needed
-skip = "cp36-* cp37-* cp38-*" # Matches your existing skip configuration
+# Command to repair the wheel by copying DLLs.
+# This will also be executed in a pwsh shell.
+repair-wheel-command = "Get-ChildItem -Path $env:INSTALL_DIR\\bin\\*.dll | Copy-Item -Destination {dest_dir} -ErrorAction SilentlyContinue"
 
 # Environment variables for the build process on Windows
 [tool.cibuildwheel.windows.environment]
@@ -43,4 +43,4 @@ PATH = "{project}\\win64\\bin;{env_path}"
 INCLUDE = "{project}\\win64\\include;{env_include}"
 LIB = "{project}\\win64\\lib;{env_lib}"
 TESSDATA_PREFIX = "{project}\\tessdata"
-INSTALL_DIR = "{project}\\win64" # Make INSTALL_DIR available to the repair command's environment
+INSTALL_DIR = "{project}\\win64" # Make INSTALL_DIR available
