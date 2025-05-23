@@ -19,11 +19,11 @@ param (
     [string]$InstallDir = "$env:GITHUB_WORKSPACE\win64",
     [string]$TesseractVersion = "5.3.4",
     [string]$LeptonicaVersion = "1.83.1",
-    [string]$ZlibVersion = "1.3.1", # Latest stable as of early 2024
-    [string]$LibPngVersion = "1.6.48", # Updated to 1.6.48 as of 2025-05-23
-    [string]$LibJpegTurboVersion = "3.0.2", # Latest stable as of early 2024
-    [string]$LibTiffVersion = "4.6.0", # Latest stable as of early 2024
-    [string]$LibWebPVersion = "1.3.2"  # Latest stable as of early 2024
+    [string]$ZlibVersion = "1.3.1",
+    [string]$LibPngVersion = "1.6.48",
+    [string]$LibJpegTurboVersion = "3.0.2",
+    [string]$LibTiffVersion = "4.6.0",
+    [string]$LibWebPVersion = "1.3.2"
 )
 
 Set-StrictMode -Version Latest
@@ -47,8 +47,8 @@ if (-not (Test-Path $InstallDir)) {
 
 # Set environment variables for the build process
 $env:INSTALL_DIR = $InstallDir
-$env:PATH = "$env:INSTALL_DIR\bin;$env:PATH" # Prepend so our compiled tools are found first if needed
-$env:CMAKE_PREFIX_PATH = $env:INSTALL_DIR # Help CMake find dependencies
+$env:PATH = "$env:INSTALL_DIR\bin;$env:PATH"
+$env:CMAKE_PREFIX_PATH = $env:INSTALL_DIR
 $env:TESSDATA_PREFIX = "$env:GITHUB_WORKSPACE\tessdata"
 
 # Temporary directory for downloads and builds
@@ -71,7 +71,7 @@ function Get-Archive {
     Invoke-WebRequest -Uri $Url -OutFile $FullOutFile
     Write-Host "Extracting $FullOutFile to $FullExtractTo..."
     tar -xf $FullOutFile -C $FullExtractTo
-    Remove-Item $FullOutFile # Clean up archive
+    Remove-Item $FullOutFile
 }
 
 # --- Build zlib ---
@@ -89,10 +89,12 @@ Pop-Location; Pop-Location; Pop-Location
 Write-Host "Building libpng $LibPngVersion..."
 $LibPngFileName = "lpng$($LibPngVersion -replace '\.','').zip" # e.g., lpng1648.zip
 $LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"     # e.g., lpng1648
-$LibPngUrl = "https://sourceforge.net/projects/libpng/files/libpng16/$($LibPngVersion)/$($LibPngFileName)/download"
+# Use a more direct SourceForge download link
+$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngFileName)"
 
 Push-Location $TempBuildDir
-Get-Archive -Url $LibPngUrl -OutFile "libpng.zip" -ExtractTo "."
+# Ensure the output file has a .zip extension for clarity, though Get-Archive renames it internally
+Get-Archive -Url $LibPngUrl -OutFile "libpng-$($LibPngVersion).zip" -ExtractTo "."
 Push-Location $LibPngDirName # Navigate into the correct extracted folder, e.g., lpng1648
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
@@ -101,7 +103,6 @@ cmake --build . --config Release --target install
 Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libjpeg-turbo ---
-# Requires NASM to be in PATH for optimal SIMD builds. GitHub Windows runners usually have it.
 Write-Host "Building libjpeg-turbo $LibJpegTurboVersion..."
 Push-Location $TempBuildDir
 Get-Archive -Url "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/$($LibJpegTurboVersion).tar.gz" -OutFile "libjpeg-turbo.tar.gz" -ExtractTo "."
@@ -130,8 +131,7 @@ Get-Archive -Url "https://download.osgeo.org/libtiff/tiff-$($LibTiffVersion).tar
 Push-Location "tiff-$LibTiffVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
-# TIFF's CMake can be particular. Ensure it finds zlib and jpeg.
-cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -Djbig=OFF -Dlerc=OFF -Dlzma=OFF -Dzstd=OFF -Dwebp=ON # Enable WebP if found
+cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -Djbig=OFF -Dlerc=OFF -Dlzma=OFF -Dzstd=OFF -Dwebp=ON
 cmake --build . --config Release --target install
 Pop-Location; Pop-Location; Pop-Location
 
@@ -142,8 +142,6 @@ Get-Archive -Url "https://github.com/DanBloomberg/leptonica/archive/$($Leptonica
 Push-Location "leptonica-$LeptonicaVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
-# Match flags from linux script where applicable
-# Leptonica's CMake should find zlib, png, jpeg, tiff, webp via CMAKE_PREFIX_PATH
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR `
            -DCMAKE_BUILD_TYPE=Release `
            -DBUILD_SHARED_LIBS=ON `
@@ -161,18 +159,16 @@ Get-Archive -Url "https://github.com/tesseract-ocr/tesseract/archive/$($Tesserac
 Push-Location "tesseract-$TesseractVersion"
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
-# Match flags from linux script
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR `
            -DCMAKE_BUILD_TYPE=Release `
            -DBUILD_SHARED_LIBS=ON `
            -DOPENMP_BUILD=OFF `
            -DBUILD_TRAINING_TOOLS=OFF `
-           -DSW_BUILD=OFF # Optional: disable software renderer if not needed by tesseract core
+           -DSW_BUILD=OFF
 cmake --build . --config Release --target install
 Pop-Location; Pop-Location; Pop-Location
 
-# --- Download Tessdata (using Tesseract 5.x.x compatible data) ---
-# Using tessdata_fast for Tesseract 5.x
+# --- Download Tessdata ---
 Write-Host "Downloading Tesseract language data (tessdata_fast)..."
 if (-not (Test-Path $env:TESSDATA_PREFIX)) {
     New-Item -ItemType Directory -Path $env:TESSDATA_PREFIX -Force | Out-Null
@@ -181,8 +177,7 @@ $TessdataRepo = "https://github.com/tesseract-ocr/tessdata_fast"
 Invoke-WebRequest -Uri "$TessdataRepo/raw/main/eng.traineddata" -OutFile "$env:TESSDATA_PREFIX\eng.traineddata"
 Invoke-WebRequest -Uri "$TessdataRepo/raw/main/osd.traineddata" -OutFile "$env:TESSDATA_PREFIX\osd.traineddata"
 
-# Clean up temporary build directory
-Pop-Location # Back to original location before $TempBuildDir
+Pop-Location
 Remove-Item -Recurse -Force $TempBuildDir
 
 Write-Host "Windows dependencies installation complete."
