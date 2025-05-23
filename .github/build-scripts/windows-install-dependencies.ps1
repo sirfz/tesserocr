@@ -20,7 +20,7 @@ param (
     [string]$TesseractVersion = "5.3.4",
     [string]$LeptonicaVersion = "1.83.1",
     [string]$ZlibVersion = "1.3.1",
-    [string]$LibPngVersion = "1.6.48",
+    [string]$LibPngVersion = "1.6.48", # Current version
     [string]$LibJpegTurboVersion = "3.0.2",
     [string]$LibTiffVersion = "4.6.0",
     [string]$LibWebPVersion = "1.3.2"
@@ -88,30 +88,23 @@ function Get-Archive {
         throw
     }
 
-    Write-Host "Extracting $FullOutFile to $FullExtractTo..."
+    Write-Host "Extracting $FullOutFile to $FullExtractTo (using tar.exe)..."
     try {
-        if ($FullOutFile.EndsWith(".zip")) {
-            Add-Type -AssemblyName System.IO.Compression.FileSystem # Ensure ZipFile class is available
-            [System.IO.Compression.ZipFile]::ExtractToDirectory($FullOutFile, $FullExtractTo, $true) # $true to overwrite
-            Write-Host "Successfully extracted (using .NET ZipFile) $FullOutFile to $FullExtractTo."
-        }
-        elseif ($FullOutFile.EndsWith(".tar.gz") -or $FullOutFile.EndsWith(".tgz") -or $FullOutFile.EndsWith(".tar.bz2") -or $FullOutFile.EndsWith(".tar")) {
-            tar -xf $FullOutFile -C $FullExtractTo # tar usually gives good errors on failure
-            Write-Host "Successfully extracted (using tar) $FullOutFile to $FullExtractTo."
-        }
-        else {
-            throw "Unrecognized archive format for file: $FullOutFile"
-        }
+        # Use tar for all archives; bsdtar on Windows runners usually handles zip files as well.
+        tar -xf $FullOutFile -C $FullExtractTo
+        Write-Host "Successfully extracted (using tar) $FullOutFile to $FullExtractTo."
     }
     catch {
-        Write-Error "Failed to extract '$FullOutFile'."
-        Write-Error "Underlying Exception details: $($_.Exception.ToString())"
-        # If the file still exists, it implies extraction itself failed, not the file disappearing
+        Write-Error "The 'tar -xf' command encountered an issue for '$FullOutFile'."
+        Write-Error "Underlying PowerShell Exception (if any): $($_.Exception.ToString())"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "tar.exe exited with code $LASTEXITCODE. This indicates a failure by tar itself."
+        }
         if (Test-Path $FullOutFile) {
             $fileInfoOnFail = Get-Item $FullOutFile
             Write-Warning "File '$FullOutFile' still exists at time of extraction failure. Size: $($fileInfoOnFail.Length) bytes."
         }
-        throw # Rethrow to stop the script
+        throw "Extraction failed for $FullOutFile using tar.exe. Exit code: $LASTEXITCODE"
     }
     finally {
         if (Test-Path $FullOutFile) {
@@ -133,14 +126,14 @@ Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libpng ---
 Write-Host "Building libpng $LibPngVersion..."
-$LibPngFileNameOnDisk = "libpng-$($LibPngVersion).zip"
-$LibPngSourceFileNameInUrl = "lpng$($LibPngVersion -replace '\.','').zip"
-$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"
-$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngSourceFileNameInUrl)"
+# Switched to .tar.gz for libpng
+$LibPngArchiveFileName = "libpng-$($LibPngVersion).tar.gz" 
+$LibPngDirName = "libpng-$($LibPngVersion)" # Standard directory name from tar.gz
+$LibPngUrl = "https://downloads.sourceforge.net/project/libpng/libpng16/$($LibPngVersion)/$($LibPngArchiveFileName)"
 
 Push-Location $TempBuildDir
-Get-Archive -Url $LibPngUrl -OutFile $LibPngFileNameOnDisk -ExtractTo "."
-Push-Location $LibPngDirName
+Get-Archive -Url $LibPngUrl -OutFile $LibPngArchiveFileName -ExtractTo "." # OutFile matches the archive name
+Push-Location $LibPngDirName # Navigate into the extracted directory (e.g., libpng-1.6.48)
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DPNG_SHARED=ON -DPNG_STATIC=OFF -DZLIB_ROOT=$env:INSTALL_DIR
