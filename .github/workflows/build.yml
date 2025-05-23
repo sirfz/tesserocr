@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Git (for Bash)
         if: runner.os == 'Windows'
-        run: choco install git -y
+        run: choco install git -y && refreshenv
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.22.0
