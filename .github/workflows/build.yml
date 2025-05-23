@@ -37,7 +37,10 @@ jobs:
 
       - name: Install Git (for Bash)
         if: runner.os == 'Windows'
-        run: choco install git -y && refreshenv
+        run: |
+          choco install git -y
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          refreshenv
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.22.0
