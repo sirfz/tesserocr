@@ -23,24 +23,27 @@ before-all = [
   "bash .github/build-scripts/macos-install-tesseract.sh",
 ]
 
-[tool.cibuildwheel.windows]
-# Specify PowerShell (pwsh) as the shell for executing commands on Windows
-shell = "pwsh"
+tool.cibuildwheel.windows]
+# Commands will be executed by cmd.exe by default.
 
-# Command to run before building wheels on Windows.
-# Since the shell is now pwsh, we don't need to prefix the command with "pwsh".
 before-all = [
-  "-ExecutionPolicy Bypass -File {project}/.github/build-scripts/windows-install-dependencies.ps1 -InstallDir {project}\\win64",
+  "echo [DEBUG] In cmd.exe (before_all). Current PATH is: %PATH%",
+  "echo [DEBUG] Attempting to locate powershell.exe using 'where':",
+  "where powershell.exe",
+  # Explicitly call powershell.exe. Using -NoProfile to prevent profile loading issues.
+  # Paths for -File and -InstallDir are quoted.
+  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"{project}/.github/build-scripts/windows-install-dependencies.ps1\" -InstallDir \"{project}\\win64\"",
 ]
 
 # Command to repair the wheel by copying DLLs.
-# This will also be executed in a pwsh shell.
-repair-wheel-command = "Get-ChildItem -Path $env:INSTALL_DIR\\bin\\*.dll | Copy-Item -Destination {dest_dir} -ErrorAction SilentlyContinue"
+# This will also be executed by cmd.exe.
+# %INSTALL_DIR% is expanded by cmd.exe from the environment variables.
+# The PowerShell command string is quoted for cmd.exe, and internal PowerShell strings are single-quoted.
+repair-wheel-command = "powershell.exe -NoProfile -Command \"Get-ChildItem -Path '%INSTALL_DIR%\\bin\\*.dll' | Copy-Item -Destination '{dest_dir}' -ErrorAction SilentlyContinue\""
 
-# Environment variables for the build process on Windows
 [tool.cibuildwheel.windows.environment]
-PATH = "{project}\\win64\\bin;{env_path}"
+PATH = "{project}\\win64\\bin;{env_path}" # This prepends to PATH for the build environment
 INCLUDE = "{project}\\win64\\include;{env_include}"
 LIB = "{project}\\win64\\lib;{env_lib}"
 TESSDATA_PREFIX = "{project}\\tessdata"
-INSTALL_DIR = "{project}\\win64" # Make INSTALL_DIR available
+INSTALL_DIR = "{project}\\win64" # Makes %INSTALL_DIR% available to cmd.exe
