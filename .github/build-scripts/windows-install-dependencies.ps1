@@ -20,7 +20,7 @@ param (
     [string]$TesseractVersion = "5.3.4",
     [string]$LeptonicaVersion = "1.83.1",
     [string]$ZlibVersion = "1.3.1", # Latest stable as of early 2024
-    [string]$LibPngVersion = "1.6.43", # Latest stable as of early 2024
+    [string]$LibPngVersion = "1.6.48", # Updated to 1.6.48 as of 2025-05-23
     [string]$LibJpegTurboVersion = "3.0.2", # Latest stable as of early 2024
     [string]$LibTiffVersion = "4.6.0", # Latest stable as of early 2024
     [string]$LibWebPVersion = "1.3.2"  # Latest stable as of early 2024
@@ -87,9 +87,13 @@ Pop-Location; Pop-Location; Pop-Location
 
 # --- Build libpng ---
 Write-Host "Building libpng $LibPngVersion..."
+$LibPngFileName = "lpng$($LibPngVersion -replace '\.','').zip" # e.g., lpng1648.zip
+$LibPngDirName = "lpng$($LibPngVersion -replace '\.','')"     # e.g., lpng1648
+$LibPngUrl = "https://sourceforge.net/projects/libpng/files/libpng16/$($LibPngVersion)/$($LibPngFileName)/download"
+
 Push-Location $TempBuildDir
-Get-Archive -Url "https://download.sourceforge.net/libpng/lpng$($LibPngVersion).zip" -OutFile "libpng.zip" -ExtractTo "." # Note: sourceforge uses lpng<version>.zip
-Push-Location "lpng$LibPngVersion"
+Get-Archive -Url $LibPngUrl -OutFile "libpng.zip" -ExtractTo "."
+Push-Location $LibPngDirName # Navigate into the correct extracted folder, e.g., lpng1648
 New-Item -ItemType Directory -Path "build.msvs" -Force | Out-Null
 Push-Location "build.msvs"
 cmake .. -DCMAKE_INSTALL_PREFIX=$env:INSTALL_DIR -DCMAKE_BUILD_TYPE=Release -DPNG_SHARED=ON -DPNG_STATIC=OFF -DZLIB_ROOT=$env:INSTALL_DIR
