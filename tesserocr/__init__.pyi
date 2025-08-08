@@ -442,7 +442,7 @@ class PyPageIterator:
         """
         ...
 
-    def BoundingBox(self, level: RIL, padding: int = 0) -> luple[int, int, int, int]:
+    def BoundingBox(self, level: RIL, padding: int = 0) -> tuple[int, int, int, int]:
         """Return the bounding rectangle of the current object at the given level.
 
         See comment on coordinate system above.
