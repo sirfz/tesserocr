@@ -1672,6 +1672,57 @@ class PyTessBaseAPI:
         """
         ...
 
+    def SetInputName(self, name: str) -> None:
+        """Set the name of the input file. Needed for training and reading a UNLV zone file.
+
+        Args:
+            name (str): Input file name.
+        """
+        ...
+
+    def GetInputName(self) -> str:
+        """Return the name previously set by SetInputName.
+
+        Returns:
+            str: Input file name.
+        """
+        ...
+
+    def SetInputImage(self, image: PIL.Image) -> None:
+        """Set the input image as a Pix. This is useful for debugging.
+
+        Args:
+            image (PIL.Image): Input image.
+        """
+        ...
+
+    def GetInputImage(self) -> PIL.Image:
+        """Return the input image as a Pix.
+
+        Returns:
+            PIL.Image: Input image or None if no image was set.
+        """
+        ...
+
+    def GetSourceYResolution(self) -> int:
+        """Return the source resolution (in pixels per inch) of the image.
+
+        Returns:
+            int: Source resolution in pixels per inch.
+        """
+        ...
+
+    def IsValidWord(self, word: str) -> bool:
+        """Check whether the given word is valid according to Tesseract's language model.
+
+        Args:
+            word (str): Word to check.
+
+        Returns:
+            bool: True if the word is valid.
+        """
+        ...
+
 
 def image_to_text(image: PIL.Image, lang: str = ..., psm: PSM = PSM.AUTO,
                   path: str = ..., oem: OEM = OEM.DEFAULT) -> str:
