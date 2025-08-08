@@ -40,13 +40,26 @@ from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
 
 
-cdef bytes _b(s):
-    if PY_MAJOR_VERSION > 3:
+cdef bytes _b(object s):
+    """Convert string to bytes for cross-Python compatibility.
+
+    Args:
+        s: Input string or bytes object
+
+    Returns:
+        bytes: UTF-8 encoded bytes object
+    """
+    if PY_MAJOR_VERSION >= 3:
         if isinstance(s, str):
             return s.encode('UTF-8')
-    elif isinstance(s, unicode):
-        return s.encode('UTF-8')
-    return s
+        elif isinstance(s, bytes):
+            return s
+    else:
+        # Python 2: unicode needs encoding
+        if isinstance(s, unicode):
+            return s.encode('UTF-8')
+        elif isinstance(s, str):
+            return s
 
 
 # default parameters
