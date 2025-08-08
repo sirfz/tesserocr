@@ -2492,11 +2492,17 @@ cdef class PyTessBaseAPI:
 
         The number of confidences should correspond to the number of space-
         delimited words in `GetUTF8Text`.
+
+        Returns:
+            list: List of confidence values, or empty list if no confidences available
         """
         cdef:
             int *confidences = self._baseapi.AllWordConfidences()
             int confidence
             size_t i = 0
+
+        if confidences == NULL:
+            return []
 
         confs = []
         while confidences[i] != -1:
@@ -2509,18 +2515,46 @@ cdef class PyTessBaseAPI:
     def AllWords(self):
         """Return list of all detected words.
 
-        Returns an empty list if :meth:`Recognize` was not called first.
+        Returns an empty list if :meth:`Recognize` was not called first or if no words are detected.
         """
         words = []
         wi = self.GetIterator()
         if wi:
-            for w in iterate_level(wi, RIL.WORD):
-                words.append(w.GetUTF8Text(RIL.WORD))
+            try:
+                for w in iterate_level(wi, RIL.WORD):
+                    try:
+                        word_text = w.GetUTF8Text(RIL.WORD)
+                        if word_text:  # Only add non-empty words
+                            words.append(word_text)
+                    except RuntimeError:
+                        # Skip words that can't be extracted
+                        continue
+            except:
+                # If iteration fails completely, return empty list
+                return []
         return words
 
     def MapWordConfidences(self):
-        """Return list of word, confidence tuples"""
-        return list(zip(self.AllWords(), self.AllWordConfidences()))
+        """Return list of word, confidence tuples
+
+        Returns:
+            list: List of (word, confidence) tuples, or empty list if no words detected
+        """
+        try:
+            words = self.AllWords()
+            confidences = self.AllWordConfidences()
+
+            # Handle case where we have different numbers of words and confidences
+            if len(words) != len(confidences):
+                # Take the minimum to avoid index errors
+                min_len = min(len(words), len(confidences))
+                words = words[:min_len]
+                confidences = confidences[:min_len]
+
+            return list(zip(words, confidences))
+        except:
+            # If anything goes wrong, return empty list instead of crashing
+            return []
 
     def AdaptToWordStr(self, PageSegMode psm, word):
         """Apply the given word to the adaptive classifier if possible.
@@ -2567,13 +2601,14 @@ cdef class PyTessBaseAPI:
         """Get text direction.
 
         Returns:
-            tuple: offset and slope
+            tuple: offset and slope, or None if text direction cannot be determined
         """
         cdef:
             int out_offset
             float out_slope
-        self._baseapi.GetTextDirection(&out_offset, &out_slope)
-        return out_offset, out_slope
+        if self._baseapi.GetTextDirection(&out_offset, &out_slope):
+            return out_offset, out_slope
+        return None
 
     def DetectOS(self):
         """Estimate the Orientation and Script of the image.
