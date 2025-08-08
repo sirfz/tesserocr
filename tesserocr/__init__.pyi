@@ -895,6 +895,20 @@ class PyTessBaseAPI:
         :exc:`RuntimeError`: If `init` is ``True`` and API initialization fails.
     """
 
+    def __init__(self,
+                 path: str = ...,
+                 lang: str = ...,
+                 oem: OEM = ...,
+                 psm: PSM = ...,
+                 configs: typing.Optional[typing.List[str]] = None,
+                 variables: typing.Optional[typing.Dict[str, str]] = None,
+                 set_only_non_debug_params: bool = False,
+                 init: bool = True) -> None: ...
+
+    def __enter__(self) -> 'PyTessBaseAPI': ...
+
+    def __exit__(self, exc_type: typing.Any, exc_val: typing.Any, exc_tb: typing.Any) -> None: ...
+
     @staticmethod
     def Version() -> str:
         ...
