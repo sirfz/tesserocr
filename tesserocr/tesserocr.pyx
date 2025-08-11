@@ -2529,7 +2529,7 @@ cdef class PyTessBaseAPI:
                     except RuntimeError:
                         # Skip words that can't be extracted
                         continue
-            except:
+            except Exception:
                 # If iteration fails completely, return empty list
                 return []
         return words
@@ -2552,7 +2552,7 @@ cdef class PyTessBaseAPI:
                 confidences = confidences[:min_len]
 
             return list(zip(words, confidences))
-        except:
+        except Exception:
             # If anything goes wrong, return empty list instead of crashing
             return []
 
