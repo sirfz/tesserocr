@@ -31,6 +31,8 @@ with image files instead.
 Requirements
 ============
 
+**Python 3.9+** is required. tesserocr no longer supports Python 2.
+
 Requires libtesseract (>=3.04) and libleptonica (>=1.71).
 
 On Debian/Ubuntu:
@@ -185,15 +187,15 @@ GetComponentImages example:
     with PyTessBaseAPI() as api:
         api.SetImage(image)
         boxes = api.GetComponentImages(RIL.TEXTLINE, True)
-        print('Found {} textline image components.'.format(len(boxes)))
+        print(f'Found {len(boxes)} textline image components.')
         for i, (im, box, _, _) in enumerate(boxes):
             # im is a PIL image object
             # box is a dict with x, y, w and h keys
             api.SetRectangle(box['x'], box['y'], box['w'], box['h'])
             ocrResult = api.GetUTF8Text()
             conf = api.MeanTextConf()
-            print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
-                  "confidence: {1}, text: {2}".format(i, conf, ocrResult, **box))
+            print(f"Box[{i}]: x={box['x']}, y={box['y']}, w={box['w']}, h={box['h']}, "
+                  f"confidence: {conf}, text: {ocrResult}")
 
 Orientation and script detection (OSD):
 ```````````````````````````````````````
@@ -246,8 +248,6 @@ Iterator over the classifier choices for a single symbol:
 
 .. code:: python
 
-    from __future__ import print_function
-
     from tesserocr import PyTessBaseAPI, RIL, iterate_level
 
     with PyTessBaseAPI() as api:
@@ -262,7 +262,7 @@ Iterator over the classifier choices for a single symbol:
             symbol = r.GetUTF8Text(level)  # r == ri
             conf = r.Confidence(level)
             if symbol:
-                print(u'symbol {}, conf: {}'.format(symbol, conf), end='')
+                print(f'symbol {symbol}, conf: {conf}', end='')
             indent = False
             ci = r.GetChoiceIterator()
             for c in ci:
@@ -270,6 +270,6 @@ Iterator over the classifier choices for a single symbol:
                     print('\t\t ', end='')
                 print('\t- ', end='')
                 choice = c.GetUTF8Text()  # c == ci
-                print(u'{} conf: {}'.format(choice, c.Confidence()))
+                print(f'{choice} conf: {c.Confidence()}')
                 indent = True
             print('---------------------------------------------')
