@@ -22,3 +22,25 @@ before-all = [
   "bash .github/build-scripts/macos-install-build-dependencies.sh",
   "bash .github/build-scripts/macos-install-tesseract.sh",
 ]
+
+[tool.cibuildwheel.windows]
+# Commands will be executed by cmd.exe by default.
+
+before-all = [
+  # Use the absolute path to pwsh.exe. Paths for -File and -InstallDir are quoted.
+  "\"C:\\Program Files\\PowerShell\\7\\pwsh.EXE\" -NoProfile -ExecutionPolicy Bypass -File \"{project}/.github/build-scripts/windows-install-dependencies.ps1\" -InstallDir \"{project}\\win64\"",
+]
+
+# Command to repair the wheel by copying DLLs.
+# Use the absolute path to pwsh.exe. %INSTALL_DIR% is expanded by cmd.exe.
+# The PowerShell command string is quoted for cmd.exe, and internal PowerShell strings are single-quoted.
+repair-wheel-command = "\"C:\\Program Files\\PowerShell\\7\\pwsh.EXE\" -NoProfile -Command \"Get-ChildItem -Path '%INSTALL_DIR%\\bin\\*.dll' | Copy-Item -Destination '{dest_dir}' -ErrorAction SilentlyContinue\""
+
+skip = "cp36-* cp37-* cp38-*"
+
+[tool.cibuildwheel.windows.environment]
+# REMOVED the PATH variable from here to prevent corruption of cmd.exe's PATH for before_all
+INCLUDE = "{project}\\win64\\include;{env_include}"
+LIB = "{project}\\win64\\lib;{env_lib}"
+TESSDATA_PREFIX = "{project}\\tessdata"
+INSTALL_DIR = "{project}\\win64" # Makes %INSTALL_DIR% available to cmd.exe for repair_command
