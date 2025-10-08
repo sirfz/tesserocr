@@ -34,11 +34,10 @@ jobs:
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" | tee -a $GITHUB_ENV
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v3.2.0
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
-          CIBW_SKIP: "cp36* cp37* cp38*"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
