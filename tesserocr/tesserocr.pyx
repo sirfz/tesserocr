@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.8.0'
+__version__ = '2.9.0'
 
 import os
 import logging
