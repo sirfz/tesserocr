@@ -21,6 +21,7 @@ tesseract 3.04.00
 __version__ = '2.8.0'
 
 import os
+import logging
 from io import BytesIO
 from os.path import abspath, join
 try:
@@ -38,6 +39,9 @@ from libcpp.pair cimport pair
 from libcpp.vector cimport vector
 from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
+
+
+_LOGGER = logging.getLogger("tesserocr")
 
 
 cdef bytes _b(object s):
@@ -2516,18 +2520,14 @@ cdef class PyTessBaseAPI:
         words = []
         wi = self.GetIterator()
         if wi:
-            try:
-                for w in iterate_level(wi, RIL.WORD):
-                    try:
-                        word_text = w.GetUTF8Text(RIL.WORD)
-                        if word_text:  # Only add non-empty words
-                            words.append(word_text)
-                    except RuntimeError:
-                        # Skip words that can't be extracted
-                        continue
-            except:
-                # If iteration fails completely, return empty list
-                return []
+            for w in iterate_level(wi, RIL.WORD):
+                try:
+                    words.append(w.GetUTF8Text(RIL.WORD))
+                except RuntimeError as ex:
+                    _LOGGER.warning("RuntimeError while iterating words: %s", ex)
+                    # Skip words that can't be extracted
+                    continue
+
         return words
 
     def MapWordConfidences(self):
@@ -2539,16 +2539,9 @@ cdef class PyTessBaseAPI:
         try:
             words = self.AllWords()
             confidences = self.AllWordConfidences()
-
-            # Handle case where we have different numbers of words and confidences
-            if len(words) != len(confidences):
-                # Take the minimum to avoid index errors
-                min_len = min(len(words), len(confidences))
-                words = words[:min_len]
-                confidences = confidences[:min_len]
-
             return list(zip(words, confidences))
-        except:
+        except Exception as ex:
+            _LOGGER.warning("%s error while iterating words: %s", type(ex).__name__, ex)
             # If anything goes wrong, return empty list instead of crashing
             return []
 
