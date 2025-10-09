@@ -39,7 +39,8 @@ EXTRA_COMPILE_ARGS5 = {
 
 
 def read(*parts):
-    return codecs.open(pjoin(here, *parts), "r").read()
+    with codecs.open(pjoin(here, *parts), "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def find_version(*file_paths):
@@ -50,14 +51,9 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-if sys.version_info >= (3, 0):
-
-    def _read_string(s):
-        return s.decode("UTF-8")
-else:
-
-    def _read_string(s):
-        return s
+def _read_string(s):
+    """Convert bytes to string for Python 3."""
+    return s.decode("UTF-8")
 
 
 def major_version(version):
@@ -86,15 +82,17 @@ def version_to_int(version):
     # group with leading 0 if needed. To be safe, also handle cases where
     # an extra group is added to the version string, or if one or two
     # groups are dropped.
-    version_groups = (version.split(".") + [0, 0])[:3]
-    version_str = "{:02}{:02}{:02}".format(*map(int, version_groups))
+    version_groups = (version.split(".") + ['0', '0'])[:3]
+    # Convert strings to integers for formatting
+    version_ints = [int(x) for x in version_groups]
+    version_str = f"{version_ints[0]:02d}{version_ints[1]:02d}{version_ints[2]:02d}"
     version_str = str((int(version_str, 10) - subtrahend))
     # Adds a 2 digit subversion number for the subversionrelease.
     subversion_str = "00"
     if subversion is not None and subversion != "":
         subversion = re.search(r"(?:\d+)", subversion).group()
-        subversion_groups = (subversion.split("-") + [0, 0])[:1]
-        subversion_str = "{:02}".format(*map(int, subversion_groups))
+        subversion_groups = (subversion.split("-") + ['0', '0'])[:1]
+        subversion_str = f"{int(subversion_groups[0]):02d}"
 
     version_str += subversion_str
     return int(version_str, 16)
@@ -106,7 +104,7 @@ def package_config():
         [
             "pkg-config",
             "--exists",
-            "--atleast-version={}".format(_TESSERACT_MIN_VERSION),
+            f"--atleast-version={_TESSERACT_MIN_VERSION}",
             "--print-errors",
             "tesseract",
         ],
@@ -208,7 +206,7 @@ def get_tesseract_version():
             base = os.path.basename(sorted(tess_lib, reverse=True)[0])
             tess_lib = os.path.splitext(base)[0]
         else:
-            error = "Tesseract library not found in LIBPATH: {}".format(libpaths)
+            error = f"Tesseract library not found in LIBPATH: {libpaths}"
             raise RuntimeError(error)
 
         lept_lib = find_library("lept*.lib", libpaths)
@@ -216,7 +214,7 @@ def get_tesseract_version():
             base = os.path.basename(sorted(lept_lib, reverse=True)[0])
             lept_lib = os.path.splitext(base)[0]
         else:
-            error = "Leptonica library not found in LIBPATH: {}".format(libpaths)
+            error = f"Leptonica library not found in LIBPATH: {libpaths}"
             raise RuntimeError(error)
 
         includepaths = os.getenv("INCLUDE", None)
@@ -296,6 +294,7 @@ setup(
     author="Fayez Zouheiry",
     author_email="iamfayez@gmail.com",
     license="MIT",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -310,6 +309,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Programming Language :: Cython",

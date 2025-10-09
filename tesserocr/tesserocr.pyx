@@ -9,7 +9,7 @@ In addition, helper functions are provided for ocr operations:
 
 >>> text = image_to_text(Image.open('./image.jpg').convert('L'), lang='eng')
 >>> text = file_to_text('./image.jpg', psm=PSM.AUTO)
->>> print tesseract_version()
+>>> print(tesseract_version())
 tesseract 3.04.00
     leptonica-1.72
     libjpeg 8d (libjpeg-turbo 1.3.0) : libpng 1.2.51 : libtiff 4.0.3 : zlib 1.2.8
@@ -40,13 +40,22 @@ from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
 
 
-cdef bytes _b(s):
-    if PY_MAJOR_VERSION > 3:
-        if isinstance(s, str):
-            return s.encode('UTF-8')
-    elif isinstance(s, unicode):
+cdef bytes _b(object s):
+    """Convert string to bytes for Python 3.
+
+    Args:
+        s: Input string or bytes object
+
+    Returns:
+        bytes: UTF-8 encoded bytes object
+    """
+    if isinstance(s, str):
         return s.encode('UTF-8')
-    return s
+
+    if isinstance(s, bytes):
+        return s
+
+    raise TypeError(f"Expected str or bytes, got {type(s).__name__}")
 
 
 # default parameters
@@ -69,7 +78,7 @@ TessBaseAPI.ClearPersistentCache()
 cdef class _Enum:
 
     def __init__(self):
-        raise TypeError('{} is an enum and cannot be instantiated'.format(type(self).__name__))
+        raise TypeError(f'{type(self).__name__} is an enum and cannot be instantiated')
 
 
 cdef class OEM(_Enum):
@@ -453,7 +462,7 @@ cdef class PyPageIterator:
             del self._piter
 
     def __init__(self):
-        raise TypeError('{} cannot be instantiated from Python'.format(type(self).__name__))
+        raise TypeError(f'{type(self).__name__} cannot be instantiated from Python')
 
     def Begin(self):
         """Move the iterator to point to the start of the page to begin an iteration."""
@@ -1326,7 +1335,7 @@ cdef class PyTessBaseAPI:
                                               set_only_non_debug_params)
             if ret == -1:
                 with gil:
-                    raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+                    raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
             self._baseapi.SetPageSegMode(psm)
             return ret
 
@@ -1603,7 +1612,7 @@ cdef class PyTessBaseAPI:
         ELSE:
             cdef GenericVector[STRING] langs
         self._baseapi.GetLoadedLanguagesAsVector(&langs)
-        return [langs[i].c_str() for i in xrange(langs.size())]
+        return [langs[i].c_str() for i in range(langs.size())]
 
     def GetAvailableLanguages(self):
         """Return list of available languages in the init data path"""
@@ -1617,7 +1626,7 @@ cdef class PyTessBaseAPI:
                 int i
         langs = []
         self._baseapi.GetAvailableLanguagesAsVector(&v)
-        langs = [v[i].c_str() for i in xrange(v.size())]
+        langs = [v[i].c_str() for i in range(v.size())]
         return langs
 
     def InitForAnalysePage(self):
@@ -2675,7 +2684,7 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
-                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+                raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
 
     return _free_str(text)
 
@@ -2720,7 +2729,7 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         text = _image_to_text(pix, clang, psm, cpath, oem)
         if text == NULL:
             with gil:
-                raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
+                raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
 
     return _free_str(text)
 
@@ -2762,7 +2771,7 @@ def get_languages(path=_DEFAULT_PATH):
     baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
     baseapi.GetAvailableLanguagesAsVector(&v)
-    langs = [v[i].c_str() for i in xrange(v.size())]
+    langs = [v[i].c_str() for i in range(v.size())]
     baseapi.End()
     return path, langs
 
