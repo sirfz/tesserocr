@@ -21,6 +21,7 @@ tesseract 3.04.00
 __version__ = '2.8.0'
 
 import os
+import logging
 from io import BytesIO
 from os.path import abspath, join
 try:
@@ -38,6 +39,9 @@ from libcpp.pair cimport pair
 from libcpp.vector cimport vector
 from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
+
+
+_LOGGER = logging.getLogger("tesserocr")
 
 
 cdef bytes _b(object s):
@@ -2488,11 +2492,17 @@ cdef class PyTessBaseAPI:
 
         The number of confidences should correspond to the number of space-
         delimited words in `GetUTF8Text`.
+
+        Returns:
+            list: List of confidence values, or empty list if no confidences available
         """
         cdef:
             int *confidences = self._baseapi.AllWordConfidences()
             int confidence
             size_t i = 0
+
+        if confidences == NULL:
+            return []
 
         confs = []
         while confidences[i] != -1:
@@ -2505,18 +2515,35 @@ cdef class PyTessBaseAPI:
     def AllWords(self):
         """Return list of all detected words.
 
-        Returns an empty list if :meth:`Recognize` was not called first.
+        Returns an empty list if :meth:`Recognize` was not called first or if no words are detected.
         """
         words = []
         wi = self.GetIterator()
         if wi:
             for w in iterate_level(wi, RIL.WORD):
-                words.append(w.GetUTF8Text(RIL.WORD))
+                try:
+                    words.append(w.GetUTF8Text(RIL.WORD))
+                except RuntimeError as ex:
+                    _LOGGER.warning("RuntimeError while iterating words: %s", ex)
+                    # Skip words that can't be extracted
+                    continue
+
         return words
 
     def MapWordConfidences(self):
-        """Return list of word, confidence tuples"""
-        return list(zip(self.AllWords(), self.AllWordConfidences()))
+        """Return list of word, confidence tuples
+
+        Returns:
+            list: List of (word, confidence) tuples, or empty list if no words detected
+        """
+        try:
+            words = self.AllWords()
+            confidences = self.AllWordConfidences()
+            return list(zip(words, confidences))
+        except Exception as ex:
+            _LOGGER.warning("%s error while iterating words: %s", type(ex).__name__, ex)
+            # If anything goes wrong, return empty list instead of crashing
+            return []
 
     def AdaptToWordStr(self, PageSegMode psm, word):
         """Apply the given word to the adaptive classifier if possible.
@@ -2563,13 +2590,14 @@ cdef class PyTessBaseAPI:
         """Get text direction.
 
         Returns:
-            tuple: offset and slope
+            tuple: offset and slope, or None if text direction cannot be determined
         """
         cdef:
             int out_offset
             float out_slope
-        self._baseapi.GetTextDirection(&out_offset, &out_slope)
-        return out_offset, out_slope
+        if self._baseapi.GetTextDirection(&out_offset, &out_slope):
+            return out_offset, out_slope
+        return None
 
     def DetectOS(self):
         """Estimate the Orientation and Script of the image.
