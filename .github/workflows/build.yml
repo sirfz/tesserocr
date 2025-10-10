@@ -29,6 +29,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Set macOS deployment target
         if: runner.os == 'macOS'
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" | tee -a $GITHUB_ENV
@@ -38,6 +41,22 @@ jobs:
         env:
           CIBW_ARCHS: "${{ matrix.config.arch }}"
           CIBW_BUILD: "${{ matrix.config.build }}-${{ matrix.config.platform }}"
+
+      - name: Test wheel
+        if: matrix.config.platform != 'musllinux_x86_64'
+        run: |
+          for wheel in wheelhouse/*-cp*.whl ; do
+            python_version=$(echo $wheel | sed -n -E 's/.*-cp3([0-9]+t?)-.*/3.\1/p')
+            echo "Testing $wheel with Python $python_version"
+            venv_dir="/tmp/test-env-$python_version"
+            uv venv --python "$python_version" "$venv_dir"
+            source "$venv_dir/bin/activate"
+            uv pip install "$wheel"
+            pushd "$venv_dir"
+            python -c "import tesserocr"
+            popd
+            deactivate
+          done
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
