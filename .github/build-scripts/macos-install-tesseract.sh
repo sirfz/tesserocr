@@ -21,6 +21,11 @@ sudo cmake \
   --config Release \
   --target install
 
+# Workaround wrong installation name (includes build type)
+if [ -f ${PREFIX}/lib/pkgconfig/lept_*.pc ] ; then
+    sudo mv ${PREFIX}/lib/pkgconfig/lept_*.pc ${PREFIX}/lib/pkgconfig/lept.pc
+fi
+
 cd ..
 
 # build tesseract

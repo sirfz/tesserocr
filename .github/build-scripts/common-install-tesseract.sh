@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-LEPTONICA_VERSION="1.86.0"
+LEPTONICA_VERSION="1.85.0"
 TESSERACT_VERSION="5.5.1"
 
 PREFIX="${PREFIX:-/usr/local}"
