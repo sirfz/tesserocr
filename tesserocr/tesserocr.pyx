@@ -2121,7 +2121,8 @@ cdef class PyTessBaseAPI:
             :class:`PyPageIterator`: Page iterator or `None` on error or an empty page.
         """
         cdef PageIterator *piter
-        piter = self._baseapi.AnalyseLayout(merge_similar_words)
+        with nogil:
+            piter = self._baseapi.AnalyseLayout(merge_similar_words)
         if piter == NULL:
             return None
         return PyPageIterator.createPageIterator(piter)
