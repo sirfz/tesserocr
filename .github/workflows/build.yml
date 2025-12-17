@@ -22,8 +22,8 @@ jobs:
           - { os: ubuntu-24.04, arch: x86_64, platform: manylinux_x86_64, build: cp*, tag: cpall }
           - { os: ubuntu-24.04-arm, arch: aarch64, platform: manylinux_aarch64, build: cp*, tag: cpall }
           - { os: ubuntu-24.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
-          - { os: macos-15,     arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
-          - { os: macos-15,     arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
+          - { os: macos-15-intel, arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
+          - { os: macos-15, arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
 
     steps:
       - name: Checkout
