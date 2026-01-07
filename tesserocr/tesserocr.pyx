@@ -39,6 +39,7 @@ from libcpp.pair cimport pair
 from libcpp.vector cimport vector
 from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
+from cysignals.signals cimport sig_on, sig_off
 
 
 _LOGGER = logging.getLogger("tesserocr")
@@ -2073,8 +2074,11 @@ cdef class PyTessBaseAPI:
             blockids_addr = NULL
         if not paraids:
             paraids_addr = NULL
-        boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
-                                                &pixa, blockids_addr, paraids_addr)
+        with nogil:
+            sig_on()
+            boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
+                                                    &pixa, blockids_addr, paraids_addr)
+            sig_off()
         if boxa == NULL:
             # no components found
             return []
@@ -2122,7 +2126,9 @@ cdef class PyTessBaseAPI:
         """
         cdef PageIterator *piter
         with nogil:
+            sig_on()
             piter = self._baseapi.AnalyseLayout(merge_similar_words)
+            sig_off()
         if piter == NULL:
             return None
         return PyPageIterator.createPageIterator(piter)
@@ -2145,6 +2151,7 @@ cdef class PyTessBaseAPI:
             ETEXT_DESC monitor
             int res
         with nogil:
+            sig_on()
             if timeout > 0:
                 monitor.cancel = NULL
                 monitor.cancel_this = NULL
@@ -2152,6 +2159,7 @@ cdef class PyTessBaseAPI:
                 res = self._baseapi.Recognize(&monitor)
             else:
                 res = self._baseapi.Recognize(NULL)
+            sig_off()
         return res == 0
 
     """Methods to retrieve information after :meth:`SetImage`,
@@ -2164,6 +2172,7 @@ cdef class PyTessBaseAPI:
                 ETEXT_DESC monitor
                 int res
             with nogil:
+                sig_on()
                 if timeout > 0:
                     monitor.cancel = NULL
                     monitor.cancel_this = NULL
@@ -2171,6 +2180,7 @@ cdef class PyTessBaseAPI:
                     res = self._baseapi.RecognizeForChopTest(&monitor)
                 else:
                     res = self._baseapi.RecognizeForChopTest(NULL)
+                sig_off()
             return res == 0
 
     cdef TessResultRenderer *_get_renderer(self, cchar_t *outputbase):
@@ -2370,7 +2380,9 @@ cdef class PyTessBaseAPI:
         """Return the recognized text coded as UTF-8 from the image."""
         cdef char *text
         with nogil:
+            sig_on()
             text = self._baseapi.GetUTF8Text()
+            sig_off()
             self._destroy_pix()
             if text == NULL:
                 with gil:
@@ -2710,7 +2722,9 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
+        sig_on()
         text = _image_to_text(pix, clang, psm, cpath, oem)
+        sig_off()
         if text == NULL:
             with gil:
                 raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
@@ -2755,7 +2769,9 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
+        sig_on()
         text = _image_to_text(pix, clang, psm, cpath, oem)
+        sig_off()
         if text == NULL:
             with gil:
                 raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
