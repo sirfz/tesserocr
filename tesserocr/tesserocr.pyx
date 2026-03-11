@@ -2815,7 +2815,11 @@ def get_languages(path=_DEFAULT_PATH):
             int i
     baseapi.Init(py_path, NULL)
     path = baseapi.GetDatapath()
-    baseapi.GetAvailableLanguagesAsVector(&v)
+    try:
+        baseapi.GetAvailableLanguagesAsVector(&v)
+    except RuntimeError:
+        baseapi.End()
+        raise
     langs = [v[i].c_str() for i in range(v.size())]
     baseapi.End()
     return path, langs
