@@ -282,7 +282,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
             int Init(cchar_t *, cchar_t *)
             cchar_t *GetInitLanguagesAsString() const
             void GetLoadedLanguagesAsVector(vector[string] *) const
-            void GetAvailableLanguagesAsVector(vector[string] *) const
+            void GetAvailableLanguagesAsVector(vector[string] *) except +
             void InitForAnalysePage()
             void ReadConfigFile(cchar_t *)
             void SetPageSegMode(PageSegMode)
