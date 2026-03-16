@@ -48,6 +48,7 @@ _TESSERACT_VERSION = version_to_int(tesserocr.PyTessBaseAPI.Version())
 class TestTessBaseApi(unittest.TestCase):
 
     _test_dir = os.path.abspath(os.path.dirname(__file__))
+    _config_file = os.path.join(_test_dir, "box.train")
     _image_file = os.path.join(_test_dir, "eurotext.png")
 
     def setUp(self):
@@ -77,13 +78,13 @@ class TestTessBaseApi(unittest.TestCase):
         self.assertEqual(self._api.GetVariableAsString("file_type"), ".tif")
         self.assertEqual(self._api.GetVariableAsString("edges_childarea"), "0.5")
         # use box.train config variables
-        configs = ["box.train"]
+        configs = [self._config_file]
         # change edges_childarea
         vars_ = {"edges_childarea": "0.7"}
         self._api.End()
         self._api.InitFull(configs=configs, variables=vars_)
         # assert file_type from box.train and custom edges_childarea
-        self.assertEqual(self._api.GetVariableAsString("file_type"), ".tif")
+        self.assertEqual(self._api.GetVariableAsString("file_type"), ".bl")
         self.assertEqual(self._api.GetVariableAsString("edges_childarea"), "0.7")
         # reset back to default
         self._api.End()
