@@ -1,4 +1,3 @@
-import codecs
 import errno
 import glob
 import itertools
@@ -39,7 +38,7 @@ EXTRA_COMPILE_ARGS5 = {
 
 
 def read(*parts):
-    with codecs.open(pjoin(here, *parts), "r", encoding="utf-8") as f:
+    with open(pjoin(here, *parts), "r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -301,7 +300,6 @@ setup(
         "Topic :: Multimedia :: Graphics :: Capture :: Scanners",
         "Topic :: Multimedia :: Graphics :: Graphics Conversion",
         "Topic :: Scientific/Engineering :: Image Recognition",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",

@@ -18,7 +18,7 @@ tesseract 3.04.00
  ['eng', 'osd', 'equ'])
 """
 
-__version__ = '2.10.0'
+__version__ = '2.11.0'
 
 import os
 import logging
@@ -376,9 +376,11 @@ cdef _pix_to_image(Pix *pix):
         size_t size
         int result
         int fmt = pix.informat
+        Pix *converted_pix = NULL
     if pix.d == 1:
         # prevent catastrophic 8-bit conversion
-        pix = pixConvertTo8(pix, 0)
+        converted_pix = pixConvertTo8(pix, 0)
+        pix = converted_pix
     if fmt > 0:
         result = pixWriteMem(&buff, &size, pix, fmt)
     else:
@@ -393,6 +395,8 @@ cdef _pix_to_image(Pix *pix):
             image.load()
     finally:
         free(buff)
+        if converted_pix != NULL:
+            pixDestroy(&converted_pix)
 
     return image
 
