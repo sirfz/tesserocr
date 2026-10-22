@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-LEPTONICA_VERSION="1.85.0"
-TESSERACT_VERSION="5.5.1"
+source "$(dirname -- "${BASH_SOURCE[0]}")/tesseract-versions.env"
 
 PREFIX="${PREFIX:-/usr/local}"
 
