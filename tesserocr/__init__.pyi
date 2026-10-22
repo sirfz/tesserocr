@@ -851,6 +851,11 @@ def iterate_level(iterator: PyPageIterator, level: RIL):
 class PyTessBaseAPI:
     """Cython wrapper class around the C++ TessBaseAPI class.
 
+    Use one active instance per worker, including its iterators and lifecycle calls.
+    Instances have no internal lock; never re-enter an active instance from a signal
+    handler. Keep the API alive and its results unchanged while using an iterator.
+    Configure process-wide Tesseract parameters before parallel native work starts.
+
     Usage as a context manager:
 
     >>> with PyTessBaseAPI(path='./', lang='eng') as tesseract:
@@ -915,7 +920,7 @@ class PyTessBaseAPI:
 
     @staticmethod
     def ClearPersistentCache():
-        ...
+        """Clear process-wide cached data while no native work is running."""
 
     def GetDatapath(self) -> str:
         """Return tessdata directory(version>=4) or parent of tessdata directory(version<=3)"""
@@ -927,6 +932,9 @@ class PyTessBaseAPI:
 
     def SetVariable(self, name: str, val: str) -> bool:
         """Set the value of an internal parameter.
+
+        Some classify/textord parameters are process-wide. Configure them before
+        parallel native work starts, not while other instances are running.
 
         Supply the name of the parameter and the value as a string, just as
         you would in a config file.
@@ -948,6 +956,9 @@ class PyTessBaseAPI:
 
     def SetDebugVariable(self, name: str, val: str) -> bool:
         """Set the value of an internal parameter. (debug)
+
+        Some parameters are process-wide. Configure them before parallel native
+        work starts, not while other instances are running.
 
         Supply the name of the parameter and the value as a string, just as
         you would in a config file.
@@ -1013,9 +1024,10 @@ class PyTessBaseAPI:
                  psm: PSM = PSM.AUTO) -> None:
         """Initialize the API with the given parameters (advanced).
 
-        It is entirely safe (and eventually will be efficient too) to call
-        :meth:`Init` multiple times on the same instance to change language, or just
-        to reset the classifier.
+        It is safe to call :meth:`Init` repeatedly, but not concurrently, on the
+        same instance to change language or reset the classifier. Config files and
+        initialization variables may change process-wide parameters; set these
+        before parallel native work starts.
 
         Page Segmentation Mode is set to :attr:`PSM.AUTO` after initialization by default.
 
@@ -1102,6 +1114,7 @@ class PyTessBaseAPI:
         """Read a "config" file containing a set of param, value pairs.
 
         Searches the standard places: tessdata/configs, tessdata/tessconfigs.
+        May change process-wide parameters; load before parallel native work starts.
 
         Args:
             filename: config file name. Also accepts relative or absolute path name.
@@ -1412,6 +1425,10 @@ class PyTessBaseAPI:
         Optional. The `Get*Text` methods below will call :meth:`Recognize` if needed.
 
         After :meth:`Recognize`, the output is kept internally until the next :meth:`SetImage`.
+
+        On the main thread, Python signal exceptions cooperatively cancel recognition
+        and are re-raised after Tesseract returns. Layout analysis may delay cancellation.
+        Call :meth:`Recognize` again or :meth:`SetImage` to retry after cancellation.
 
         Kwargs:
             timeout (int): time to wait in milliseconds before timing out.
@@ -1797,6 +1814,8 @@ def get_languages(path=...) -> tuple[str, list[str]]:
 
 def set_leptonica_log_level(level: LeptLogLevel):
     """Set Leptonica's emitted log messages level.
+
+    This setting is process-wide; configure it before parallel native work starts.
 
     See :class:`LeptLogLevel` for available options.
     """

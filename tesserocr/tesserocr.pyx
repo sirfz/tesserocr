@@ -1,5 +1,6 @@
 #!python
 #cython: c_string_type=unicode, c_string_encoding=utf-8, language_level=3
+#cython: freethreading_compatible=True
 """Python wrapper around the Tesseract-OCR C++ API
 
 This module provides a wrapper class :class:`PyTessBaseAPI` to call
@@ -24,6 +25,7 @@ import os
 import logging
 from io import BytesIO
 from os.path import abspath, join
+from threading import current_thread as _current_thread, main_thread as _main_thread
 try:
     from PIL import Image
 except ImportError:
@@ -34,12 +36,80 @@ IF TESSERACT_MAJOR_VERSION < 5:
     from .tesseract cimport *
 ELSE:
     from .tesseract5 cimport *
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport free
 from libcpp.pair cimport pair
 from libcpp.vector cimport vector
 from cython.operator cimport preincrement as inc, dereference as deref
 from cpython.version cimport PY_MAJOR_VERSION
-from cysignals.signals cimport sig_on, sig_off
+from cpython.exc cimport PyErr_CheckSignals
+
+
+cdef extern from * namespace "tesserocr" nogil:
+    """
+    #include <tesseract/baseapi.h>
+    namespace tesserocr {
+    class TessBaseAPIWithMonitor : public tesseract::TessBaseAPI {
+    public:
+        bool RecognitionDone() const { return recognition_done_; }
+    };
+    }
+    """
+    cdef cppclass TessBaseAPIWithMonitor(TessBaseAPI):
+        TessBaseAPIWithMonitor() except +
+        bool RecognitionDone() const
+
+
+cdef class _RecognitionMonitor:
+    cdef ETEXT_DESC monitor
+    cdef object error
+
+    def __cinit__(self, int timeout=0):
+        # Worker threads cannot handle Python signals and must not wait for the GIL.
+        self.monitor.cancel = NULL
+        if _current_thread() is _main_thread():
+            self.monitor.cancel = _cancel_on_signal
+        self.monitor.cancel_this = <void *>self
+        if timeout > 0:
+            self.monitor.set_deadline_msecs(timeout)
+
+    cdef void check(self) except *:
+        if self.error is not None:
+            raise self.error
+        PyErr_CheckSignals()
+
+
+cdef bool _cancel_on_signal(void *context, int words) noexcept with gil:
+    cdef _RecognitionMonitor state = <_RecognitionMonitor>context
+    if state.error is not None:
+        return True
+    try:
+        PyErr_CheckSignals()
+    except BaseException as error:
+        # Let Tesseract unwind before propagating the Python exception.
+        state.error = error
+        return True
+    return False
+
+
+cdef int _recognize(TessBaseAPI *api, int timeout=0) except -2:
+    cdef _RecognitionMonitor state = _RecognitionMonitor(timeout)
+    cdef int res
+    try:
+        with nogil:
+            res = api.Recognize(&state.monitor)
+    finally:
+        state.check()
+    return res
+
+
+cdef char *_get_utf8_text(TessBaseAPIWithMonitor *api) except? NULL:
+    cdef char *text
+    # Preserve cached results and existing iterators when recognition is complete.
+    if not api.RecognitionDone() and _recognize(api) != 0:
+        return NULL
+    with nogil:
+        text = api.GetUTF8Text()
+    return text
 
 
 _LOGGER = logging.getLogger("tesserocr")
@@ -1190,6 +1260,11 @@ def iterate_level(iterator, PageIteratorLevel level):
 cdef class PyTessBaseAPI:
     """Cython wrapper class around the C++ TessBaseAPI class.
 
+    Use one active instance per worker, including its iterators and lifecycle calls.
+    Instances have no internal lock; never re-enter an active instance from a signal
+    handler. Keep the API alive and its results unchanged while using an iterator.
+    Configure process-wide Tesseract parameters before parallel native work starts.
+
     Usage as a context manager:
 
     >>> with PyTessBaseAPI(path='./', lang='eng') as tesseract:
@@ -1235,7 +1310,7 @@ cdef class PyTessBaseAPI:
     """
 
     cdef:
-        TessBaseAPI _baseapi
+        TessBaseAPIWithMonitor _baseapi
         Pix *_pix
 
     @staticmethod
@@ -1244,6 +1319,7 @@ cdef class PyTessBaseAPI:
 
     @staticmethod
     def ClearPersistentCache():
+        """Clear process-wide cached data while no native work is running."""
         return TessBaseAPI.ClearPersistentCache()
 
     def __cinit__(self,
@@ -1280,15 +1356,16 @@ cdef class PyTessBaseAPI:
                 cchar_t *val
                 STRING sval
 
-        if configs:
-            configs_size = len(configs)
-            configs_ = <char **>malloc(configs_size * sizeof(char *))
-            for i, c in enumerate(configs):
-                c = _b(c)
-                configs_[i] = c
+        cdef vector[char *] config_ptrs
+        # Retain every encoded filename until native initialization returns.
+        encoded_configs = [_b(c) for c in tuple(configs)] if configs is not None else []
+        configs_size = len(encoded_configs)
+        for c in encoded_configs:
+            config_ptrs.push_back(c)
+        configs_ = config_ptrs.data()
 
         if variables:
-            for k, v in variables.items():
+            for k, v in variables.copy().items():
                 k = _b(k)
                 val = k
                 sval = val
@@ -1300,13 +1377,9 @@ cdef class PyTessBaseAPI:
 
         with nogil:
             self._pix = NULL
-            try:
-                if init:
-                    self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
-                                   set_only_non_debug_params, psm)
-            finally:
-                if configs_size > 0:
-                    free(configs_)
+            if init:
+                self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
+                               set_only_non_debug_params, psm)
 
     def __dealloc__(self):
         self._end_api()
@@ -1323,7 +1396,7 @@ cdef class PyTessBaseAPI:
                            bool set_only_non_debug_params,
                            PageSegMode psm) except -1 nogil:
             cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
-                                              set_only_non_debug_params)
+                                             set_only_non_debug_params)
             if ret == -1:
                 with gil:
                     raise RuntimeError('Failed to init API, possibly an invalid tessdata path: {}'.format(path))
@@ -1341,7 +1414,7 @@ cdef class PyTessBaseAPI:
                            bool set_only_non_debug_params,
                            PageSegMode psm) except -1 nogil:
             cdef int ret = self._baseapi.Init(path, lang, oem, configs, configs_size, vars_vec, vars_vals,
-                                              set_only_non_debug_params)
+                                             set_only_non_debug_params)
             if ret == -1:
                 with gil:
                     raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
@@ -1369,6 +1442,9 @@ cdef class PyTessBaseAPI:
     def SetVariable(self, name, val):
         """Set the value of an internal parameter.
 
+        Some classify/textord parameters are process-wide. Configure them before
+        parallel native work starts, not while other instances are running.
+
         Supply the name of the parameter and the value as a string, just as
         you would in a config file.
 
@@ -1392,6 +1468,9 @@ cdef class PyTessBaseAPI:
 
     def SetDebugVariable(self, name, val):
         """Set the value of an internal parameter. (debug)
+
+        Some parameters are process-wide. Configure them before parallel native
+        work starts, not while other instances are running.
 
         Supply the name of the parameter and the value as a string, just as
         you would in a config file.
@@ -1490,9 +1569,10 @@ cdef class PyTessBaseAPI:
                  PageSegMode psm=PSM_AUTO):
         """Initialize the API with the given parameters (advanced).
 
-        It is entirely safe (and eventually will be efficient too) to call
-        :meth:`Init` multiple times on the same instance to change language, or just
-        to reset the classifier.
+        It is safe to call :meth:`Init` repeatedly, but not concurrently, on the
+        same instance to change language or reset the classifier. Config files and
+        initialization variables may change process-wide parameters; set these
+        before parallel native work starts.
 
         Page Segmentation Mode is set to :attr:`PSM.AUTO` after initialization by default.
 
@@ -1547,15 +1627,16 @@ cdef class PyTessBaseAPI:
                 cchar_t *val
                 STRING sval
 
-        if configs:
-            configs_size = len(configs)
-            configs_ = <char **>malloc(configs_size * sizeof(char *))
-            for i, c in enumerate(configs):
-                c = _b(c)
-                configs_[i] = c
+        cdef vector[char *] config_ptrs
+        # Retain every encoded filename until native initialization returns.
+        encoded_configs = [_b(c) for c in tuple(configs)] if configs is not None else []
+        configs_size = len(encoded_configs)
+        for c in encoded_configs:
+            config_ptrs.push_back(c)
+        configs_ = config_ptrs.data()
 
         if variables:
-            for k, v in variables.items():
+            for k, v in variables.copy().items():
                 k = _b(k)
                 val = k
                 sval = val
@@ -1566,12 +1647,8 @@ cdef class PyTessBaseAPI:
                 vars_vals.push_back(sval)
 
         with nogil:
-            try:
-                self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
-                               set_only_non_debug_params, psm)
-            finally:
-                if configs_size > 0:
-                    free(configs_)
+            self._init_api(cpath, clang, oem, configs_, configs_size, &vars_vec, &vars_vals,
+                           set_only_non_debug_params, psm)
 
     def Init(self, path=_DEFAULT_PATH, lang=_DEFAULT_LANG,
              OcrEngineMode oem=OEM_DEFAULT, PageSegMode psm=PSM_AUTO):
@@ -1650,6 +1727,7 @@ cdef class PyTessBaseAPI:
         """Read a "config" file containing a set of param, value pairs.
 
         Searches the standard places: tessdata/configs, tessdata/tessconfigs.
+        May change process-wide parameters; load before parallel native work starts.
 
         Args:
             filename: config file name. Also accepts relative or absolute path name.
@@ -2079,10 +2157,8 @@ cdef class PyTessBaseAPI:
         if not paraids:
             paraids_addr = NULL
         with nogil:
-            sig_on()
             boxa = self._baseapi.GetComponentImages(level, text_only, raw_image, raw_padding,
                                                     &pixa, blockids_addr, paraids_addr)
-            sig_off()
         if boxa == NULL:
             # no components found
             return []
@@ -2130,9 +2206,7 @@ cdef class PyTessBaseAPI:
         """
         cdef PageIterator *piter
         with nogil:
-            sig_on()
             piter = self._baseapi.AnalyseLayout(merge_similar_words)
-            sig_off()
         if piter == NULL:
             return None
         return PyPageIterator.createPageIterator(piter)
@@ -2145,26 +2219,17 @@ cdef class PyTessBaseAPI:
 
         After :meth:`Recognize`, the output is kept internally until the next :meth:`SetImage`.
 
+        On the main thread, Python signal exceptions cooperatively cancel recognition
+        and are re-raised after Tesseract returns. Layout analysis may delay cancellation.
+        Call :meth:`Recognize` again or :meth:`SetImage` to retry after cancellation.
+
         Kwargs:
             timeout (int): time to wait in milliseconds before timing out.
 
         Returns:
             bool: ``True`` if the operation is successful.
         """
-        cdef:
-            ETEXT_DESC monitor
-            int res
-        with nogil:
-            sig_on()
-            if timeout > 0:
-                monitor.cancel = NULL
-                monitor.cancel_this = NULL
-                monitor.set_deadline_msecs(timeout)
-                res = self._baseapi.Recognize(&monitor)
-            else:
-                res = self._baseapi.Recognize(NULL)
-            sig_off()
-        return res == 0
+        return _recognize(&self._baseapi, timeout) == 0
 
     """Methods to retrieve information after :meth:`SetImage`,
     :meth:`Recognize` or :meth:`TesseractRect`. (:meth:`Recognize` is called implicitly if needed.)"""
@@ -2173,18 +2238,13 @@ cdef class PyTessBaseAPI:
         cpdef bool RecognizeForChopTest(self, int timeout=0):
             """Variant on :meth:`Recognize` used for testing chopper."""
             cdef:
-                ETEXT_DESC monitor
+                _RecognitionMonitor state = _RecognitionMonitor(timeout)
                 int res
-            with nogil:
-                sig_on()
-                if timeout > 0:
-                    monitor.cancel = NULL
-                    monitor.cancel_this = NULL
-                    monitor.set_deadline_msecs(timeout)
-                    res = self._baseapi.RecognizeForChopTest(&monitor)
-                else:
-                    res = self._baseapi.RecognizeForChopTest(NULL)
-                sig_off()
+            try:
+                with nogil:
+                    res = self._baseapi.RecognizeForChopTest(&state.monitor)
+            finally:
+                state.check()
             return res == 0
 
     cdef TessResultRenderer *_get_renderer(self, cchar_t *outputbase):
@@ -2383,14 +2443,13 @@ cdef class PyTessBaseAPI:
     def GetUTF8Text(self):
         """Return the recognized text coded as UTF-8 from the image."""
         cdef char *text
-        with nogil:
-            sig_on()
-            text = self._baseapi.GetUTF8Text()
-            sig_off()
-            self._destroy_pix()
-            if text == NULL:
-                with gil:
-                    raise RuntimeError('Failed to recognize. No image set?')
+        try:
+            text = _get_utf8_text(&self._baseapi)
+        finally:
+            with nogil:
+                self._destroy_pix()
+        if text == NULL:
+            raise RuntimeError('Failed to recognize. No image set?')
         return _free_str(text)
 
     IF TESSERACT_VERSION >= 0x4000000:
@@ -2667,21 +2726,19 @@ cdef class PyTessBaseAPI:
 
 
 cdef char *_image_to_text(Pix *pix, cchar_t *lang, const PageSegMode pagesegmode,
-                          cchar_t *path, OcrEngineMode oem) noexcept nogil:
-    cdef:
-        TessBaseAPI baseapi
-        char *text
-
-    if baseapi.Init(path, lang, oem) == -1:
-        return NULL
-
-    baseapi.SetPageSegMode(pagesegmode)
-    baseapi.SetImage(pix)
-    text = baseapi.GetUTF8Text()
-    pixDestroy(&pix)
-    baseapi.End()
-
-    return text
+                          cchar_t *path, OcrEngineMode oem) except? NULL:
+    cdef TessBaseAPIWithMonitor baseapi
+    try:
+        with nogil:
+            if baseapi.Init(path, lang, oem) == -1:
+                return NULL
+            baseapi.SetPageSegMode(pagesegmode)
+            baseapi.SetImage(pix)
+        return _get_utf8_text(&baseapi)
+    finally:
+        with nogil:
+            pixDestroy(&pix)
+            baseapi.End()
 
 
 def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
@@ -2726,12 +2783,9 @@ def image_to_text(image, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        sig_on()
-        text = _image_to_text(pix, clang, psm, cpath, oem)
-        sig_off()
-        if text == NULL:
-            with gil:
-                raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
+    text = _image_to_text(pix, clang, psm, cpath, oem)
+    if text == NULL:
+        raise RuntimeError(f'Failed to init API or recognize image, possibly an invalid tessdata path: {path}')
 
     return _free_str(text)
 
@@ -2773,12 +2827,9 @@ def file_to_text(filename, lang=_DEFAULT_LANG, PageSegMode psm=PSM_AUTO,
         if pix == NULL:
             with gil:
                 raise RuntimeError('Failed to read picture')
-        sig_on()
-        text = _image_to_text(pix, clang, psm, cpath, oem)
-        sig_off()
-        if text == NULL:
-            with gil:
-                raise RuntimeError(f'Failed to init API, possibly an invalid tessdata path: {path}')
+    text = _image_to_text(pix, clang, psm, cpath, oem)
+    if text == NULL:
+        raise RuntimeError(f'Failed to init API or recognize image, possibly an invalid tessdata path: {path}')
 
     return _free_str(text)
 
@@ -2831,6 +2882,8 @@ def get_languages(path=_DEFAULT_PATH):
 
 def set_leptonica_log_level(int level):
     """Set Leptonica's emitted log messages level.
+
+    This setting is process-wide; configure it before parallel native work starts.
 
     See :class:`LeptLogLevel` for available options.
     """
