@@ -24,12 +24,14 @@ jobs:
           - { os: ubuntu-24.04, arch: x86_64, platform: musllinux_x86_64, build: cp*, tag: cpall }
           - { os: macos-15-intel, arch: x86_64, platform: macosx_x86_64, build: cp*, tag: cpall }
           - { os: macos-15, arch: arm64,  platform: macosx_arm64, build: cp*, tag: cpall }
+          - { os: windows-2022, arch: AMD64, platform: win_amd64, build: cp*, tag: cpall }
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download test language data
+        shell: bash
         run: |
           mkdir -p .test-tessdata
           for lang in eng osd; do
@@ -41,6 +43,11 @@ jobs:
       - name: Set macOS deployment target
         if: runner.os == 'macOS'
         run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" | tee -a $GITHUB_ENV
+
+      - name: Install Windows dependencies
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .github/build-scripts/windows-install-tesseract.ps1
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v4.3.3

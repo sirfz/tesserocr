@@ -80,9 +80,9 @@ Tested on Linux and BSD/MacOS
 Windows
 -------
 
-The proposed downloads consist of stand-alone packages containing all the Windows libraries needed for execution. This means that no additional installation of tesseract is required on your system.
-
-The recommended method of installation is via Conda as described below.
+64-bit Windows wheels are built by this project's GitHub Actions workflow and bundle Tesseract,
+Leptonica, and their runtime DLL dependencies. No separate Tesseract or Conda installation is
+required to use these wheels. Language data must still be installed separately (see `tessdata`_).
 
 Conda
 `````
@@ -102,17 +102,23 @@ Or alternatively the independently-maintained `simonflueckiger <https://anaconda
 pip
 ```
 
-Download the wheel file corresponding to your Windows platform and Python installation from `simonflueckiger/tesserocr-windows_build/releases <https://github.com/simonflueckiger/tesserocr-windows_build/releases>`_ and install them via:
+For releases with Windows wheels on PyPI:
 
 ::
 
-    > pip install <package_name>.whl
+    > pip install tesserocr
+
+Wheels from workflow runs are also available as GitHub Actions artifacts. Download and unpack
+the artifact, then install the matching wheel with ``pip install <package_name>.whl``.
+Alternatively, download a wheel matching your Windows platform and Python version from
+`simonflueckiger/tesserocr-windows_build/releases <https://github.com/simonflueckiger/tesserocr-windows_build/releases>`_
+and install it with ``pip install <package_name>.whl``.
 
 Build from source
 `````````````````
 
-If you need Windows tessocr package and your Python version is not supported by above mentioned project,
-you can try to follow `step by step instructions for Windows 64bit` in `Windows.build.md`_.
+If a wheel is not available for your platform or Python version, follow the
+`step by step instructions for Windows 64bit` in `Windows.build.md`_.
 
 .. _Windows.build.md: Windows.build.md
 
