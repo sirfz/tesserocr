@@ -33,7 +33,7 @@ Requirements
 
 **Python 3.9+** is required. tesserocr no longer supports Python 2.
 
-Requires libtesseract (>=3.04) and libleptonica (>=1.71).
+Building from source requires libtesseract (>=3.04) and libleptonica (>=1.71).
 
 On Debian/Ubuntu:
 
@@ -53,11 +53,31 @@ case you have multiple tesseract/leptonica installations.
 
 Installation
 ============
-Linux and BSD/MacOS
--------------------
+
+Install from PyPI:
+
 ::
 
     $ pip install tesserocr
+
+Pre-built wheels for Linux, macOS, and 64-bit Windows bundle Tesseract, Leptonica, and their
+runtime dependencies. No separate Tesseract installation is required to use these wheels.
+Language data must still be installed separately (see `tessdata`_).
+
+Conda
+-----
+
+Alternatively, install from the `conda-forge <https://anaconda.org/conda-forge/tesserocr>`_ channel:
+
+::
+
+    $ conda install -c conda-forge tesserocr
+
+Build from source
+-----------------
+
+If a wheel is not available for your platform or Python version, pip will build from source
+using the dependencies listed above.
 
 The setup script attempts to detect the include/library dirs (via |pkg-config|_ if available) but you
 can override them with your own parameters, e.g.:
@@ -72,48 +92,10 @@ or
 
     $ python setup.py build_ext -I/usr/local/include
 
-Tested on Linux and BSD/MacOS
+For Windows source builds, see `Windows.build.md`_.
 
 .. |pkg-config| replace:: **pkg-config**
 .. _pkg-config: https://pkgconfig.freedesktop.org/
-
-Windows
--------
-
-The proposed downloads consist of stand-alone packages containing all the Windows libraries needed for execution. This means that no additional installation of tesseract is required on your system.
-
-The recommended method of installation is via Conda as described below.
-
-Conda
-`````
-
-You can use the `conda-forge <https://anaconda.org/conda-forge/tesserocr>`_ channel to install from Conda:
-
-::
-
-    > conda install -c conda-forge tesserocr
-
-Or alternatively the independently-maintained `simonflueckiger <https://anaconda.org/simonflueckiger/tesserocr>`_ channel:
-
-::
-
-    > conda install -c simonflueckiger tesserocr
-
-pip
-```
-
-Download the wheel file corresponding to your Windows platform and Python installation from `simonflueckiger/tesserocr-windows_build/releases <https://github.com/simonflueckiger/tesserocr-windows_build/releases>`_ and install them via:
-
-::
-
-    > pip install <package_name>.whl
-
-Build from source
-`````````````````
-
-If you need Windows tessocr package and your Python version is not supported by above mentioned project,
-you can try to follow `step by step instructions for Windows 64bit` in `Windows.build.md`_.
-
 .. _Windows.build.md: Windows.build.md
 
 tessdata
@@ -170,7 +152,7 @@ Basic example using available helper functions:
     print(tesserocr.file_to_text('sample.jpg'))
 
 Thread safety and free-threaded Python
--------------------------------------
+--------------------------------------
 
 ``tesserocr`` supports free-threaded CPython without enabling the GIL on import.
 ``image_to_text`` and ``file_to_text`` can process independent images concurrently.
