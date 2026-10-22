@@ -45,7 +45,7 @@ You may need to `manually compile tesseract`_ for a more recent version. Note th
 to update your ``LD_LIBRARY_PATH`` environment variable to point to the right library versions in
 case you have multiple tesseract/leptonica installations.
 
-|Cython|_ (>=0.23) is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
+|Cython|_ (>=3.1.8,<3.4) is required for building and optionally |Pillow|_ to support ``PIL.Image`` objects.
 
 .. _manually compile tesseract: https://github.com/tesseract-ocr/tesseract/wiki/Compiling
 .. |Cython| replace:: ``Cython``
@@ -169,8 +169,33 @@ Basic example using available helper functions:
     # or
     print(tesserocr.file_to_text('sample.jpg'))
 
-``image_to_text`` and ``file_to_text`` can be used with ``threading`` to
-concurrently process multiple images which is highly efficient.
+Thread safety and free-threaded Python
+-------------------------------------
+
+``tesserocr`` supports free-threaded CPython without enabling the GIL on import.
+``image_to_text`` and ``file_to_text`` can process independent images concurrently.
+The same ownership rules apply with or without the GIL:
+
+* Use a separate ``PyTessBaseAPI`` instance per worker. Instances and their
+  iterators have no internal lock. Do not call an active instance from another
+  thread or re-enter it from a signal handler, including ``Clear`` and ``End``.
+* Keep the API alive while using its iterators. Calls such as ``Init``,
+  ``SetImage``, ``Recognize``, ``Clear`` and ``End`` invalidate existing iterators.
+* Some Tesseract parameters, particularly in ``classify`` and ``textord``, are
+  process-wide even with separate API instances. Configure these before starting
+  parallel native work and do not change them while it runs. This applies to
+  ``SetVariable``, ``SetDebugVariable``, config files and ``InitFull`` variables.
+* Leptonica's log level and Tesseract's persistent cache are also process-wide.
+  Set ``set_leptonica_log_level`` and call ``ClearPersistentCache`` only while
+  no native work is running. Use separate processes for independent settings
+  that must change during OCR.
+
+``Recognize``, ``GetUTF8Text``, ``image_to_text`` and ``file_to_text`` use
+Tesseract's cooperative cancellation to propagate Python signal exceptions
+(such as ``KeyboardInterrupt``) after recognition unwinds safely. Python handles
+signals only on the main thread: interrupting the main thread does not cancel
+OCR running in a worker. Layout analysis and other native operations without
+cancellation checkpoints may delay signal handling until they return.
 
 Advanced API Examples
 ---------------------

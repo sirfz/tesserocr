@@ -305,7 +305,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
                                     Pixa **, int **, int **)
             int GetThresholdedImageScaleFactor() const
             PageIterator *AnalyseLayout(bool)
-            int Recognize(ETEXT_DESC *)
+            int Recognize(ETEXT_DESC *) except +
             bool ProcessPages(cchar_t *, cchar_t *, int, TessResultRenderer *)
             bool ProcessPage(Pix *, int, cchar_t *, cchar_t *, int, TessResultRenderer *)
             ResultIterator *GetIterator()

@@ -1,6 +1,9 @@
-import unittest
-import re
 import os.path
+import re
+import tempfile
+import unittest
+from pathlib import Path
+
 import tesserocr
 
 try:
@@ -90,6 +93,43 @@ class TestTessBaseApi(unittest.TestCase):
         self._api.End()
         self._api.Init()
 
+    def test_multiple_configs(self):
+        """Both initialization paths own encoded filenames, not the caller's list."""
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory) / "first.conf"
+            second = Path(directory) / "second.conf"
+            first.write_text("tessedit_char_whitelist abc\n", encoding="utf-8")
+            second.write_text("tessedit_char_blacklist xyz\n", encoding="utf-8")
+
+            class MutatingPath(str):
+                def encode(self, encoding="utf-8", errors="strict"):
+                    configs.clear()
+                    return super().encode(encoding, errors)
+
+            for encode in (str, os.fsencode, MutatingPath):
+                for init_full in (False, True):
+                    with self.subTest(encode=encode, init_full=init_full):
+                        configs = [encode(str(first)), encode(str(second))]
+                        with tesserocr.PyTessBaseAPI(
+                            init=not init_full,
+                            configs=None if init_full else configs,
+                        ) as api:
+                            if init_full:
+                                api.InitFull(configs=configs)
+                            self.assertEqual(api.GetStringVariable("tessedit_char_whitelist"), "abc")
+                            self.assertEqual(api.GetStringVariable("tessedit_char_blacklist"), "xyz")
+                        if encode is MutatingPath:
+                            self.assertEqual(configs, [])
+
+    def test_invalid_configs(self):
+        for configs in ([object()], ["unused.conf", object()]):
+            with self.subTest(configs=configs):
+                with self.assertRaises(TypeError):
+                    tesserocr.PyTessBaseAPI(configs=configs)
+                with self.assertRaises(TypeError):
+                    self._api.InitFull(configs=configs)
+        self._api.Init()
+
     def test_init(self):
         """Test Init calls with different lang and oem."""
         self._api.Init(lang="eng+osd")
@@ -115,6 +155,16 @@ class TestTessBaseApi(unittest.TestCase):
         self.assertIn("quick", text)
         text2 = tesserocr.file_to_text(self._image_file)
         self.assertEqual(text, text2)
+
+    def test_get_utf8_text_preserves_results(self):
+        """Reading cached text must not recognize again or invalidate iterators."""
+        self._api.SetImageFile(self._image_file)
+        self._api.AnalyseLayout()
+        text = self._api.GetUTF8Text()
+        self.assertIn("quick", text)
+        iterator = self._api.GetIterator()
+        self.assertEqual(self._api.GetUTF8Text(), text)
+        self.assertEqual(iterator.GetUTF8Text(tesserocr.RIL.WORD), "The")
 
     @unittest.skipIf(not pil_installed, "Pillow not installed")
     def test_thresholded_image(self):

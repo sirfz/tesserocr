@@ -1,5 +1,9 @@
 [tool.cibuildwheel]
 build-verbosity = "1"
+test-requires = ["Pillow"]
+test-sources = ["tests", ".test-tessdata"]
+test-command = "python -m unittest discover -v"
+test-environment = { TESSDATA_PREFIX = ".test-tessdata", OMP_THREAD_LIMIT = "1" }
 
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"

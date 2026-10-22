@@ -308,6 +308,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Programming Language :: Cython",
@@ -316,8 +317,7 @@ setup(
     cmdclass={"build_ext": my_build_ext},
     ext_modules=[make_extension()],
     test_suite="tests",
-    setup_requires=["Cython>=3.0.0,<3.2.0", "cysignals"],
-    install_requires=["cysignals"],
+    setup_requires=["Cython>=3.1.8,<3.4.0"],
     packages=["tesserocr"],
     package_dir={"tesserocr": "tesserocr"},
 )
