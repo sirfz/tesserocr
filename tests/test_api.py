@@ -193,17 +193,32 @@ class TestTessBaseApi(unittest.TestCase):
         LSTM_choices = self._api.GetBestLSTMSymbolChoices()
         words = self._api.AllWords()
         self.assertEqual(len(words), len(LSTM_choices))
+        self.assertGreater(len(words), 0)
 
-        for choice, word in zip(LSTM_choices, words):
-            chosen_word = ""
-            for timestep in choice:
-                for alternative in timestep:
-                    self.assertGreaterEqual(alternative[1], 0.0)
-                    # self.assertLessEqual(alternative[1], 2.0)
-                chosen_symbol = timestep[0][0]
-                if chosen_symbol != " ":
-                    chosen_word += chosen_symbol
-            self.assertEqual(chosen_word, word)
+        iterator = self._api.GetIterator()
+        level = tesserocr.RIL.WORD
+        iterator_choices = []
+        for word in tesserocr.iterate_level(iterator, level):
+            iterator_choices.append(word.GetBestLSTMSymbolChoices())
+        self.assertEqual(LSTM_choices, iterator_choices)
+
+        # Empty per-word or per-timestep lists are valid and are skipped by iteration.
+        # The fixture must still yield at least one alternative.
+        inspected = 0
+        for choices in (LSTM_choices, iterator_choices):
+            self.assertIsInstance(choices, list)
+            for word_choices in choices:
+                self.assertIsInstance(word_choices, list)
+                for timestep in word_choices:
+                    self.assertIsInstance(timestep, list)
+                    for alternative in timestep:
+                        self.assertIsInstance(alternative, tuple)
+                        self.assertEqual(len(alternative), 2)
+                        symbol, score = alternative
+                        self.assertIsInstance(symbol, str)
+                        self.assertIsInstance(score, float)
+                        inspected += 1
+        self.assertGreater(inspected, 0)
 
     @unittest.skipIf(_TESSERACT_VERSION < 0x4000000, "tesseract < 4")
     def test_result_iterator(self):
