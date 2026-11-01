@@ -912,12 +912,10 @@ cdef class PyLTRResultIterator(PyPageIterator):
         cdef:
             const LTRResultIterator *ltrriter = self._ltrriter
             ChoiceIterator *citer
-            char *text = self._ltrriter.GetUTF8Text(RIL_SYMBOL)
-        if text == NULL:
+        if self._ltrriter.Empty(RIL_WORD):
             # Tesseract aborts the whole process (ASSERT_HOST) when a
             # ChoiceIterator is created without a current word.
             return None
-        free(text)
         citer = new ChoiceIterator(ltrriter[0])
         if citer == NULL:
             return None
