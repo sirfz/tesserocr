@@ -289,6 +289,28 @@ class TestTessBaseApi(unittest.TestCase):
             else:
                 break
 
+    @unittest.skipIf(not pil_installed, "Pillow not installed")
+    def test_choice_iterator_without_word(self):
+        """Test GetChoiceIterator when the iterator is not on a word.
+
+        Tesseract aborts the whole process if a choice iterator is requested
+        without a current word, so this must return ``None`` instead.
+        """
+        self._api.SetImage(Image.new("RGB", (100, 100), (255, 255, 255)))
+        self._api.Recognize()
+        it = self._api.GetIterator()
+        for _ in tesserocr.iterate_level(it, tesserocr.RIL.SYMBOL):
+            self.assertIsNone(it.GetChoiceIterator())
+
+    def test_choice_iterator(self):
+        """Test GetChoiceIterator on a recognized symbol."""
+        self._api.SetImageFile(self._image_file)
+        self._api.Recognize()
+        it = self._api.GetIterator()
+        choices = it.GetChoiceIterator()
+        self.assertIsNotNone(choices)
+        self.assertEqual(choices.GetUTF8Text(), "T")
+
     def test_detect_os(self):
         """Test DetectOS and DetectOrientationScript (tesseract v4+)."""
         self._api.SetPageSegMode(tesserocr.PSM.OSD_ONLY)
