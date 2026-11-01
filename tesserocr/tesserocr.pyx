@@ -906,11 +906,17 @@ cdef class PyLTRResultIterator(PyPageIterator):
     def GetChoiceIterator(self):
         """Return `PyChoiceIterator` instance to iterate over symbol choices.
 
-        Returns `None` on failure.
+        Returns `None` on failure, including when the iterator is not positioned
+        on a word (e.g. on a non-text block or on an image without any text).
         """
         cdef:
             const LTRResultIterator *ltrriter = self._ltrriter
-            ChoiceIterator *citer = new ChoiceIterator(ltrriter[0])
+            ChoiceIterator *citer
+        if self._ltrriter.Empty(RIL_WORD):
+            # Tesseract aborts the whole process (ASSERT_HOST) when a
+            # ChoiceIterator is created without a current word.
+            return None
+        citer = new ChoiceIterator(ltrriter[0])
         if citer == NULL:
             return None
         return PyChoiceIterator.create(citer)
