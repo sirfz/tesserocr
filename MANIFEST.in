@@ -1,9 +1,10 @@
 include README.rst
 include LICENSE
-include tesserocr/*.pyx
+include tesserocr/*.templ.pyx tesserocr/*.templ.pxd
 include tesserocr/*.pxd
 include tesserocr/*.pyi
 include tests/*.py tests/*.png tests/*.train
+exclude tesserocr/tesserocr.pyx tesserocr/tesseract.pxd
 exclude tesserocr/*.cpp
 exclude tesserocr/*.so
 exclude *.so

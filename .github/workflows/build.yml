@@ -73,8 +73,27 @@ jobs:
         with:
           python-version: "3.9"
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtesseract-dev libleptonica-dev pkg-config
+          python -m pip install build -r requirements-dev.txt
+
+      - name: Test version-dependent source generation
+        run: python -m unittest tests.test_build -v
+
       - name: Build sdist
-        run: python setup.py sdist
+        run: python -m build --sdist
+
+      - name: Test wheel build from sdist
+        run: |
+          mkdir sdist-check
+          tar -xzf dist/*.tar.gz --strip-components=1 -C sdist-check
+          test -f sdist-check/tesserocr/tesserocr.templ.pyx
+          test -f sdist-check/tesserocr/tesseract.templ.pxd
+          test ! -e sdist-check/tesserocr/tesserocr.pyx
+          test ! -e sdist-check/tesserocr/tesseract.pxd
+          python -m build --wheel --outdir wheelhouse sdist-check
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

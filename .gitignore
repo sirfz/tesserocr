@@ -62,6 +62,10 @@ target/
 *.swp
 .ycm_extra_conf.py
 
+# Generated Cython sources
+/tesserocr/tesserocr.pyx
+/tesserocr/tesseract.pxd
+
 # cpp
 *.cpp
 Makefile
