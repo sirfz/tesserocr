@@ -311,7 +311,7 @@ setup(
     author_email="iamfayez@gmail.com",
     license="MIT",
     license_files=["LICENSE", *glob.glob(".wheel-licenses/**/*", recursive=True)],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -321,7 +321,6 @@ setup(
         "Operating System :: POSIX",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",

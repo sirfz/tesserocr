@@ -31,7 +31,7 @@ with image files instead.
 Requirements
 ============
 
-**Python 3.9+** is required. tesserocr no longer supports Python 2.
+**Python 3.10+** is required. tesserocr no longer supports Python 2.
 
 Building from source requires libtesseract (>=3.04) and libleptonica (>=1.71).
 
