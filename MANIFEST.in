@@ -1,6 +1,6 @@
 include README.rst
 include LICENSE
-include tesserocr/*.pyx.in tesserocr/*.pxd.in
+include tesserocr/*.templ.pyx tesserocr/*.templ.pxd
 include tesserocr/*.pxd
 include tesserocr/*.pyi
 include tests/*.py tests/*.png tests/*.train

@@ -146,7 +146,7 @@ cdef extern from "tesseract/pageiterator.h" namespace "tesseract" nogil:
         void ParagraphInfo(TessParagraphJustification *, bool *, bool *, int *) const
 
 cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
-{{if TESSERACT_VERSION >= 0x4000000}}
+### {{if TESSERACT_VERSION >= 0x4000000}}
     cdef cppclass LTRResultIterator(PageIterator):
         char *GetUTF8Text(PageIteratorLevel) const
         void SetLineSeparator(cchar_t *)
@@ -170,7 +170,7 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         bool SymbolIsSuperscript() const
         bool SymbolIsSubscript() const
         bool SymbolIsDropcap() const
-{{elif TESSERACT_VERSION >= 0x3040100}}
+### {{elif TESSERACT_VERSION >= 0x3040100}}
     cdef cppclass LTRResultIterator(PageIterator):
         char *GetUTF8Text(PageIteratorLevel) const
         void SetLineSeparator(cchar_t *)
@@ -193,7 +193,7 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         bool SymbolIsSuperscript() const
         bool SymbolIsSubscript() const
         bool SymbolIsDropcap() const
-{{else}}
+### {{else}}
     cdef cppclass LTRResultIterator(PageIterator):
         char *GetUTF8Text(PageIteratorLevel) const
         void SetLineSeparator(cchar_t *)
@@ -216,7 +216,7 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         bool SymbolIsSubscript() const
         bool SymbolIsDropcap() const
 
-{{endif}}
+### {{endif}}
     cdef cppclass ChoiceIterator:
         ChoiceIterator(const LTRResultIterator &) except +
         bool Next()
@@ -224,15 +224,15 @@ cdef extern from "tesseract/ltrresultiterator.h" namespace "tesseract" nogil:
         float Confidence() const
 
 cdef extern from "tesseract/resultiterator.h" namespace "tesseract" nogil:
-{{if TESSERACT_VERSION >= 0x4000000}}
+### {{if TESSERACT_VERSION >= 0x4000000}}
     cdef cppclass ResultIterator(LTRResultIterator):
         bool ParagraphIsLtr() const
         vector[vector[pair[cchar_tp, float]]] *GetBestLSTMSymbolChoices() const
-{{else}}
+### {{else}}
     cdef cppclass ResultIterator(LTRResultIterator):
         bool ParagraphIsLtr() const
 
-{{endif}}
+### {{endif}}
 cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessResultRenderer:
         void insert(TessResultRenderer *)
@@ -240,33 +240,33 @@ cdef extern from "tesseract/renderer.h" namespace "tesseract" nogil:
     cdef cppclass TessTextRenderer(TessResultRenderer):
         TessTextRenderer(cchar_t *) except +
 
-{{if TESSERACT_VERSION >= 0x3999800}}
+### {{if TESSERACT_VERSION >= 0x3999800}}
     cdef cppclass TessAltoRenderer(TessResultRenderer):
         TessAltoRenderer(cchar_t *) except +
         
-{{endif}}
+### {{endif}}
     cdef cppclass TessHOcrRenderer(TessResultRenderer):
         TessHOcrRenderer(cchar_t *, bool) except +
 
-{{if TESSERACT_VERSION >= 0x3999800}}
+### {{if TESSERACT_VERSION >= 0x3999800}}
     cdef cppclass TessPDFRenderer(TessResultRenderer):
         TessPDFRenderer(cchar_t *, cchar_t *, bool) except +
-{{else}}
+### {{else}}
     cdef cppclass TessPDFRenderer(TessResultRenderer):
         TessPDFRenderer(cchar_t *, cchar_t *) except +
 
-{{endif}}
+### {{endif}}
     cdef cppclass TessUnlvRenderer(TessResultRenderer):
         TessUnlvRenderer(cchar_t *) except +
 
     cdef cppclass TessBoxTextRenderer(TessResultRenderer):
         TessBoxTextRenderer(cchar_t *) except +
 
-{{if TESSERACT_VERSION >= 0x3040100}}
+### {{if TESSERACT_VERSION >= 0x3040100}}
     cdef cppclass TessOsdRenderer(TessResultRenderer):
         TessOsdRenderer(cchar_t *) except +
 
-{{endif}}
+### {{endif}}
 cdef extern from "tesseract/osdetect.h" nogil:
     struct OSBestResult:
         int orientation_id
@@ -282,20 +282,20 @@ cdef extern from "tesseract/osdetect.h" nogil:
 
 cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
 
-{{if TESSERACT_VERSION >= 0x3999800}}
+### {{if TESSERACT_VERSION >= 0x3999800}}
     cdef enum OcrEngineMode:
         OEM_TESSERACT_ONLY
         OEM_LSTM_ONLY
         OEM_TESSERACT_LSTM_COMBINED
         OEM_DEFAULT
-{{else}}
+### {{else}}
     cdef enum OcrEngineMode:
         OEM_TESSERACT_ONLY
         OEM_CUBE_ONLY
         OEM_TESSERACT_CUBE_COMBINED
         OEM_DEFAULT
 
-{{endif}}
+### {{endif}}
     cdef enum PageSegMode:
         PSM_OSD_ONLY,                # Orientation and script detection only.
         PSM_AUTO_OSD,                # Automatic page segmentation with orientation and
@@ -323,7 +323,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         RIL_WORD,      # within a textline.
         RIL_SYMBOL     # character within a word.
 
-{{if TESSERACT_VERSION >= 0x3999800}}
+### {{if TESSERACT_VERSION >= 0x3999800}}
     cdef cppclass TessBaseAPI:
         TessBaseAPI() except +
         @staticmethod
@@ -399,7 +399,7 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         cchar_t *GetUnichar(int)
         const OcrEngineMode oem() const
         void set_min_orientation_margin(double)
-{{else}}
+### {{else}}
     cdef cppclass TessBaseAPI:
         TessBaseAPI() except +
         @staticmethod
@@ -473,4 +473,4 @@ cdef extern from "tesseract/baseapi.h" namespace "tesseract" nogil:
         cchar_t *GetUnichar(int)
         const OcrEngineMode oem() const
         void set_min_orientation_margin(double)
-{{endif}}
+### {{endif}}

@@ -12,7 +12,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 
 
 @unittest.skipUnless(
-    (_ROOT / "tesserocr/tesserocr.pyx.in").is_file(), "requires the source templates"
+    (_ROOT / "tesserocr/tesserocr.templ.pyx").is_file(), "requires the source templates"
 )
 class TestBuildTemplates(unittest.TestCase):
     def setUp(self):
@@ -25,7 +25,7 @@ class TestBuildTemplates(unittest.TestCase):
         self.package.mkdir()
         for name in ("setup.py", "README.rst"):
             shutil.copyfile(_ROOT / name, self.root / name)
-        for name in ("__init__.py", "tesserocr.pyx.in", "tesseract.pxd.in", "tesseract5.pxd"):
+        for name in ("__init__.py", "tesserocr.templ.pyx", "tesseract.templ.pxd", "tesseract5.pxd"):
             shutil.copyfile(_ROOT / "tesserocr" / name, self.package / name)
 
         with mock.patch("setuptools.setup") as setup_mock:
@@ -43,9 +43,17 @@ class TestBuildTemplates(unittest.TestCase):
         return tuple((self.package / name).read_text(encoding="utf-8")
                      for name in ("tesserocr.pyx", "tesseract.pxd"))
 
+    def test_template_directives_are_cython_comments(self):
+        for name in ("tesserocr.templ.pyx", "tesseract.templ.pxd"):
+            text = (self.package / name).read_text(encoding="utf-8")
+            self.assertIn("### {{if ", text)
+            for line in text.splitlines():
+                if "{{" in line:
+                    self.assertTrue(line.startswith("### {{"), line)
+
     def test_metadata_reads_template_without_generated_sources(self):
         self.assertEqual(
-            self.setup_args["version"], self.build["find_version"]("tesserocr/tesserocr.pyx.in")
+            self.setup_args["version"], self.build["find_version"]("tesserocr/tesserocr.templ.pyx")
         )
         for name in ("tesserocr.pyx", "tesseract.pxd"):
             self.assertFalse((self.package / name).exists())
@@ -65,12 +73,12 @@ class TestBuildTemplates(unittest.TestCase):
         self.assertNotEqual(self._render("5.5.3"), modern)
         self.assertEqual(self._render("4.1.1"), original)
 
-        template = self.package / "tesserocr.pyx.in"
+        template = self.package / "tesserocr.templ.pyx"
         template.write_text(template.read_text(encoding="utf-8") + "\n# template changed\n", encoding="utf-8")
         self.assertTrue(self._render("4.1.1")[0].endswith("# template changed\n"))
 
     def test_crlf_templates_do_not_trigger_rewrites(self):
-        for name in ("tesserocr.pyx.in", "tesseract.pxd.in"):
+        for name in ("tesserocr.templ.pyx", "tesseract.templ.pxd"):
             template = self.package / name
             text = template.read_text(encoding="utf-8")
             template.write_bytes(text.replace("\n", "\r\n").encode("utf-8"))

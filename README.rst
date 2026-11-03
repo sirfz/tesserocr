@@ -94,12 +94,13 @@ or
 
 For Windows source builds, see `Windows.build.md`_.
 
-The build renders ``tesserocr/tesserocr.pyx.in`` and ``tesserocr/tesseract.pxd.in``
+The build renders ``tesserocr/tesserocr.templ.pyx`` and ``tesserocr/tesseract.templ.pxd``
 using Cython's bundled Tempita engine before running Cython. Edit these templates,
-not the generated ``.pyx`` and ``.pxd`` files. No separate Tempita installation is
-needed. Rendering uses the detected Tesseract version and updates generated files
-only when their contents change. Use separate source trees for concurrent builds
-against different Tesseract versions.
+not the generated ``.pyx`` and ``.pxd`` files. Templates keep their Cython extensions
+for editor support and put Tempita directives on ``### {{...}}`` comment lines.
+No separate Tempita installation is needed. Rendering uses the detected Tesseract
+version and updates generated files only when their contents change. Use separate
+source trees for concurrent builds against different Tesseract versions.
 
 To run the build-time template and version-branch checks from a checkout:
 

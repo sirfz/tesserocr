@@ -44,7 +44,7 @@ def read(*parts):
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
-    version_match = re.search("^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    version_match = re.search("^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.MULTILINE)
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
@@ -85,7 +85,7 @@ def version_to_int(version):
     # Convert strings to integers for formatting
     version_ints = [int(x) for x in version_groups]
     version_str = f"{version_ints[0]:02d}{version_ints[1]:02d}{version_ints[2]:02d}"
-    version_str = str((int(version_str, 10) - subtrahend))
+    version_str = str(int(version_str, 10) - subtrahend)
     # Adds a 2 digit subversion number for the subversionrelease.
     subversion_str = "00"
     if subversion is not None and subversion != "":
@@ -173,7 +173,7 @@ def get_tesseract_version():
         if version == "":
             version = _read_string(stdout_version).strip()
 
-        version_match = re.search(r"^tesseract ((?:\d+\.)+\d+).*", version, re.M)
+        version_match = re.search(r"^tesseract ((?:\d+\.)+\d+).*", version, re.MULTILINE)
         if version_match:
             version = version_match.group(1)
         else:
@@ -202,7 +202,7 @@ def get_tesseract_version():
 
         tess_lib = find_library("tesseract*.lib", libpaths, lib_version)
         if len(tess_lib) >= 1:
-            base = os.path.basename(sorted(tess_lib, reverse=True)[0])
+            base = os.path.basename(max(tess_lib))
             tess_lib = os.path.splitext(base)[0]
         else:
             error = f"Tesseract library not found in LIBPATH: {libpaths}"
@@ -210,7 +210,7 @@ def get_tesseract_version():
 
         lept_lib = find_library("lept*.lib", libpaths)
         if len(lept_lib) >= 1:
-            base = os.path.basename(sorted(lept_lib, reverse=True)[0])
+            base = os.path.basename(max(lept_lib))
             lept_lib = os.path.splitext(base)[0]
         else:
             error = f"Leptonica library not found in LIBPATH: {libpaths}"
@@ -250,11 +250,14 @@ def render_templates(context):
     from Cython.Tempita import Template
 
     # shortcut: one target per checkout; use build-local outputs for concurrent target builds.
-    for filename in ("tesserocr.pyx", "tesseract.pxd"):
+    for filename, template_name in (
+        ("tesserocr.pyx", "tesserocr.templ.pyx"),
+        ("tesseract.pxd", "tesseract.templ.pxd"),
+    ):
         path = pjoin(here, "tesserocr", filename)
         # Include the version so changing native libraries also invalidates generated C++.
-        rendered = f"# Generated from {filename}.in for Tesseract {context['TESSERACT_VERSION']:#x}; do not edit.\n"
-        template = Template(read("tesserocr", filename + ".in"), name=path + ".in")
+        rendered = f"# Generated from {template_name} for Tesseract {context['TESSERACT_VERSION']:#x}; do not edit.\n"
+        template = Template(read("tesserocr", template_name), name=pjoin(here, "tesserocr", template_name))
         rendered += template.substitute(**context)
         if not os.path.exists(path) or read("tesserocr", filename) != rendered:
             with open(path, "w", encoding="utf-8") as f:
@@ -299,7 +302,7 @@ class my_build_ext(build_ext):
 
 setup(
     name="tesserocr",
-    version=find_version("tesserocr/tesserocr.pyx.in"),
+    version=find_version("tesserocr/tesserocr.templ.pyx"),
     description="A simple, Pillow-friendly, Python wrapper around " "tesseract-ocr API using Cython",
     long_description=read("README.rst"),
     long_description_content_type="text/x-rst",

@@ -89,6 +89,8 @@ jobs:
         run: |
           mkdir sdist-check
           tar -xzf dist/*.tar.gz --strip-components=1 -C sdist-check
+          test -f sdist-check/tesserocr/tesserocr.templ.pyx
+          test -f sdist-check/tesserocr/tesseract.templ.pxd
           test ! -e sdist-check/tesserocr/tesserocr.pyx
           test ! -e sdist-check/tesserocr/tesseract.pxd
           python -m build --wheel --outdir wheelhouse sdist-check
