@@ -26,7 +26,9 @@ WORKDIR /tmp
 RUN  mkdir -p /usr/local/share/tessdata/ &&  rsync -a tessdata-4.00/ /usr/local/share/tessdata
 RUN mkdir /tmp/tesserocr
 
-ADD setup.py README.rst tesseract.pxd tesserocr_experiment.pyx tesserocr.pyx tests/ tox.ini /tmp/tesserocr/
+ADD setup.py pyproject.toml README.rst LICENSE tesserocr_experiment.pyx tox.ini /tmp/tesserocr/
+ADD tesserocr/ /tmp/tesserocr/tesserocr/
+ADD tests/ /tmp/tesserocr/tests/
 WORKDIR /tmp/tesserocr
 RUN python setup.py bdist_wheel
 RUN python setup.py install

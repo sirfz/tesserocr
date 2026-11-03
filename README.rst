@@ -94,6 +94,20 @@ or
 
 For Windows source builds, see `Windows.build.md`_.
 
+The build renders ``tesserocr/tesserocr.pyx.in`` and ``tesserocr/tesseract.pxd.in``
+using Cython's bundled Tempita engine before running Cython. Edit these templates,
+not the generated ``.pyx`` and ``.pxd`` files. No separate Tempita installation is
+needed. Rendering uses the detected Tesseract version and updates generated files
+only when their contents change. Use separate source trees for concurrent builds
+against different Tesseract versions.
+
+To run the build-time template and version-branch checks from a checkout:
+
+::
+
+    $ pip install -r requirements-dev.txt
+    $ python -m unittest tests.test_build -v
+
 .. |pkg-config| replace:: **pkg-config**
 .. _pkg-config: https://pkgconfig.freedesktop.org/
 .. _Windows.build.md: Windows.build.md

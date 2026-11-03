@@ -22,7 +22,7 @@ else:
 _LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 
 _TESSERACT_MIN_VERSION = "3.04.00"
-_CYTHON_COMPILE_TIME_ENV = None
+_TEMPLATE_CONTEXT = None
 
 # find_version from pip https://github.com/pypa/pip/blob/1.5.6/setup.py#L33
 here = abspath(dirname(__file__))
@@ -142,7 +142,7 @@ def package_config():
     version, _ = p.communicate()
     version = _read_string(version).strip()
     _LOGGER.info("Supporting tesseract v%s", version)
-    config["compile_time_env"] = {
+    config["template_context"] = {
         "TESSERACT_MAJOR_VERSION": major_version(version),
         "TESSERACT_VERSION": version_to_int(version),
     }
@@ -184,7 +184,7 @@ def get_tesseract_version():
         version = _TESSERACT_MIN_VERSION
 
     _LOGGER.info("Supporting tesseract v%s", version)
-    config["compile_time_env"] = {
+    config["template_context"] = {
         "TESSERACT_MAJOR_VERSION": major_version(version),
         "TESSERACT_VERSION": version_to_int(version),
     }
@@ -246,21 +246,36 @@ def get_build_args():
     return build_args
 
 
+def render_templates(context):
+    from Cython.Tempita import Template
+
+    # shortcut: one target per checkout; use build-local outputs for concurrent target builds.
+    for filename in ("tesserocr.pyx", "tesseract.pxd"):
+        path = pjoin(here, "tesserocr", filename)
+        # Include the version so changing native libraries also invalidates generated C++.
+        rendered = f"# Generated from {filename}.in for Tesseract {context['TESSERACT_VERSION']:#x}; do not edit.\n"
+        template = Template(read("tesserocr", filename + ".in"), name=path + ".in")
+        rendered += template.substitute(**context)
+        if not os.path.exists(path) or read("tesserocr", filename) != rendered:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(rendered)
+
+
 def make_extension():
-    global _CYTHON_COMPILE_TIME_ENV
+    global _TEMPLATE_CONTEXT
     build_args = get_build_args()
-    _CYTHON_COMPILE_TIME_ENV = build_args.pop("compile_time_env")
+    _TEMPLATE_CONTEXT = build_args.pop("template_context")
     return Extension("tesserocr.tesserocr", sources=["tesserocr/tesserocr.pyx"], language="c++", **build_args)
 
 
-class my_build_ext(build_ext, object):
+class my_build_ext(build_ext):
     def build_extensions(self):
         compiler = self.compiler.compiler_type
         _LOGGER.info("Detected compiler: %s", compiler)
         extra_args = EXTRA_COMPILE_ARGS.get(compiler, EXTRA_COMPILE_ARGS["gcc"])
         extra_args5 = EXTRA_COMPILE_ARGS5.get(compiler, EXTRA_COMPILE_ARGS5["gcc"])
-        if isinstance(_CYTHON_COMPILE_TIME_ENV, dict):
-            version = _CYTHON_COMPILE_TIME_ENV.get("TESSERACT_VERSION", 0)
+        if isinstance(_TEMPLATE_CONTEXT, dict):
+            version = _TEMPLATE_CONTEXT.get("TESSERACT_VERSION", 0)
         else:
             version = 0
 
@@ -277,15 +292,14 @@ class my_build_ext(build_ext, object):
     def finalize_options(self):
         from Cython.Build.Dependencies import cythonize
 
-        self.distribution.ext_modules[:] = cythonize(
-            self.distribution.ext_modules, compile_time_env=_CYTHON_COMPILE_TIME_ENV
-        )
-        super(my_build_ext, self).finalize_options()
+        render_templates(_TEMPLATE_CONTEXT)
+        self.distribution.ext_modules[:] = cythonize(self.distribution.ext_modules)
+        super().finalize_options()
 
 
 setup(
     name="tesserocr",
-    version=find_version("tesserocr/tesserocr.pyx"),
+    version=find_version("tesserocr/tesserocr.pyx.in"),
     description="A simple, Pillow-friendly, Python wrapper around " "tesseract-ocr API using Cython",
     long_description=read("README.rst"),
     long_description_content_type="text/x-rst",
