@@ -24,6 +24,7 @@ var/
 *.egg
 uv.lock
 .wheel-licenses/
+.test-tessdata/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
